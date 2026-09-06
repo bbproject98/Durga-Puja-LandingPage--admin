@@ -1,0 +1,160 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --puja-yellow: #F59E0B;
+  --puja-yellow-light: #FEF08A;
+  --puja-yellow-gold: #EAB308;
+  --puja-yellow-dark: #D97706;
+  --puja-red: #DC2626;
+  --puja-bg-light: #FFFDF7;
+  --puja-card-bg: #FFFFFF;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #FFFDF7;
+  color: #1F2937;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  overflow-x: hidden;
+}
+
+/* White & Yellow Festive Themes */
+.bg-puja-cream {
+  background-color: #FFFDF7;
+}
+
+.bg-puja-yellow-subtle {
+  background-color: #FEFCE8;
+}
+
+.bg-puja-gradient-hero {
+  background: radial-gradient(circle at 10% 20%, rgba(254, 240, 138, 0.45) 0%, transparent 40%),
+              radial-gradient(circle at 90% 10%, rgba(253, 224, 71, 0.35) 0%, transparent 40%),
+              radial-gradient(circle at 50% 90%, rgba(254, 240, 138, 0.3) 0%, transparent 50%),
+              #FFFDF7;
+}
+
+/* Custom Yellow & Gold Shimmers */
+.text-yellow-gradient {
+  background: linear-gradient(135deg, #D97706 0%, #EAB308 50%, #B45309 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gold-amber {
+  background: linear-gradient(135deg, #B45309 0%, #D97706 50%, #EAB308 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Subtle Glowing Elements */
+.glow-yellow {
+  box-shadow: 0 4px 20px rgba(234, 179, 8, 0.25);
+}
+
+.glow-yellow-hover:hover {
+  box-shadow: 0 10px 25px rgba(234, 179, 8, 0.3);
+  transform: translateY(-3px);
+}
+
+.card-shadow {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  transition: all 0.25s ease-in-out;
+}
+
+.card-shadow:hover {
+  box-shadow: 0 12px 30px rgba(234, 179, 8, 0.18);
+  transform: translateY(-4px);
+  border-color: #FACC15 !important;
+}
+
+/* Traditional Bengali Alpana Yellow Top Border */
+.alpana-yellow-top {
+  position: relative;
+}
+.alpana-yellow-top::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: repeating-linear-gradient(
+    90deg,
+    #EAB308,
+    #EAB308 14px,
+    #DC2626 14px,
+    #DC2626 28px,
+    #FEF08A 28px,
+    #FEF08A 38px
+  );
+}
+
+/* Shimmer Button Effect in Yellow & Amber */
+.btn-yellow-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.btn-yellow-shimmer::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    60deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.5) 50%,
+    transparent 80%
+  );
+  transform: rotate(30deg);
+  animation: shimmerAnim 3.5s infinite linear;
+}
+
+@keyframes shimmerAnim {
+  0% { transform: translateX(-100%) rotate(30deg); }
+  100% { transform: translateX(100%) rotate(30deg); }
+}
+
+/* Subtle dot pattern */
+.bg-yellow-dots {
+  background-image: radial-gradient(rgba(234, 179, 8, 0.15) 1.5px, transparent 1.5px);
+  background-size: 24px 24px;
+}
+
+/* Custom Scrollbar in Yellow & White */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #FFFDF7;
+}
+::-webkit-scrollbar-thumb {
+  background: #FACC15;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #EAB308;
+}
+
+/* Hide scrollbar for Chrome, Safari, and Opera */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+/* Hide scrollbar for IE, Edge and Firefox */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Safe area insets for mobile app notches and gesture navigation bars */
+.pb-safe {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+}
+

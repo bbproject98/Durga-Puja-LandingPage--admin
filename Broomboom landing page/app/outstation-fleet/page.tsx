@@ -1,0 +1,664 @@
+"use client";
+
+import React, { useState, useEffect, useMemo, Suspense } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import {
+  Car, Users, Briefcase, ShieldCheck, CheckCircle2, Clock,
+  ArrowRight, Sparkles, PhoneCall, Calendar, MapPin,
+  ChevronDown, Info, Zap, Check, X, XCircle, MessageCircle,
+  User, Phone, Mail
+} from "lucide-react";
+
+import { FLEET_DATA } from "@/data/fleet";
+import { OUTSTATION_ROUTES } from "@/data/packages";
+import { submitBooking } from "@/lib/api";
+import { OutstationBookingHeader } from "@/components/OutstationBookingHeader";
+
+type CashfreeInstance = {
+  checkout: (options: {
+    paymentSessionId: string;
+    redirectTarget?: "_modal" | "_self" | "_top" | "_blank";
+  }) => Promise<{
+    error?: { message: string; code?: string };
+    redirect?: boolean;
+    paymentDetails?: any;
+  } | void>;
+};
+
+function loadCashfree(): Promise<CashfreeInstance> {
+  return new Promise((resolve, reject) => {
+    const win = window as Window & {
+      Cashfree?: (options: { mode: "sandbox" | "production" }) => CashfreeInstance;
+    };
+
+    if (win.Cashfree) {
+      resolve(win.Cashfree({ mode: "sandbox" }));
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = "https://sdk.cashfree.com/js/v3/cashfree.js";
+    script.async = true;
+    script.onload = () => {
+      if (win.Cashfree) resolve(win.Cashfree({ mode: "sandbox" }));
+      else reject(new Error("Unable to load Cashfree."));
+    };
+    script.onerror = () => reject(new Error("Unable to load Cashfree."));
+    document.head.appendChild(script);
+  });
+}
+
+const INDIAN_STATES = [
+  "West Bengal", "Jharkhand", "Odisha", "Bihar", "Assam", 
+  "Delhi", "Maharashtra", "Karnataka", "Tamil Nadu"
+];
+
+function OutstationFleetContent() {
+  const searchParams = useSearchParams();
+  const toCityParam = searchParams.get("toCity") || "Digha";
+
+  const [isMounted, setIsMounted] = useState(false);
+
+  const [outstationData, setOutstationData] = useState({
+    tripType: "oneWay" as "oneWay" | "roundTrip",
+    fromCity: "Kolkata",
+    toCity: toCityParam,
+    pickupDate: "", 
+    pickupTime: "08:00 AM",
+    returnDate: "",
+    returnTime: "10:00 AM",
+  });
+
+  const [selectedCategory, setSelectedCategory] = useState<"all" | "sedan" | "suv" | "traveller">("all");
+  const [expandedDetailsCarId, setExpandedDetailsCarId] = useState<string | null>(null);
+
+  const [userData, setUserData] = useState({
+    name: "Guest Traveler",
+    phone: "+91 9876543210",
+    email: "guest@example.com",
+  });
+
+  const [pickupAddress, setPickupAddress] = useState("");
+  const [pickupPincode, setPickupPincode] = useState("");
+  const [pickupState, setPickupState] = useState("West Bengal");
+  const [isStateOpen, setIsStateOpen] = useState(false);
+
+  const [selectedVehicleKey, setSelectedVehicleKey] = useState<string | null>(null);
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+    
+    setOutstationData((prev) => ({
+      ...prev,
+      pickupDate: new Date().toISOString().split("T")[0]
+    }));
+
+    try {
+      const savedUser = localStorage.getItem("broomboom_user");
+      if (savedUser) setUserData(JSON.parse(savedUser));
+    } catch (e) {}
+  }, []);
+
+  const vehiclesList = Object.values(FLEET_DATA).filter((v) => {
+    if (selectedCategory === "all") return true;
+    return v.category === selectedCategory;
+  });
+
+  const selectedVehicle = selectedVehicleKey ? FLEET_DATA[selectedVehicleKey] : null;
+
+  const getCarRate = (car: any) => {
+    const route = OUTSTATION_ROUTES.find((r) =>
+      r.title.toLowerCase().includes(outstationData.toCity.toLowerCase())
+    );
+
+    if (!route) return car.basePrice;
+
+    let baseRate = 0;
+    if (car.category === "sedan") {
+      baseRate = route.prices.sedan;
+    } else if (car.category === "suv") {
+      const isSuvPlus = car.name.toLowerCase().includes("innova") || car.seats >= 7;
+      baseRate = isSuvPlus ? route.prices.suvPlus : route.prices.suv;
+    } else {
+      baseRate = Math.round(route.prices.suvPlus * 1.5);
+    }
+
+    return outstationData.tripType === "roundTrip" ? baseRate * 2 : baseRate;
+  };
+
+  const checkoutPrice = useMemo(() => {
+    if (!selectedVehicle) return 0;
+    return getCarRate(selectedVehicle);
+  }, [selectedVehicle, outstationData]);
+
+  const handleSelectCar = (vehicleKey: string) => {
+    setSelectedVehicleKey(vehicleKey);
+    setIsCheckoutOpen(true);
+  };
+
+  const handleConfirmBooking = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // 1. Validate customer & address details
+    if (!userData.name.trim() || userData.name === "Guest Traveler") {
+      alert("Please enter your name for chauffeur coordination.");
+      return;
+    }
+
+    if (!userData.phone.trim() || userData.phone.replace(/\D/g, "").length < 10) {
+      alert("Please enter a valid 10-digit mobile number for WhatsApp booking updates.");
+      return;
+    }
+
+    if (!pickupAddress.trim()) {
+      alert("Please enter your pickup address in Kolkata.");
+      return;
+    }
+
+    if (!selectedVehicle) {
+      alert("Please select a vehicle.");
+      return;
+    }
+
+    try {
+      localStorage.setItem("broomboom_user", JSON.stringify(userData));
+    } catch (_) {}
+
+    try {
+      const totalTariff = checkoutPrice;
+      const advancePaid = Math.round(totalTariff * 0.25);
+      const balancePayable = totalTariff - advancePaid;
+
+      const bookingData = {
+        customerName: userData.name || "Guest Traveler",
+        customerPhone: userData.phone || "+91 98765 43210",
+        customerEmail: userData.email || "guest@example.com",
+        vehicleName: selectedVehicle.name,
+        vehicleModels: selectedVehicle.models,
+        vehicleSeats: selectedVehicle.seats,
+        packageTitle: `Outstation: Kolkata to ${outstationData.toCity} (${outstationData.tripType === "roundTrip" ? "Round Trip" : "One Way Drop"})`,
+        travelDate: outstationData.pickupDate,
+        pickupTime: outstationData.pickupTime,
+        pickupAddress: pickupAddress.trim(),
+        pickupPincode: pickupPincode.trim(),
+        pickupState,
+        totalTariff,
+        advancePaid,
+        balancePayable,
+      };
+
+      setIsProcessingPayment(true);
+
+      const result = await submitBooking(bookingData);
+      if (!result?.success || !result.data?.paymentSessionId) {
+        throw new Error(result?.message || "Unable to create booking.");
+      }
+
+      const bookingRef =
+        result.data?.booking?.cashfreeOrderId ||
+        result.data?.booking?.bookingId ||
+        `BBC-OUT-${Math.floor(100000 + Math.random() * 900000)}`;
+
+      // Cache booking details in localStorage for immediate thank-you page display
+      try {
+        const confirmedBooking = {
+          refId: result.data?.booking?.bookingId || bookingRef,
+          cashfreeOrderId: result.data?.booking?.cashfreeOrderId || bookingRef,
+          customerName: bookingData.customerName,
+          customerPhone: bookingData.customerPhone,
+          customerEmail: bookingData.customerEmail,
+          vehicle: bookingData.vehicleName,
+          vehicleModel: bookingData.vehicleModels,
+          package: bookingData.packageTitle,
+          date: bookingData.travelDate,
+          slot: bookingData.pickupTime,
+          pickupLocation: bookingData.pickupAddress,
+          totalFare: `₹${bookingData.totalTariff.toLocaleString()}`,
+          advanceToPay: `₹${bookingData.advancePaid.toLocaleString()}`,
+          balancePayable: `₹${bookingData.balancePayable.toLocaleString()}`,
+        };
+        localStorage.setItem("broomboom_confirmed_booking", JSON.stringify(confirmedBooking));
+      } catch (e) {
+        console.warn("Storage error", e);
+      }
+
+      const cashfree = await loadCashfree();
+      if (!cashfree) throw new Error("Unable to load Cashfree.");
+
+      const checkoutRes = await cashfree.checkout({
+        paymentSessionId: result.data.paymentSessionId,
+        redirectTarget: "_modal",
+      });
+
+      if (checkoutRes && (checkoutRes as any).error) {
+        setIsProcessingPayment(false);
+        return;
+      }
+
+      window.location.href = `/thank-you?order_id=${encodeURIComponent(bookingRef)}&payment_status=SUCCESS`;
+    } catch (error) {
+      setIsProcessingPayment(false);
+      alert(error instanceof Error ? error.message : "Something went wrong while creating your booking.");
+    }
+  };
+
+  if (!isMounted) {
+    return <div className="min-h-screen bg-puja-cream flex items-center justify-center font-bold text-slate-500">Loading Fleet...</div>;
+  }
+
+  return (
+    // FIX 1: Removed `justify-between` from this wrapper
+    <div className="min-h-screen bg-puja-cream text-slate-900 flex flex-col font-sans">
+     {/* Header */}
+            <header className="sticky top-0 z-40 bg-white border-b border-amber-200 shadow-sm backdrop-blur-md">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 py-3 flex items-center justify-between">
+
+                <div className="flex items-center gap-4">
+
+                {/* BroomBoom Logo + Puja Information */}
+                <Link
+                    href="/"
+                    className="flex items-center gap-2.5 sm:gap-3 group shrink-0"
+                    aria-label="BroomBoom Cabs Home"
+                >
+                    {/* Round Logo */}
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-full overflow-hidden shrink-0">
+                    <img
+                        src="/images/broomboom-logo.png"
+                        alt="BroomBoom Cabs"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    </div>
+
+                    {/* Puja Information */}
+                    <div className="flex flex-col justify-center">
+                    <span className="px-2 py-0.5 w-fit text-[8px] sm:text-[9px] font-black bg-amber-400 text-slate-950 rounded border border-amber-500/40 tracking-wide">
+                        PUJA 2026
+                    </span>
+
+                    <p className="text-[8px] sm:text-[10px] text-slate-500 tracking-widest uppercase font-semibold mt-1">
+                        Kolkata Durga Puja Travel
+                    </p>
+                    </div>
+                </Link>
+
+                </div>
+
+                {/* Right Side */}
+                <div className="flex items-center gap-3">
+
+                <div className="hidden sm:block text-right">
+                    <span className="text-[10px] text-slate-500 block font-medium">
+                    Logged In As
+                    </span>
+
+                    <span className="text-xs font-bold text-slate-900">
+                    {userData.name}
+                    </span>
+                </div>
+
+                <a
+                    href="tel:+919876543210"
+                    className="px-3.5 py-2 bg-amber-100 hover:bg-amber-200 text-amber-950 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors"
+                >
+                    <PhoneCall className="w-3.5 h-3.5" />
+
+                    <span className="hidden sm:inline">
+                    Highway Helpline:
+                    </span>
+
+                    +91 98765 43210
+                </a>
+
+                </div>
+
+            </div>
+            </header>
+
+      <OutstationBookingHeader
+        tripType={outstationData.tripType}
+        fromCity={outstationData.fromCity}
+        toCity={outstationData.toCity}
+        pickupDate={outstationData.pickupDate}
+        pickupTime={outstationData.pickupTime}
+        returnDate={outstationData.returnDate}
+        returnTime={outstationData.returnTime}
+        onUpdateDetails={setOutstationData}
+      />
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 w-full flex-1 pb-20 lg:pb-8">
+        <div className="flex items-center gap-2 mb-6 border-b border-amber-200 pb-3 overflow-x-auto scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap">
+          <button
+            onClick={() => setSelectedCategory("all")}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap shrink-0 min-h-[38px] active:scale-95 ${
+              selectedCategory === "all"
+                ? "bg-slate-950 text-amber-400 shadow-md"
+                : "bg-white text-slate-700 hover:bg-amber-100 border border-amber-200"
+            }`}
+          >
+            All Highway Cabs ({Object.keys(FLEET_DATA).length})
+          </button>
+          <button
+            onClick={() => setSelectedCategory("sedan")}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap shrink-0 min-h-[38px] active:scale-95 ${
+              selectedCategory === "sedan"
+                ? "bg-slate-950 text-amber-400 shadow-md"
+                : "bg-white text-slate-700 hover:bg-amber-100 border border-amber-200"
+            }`}
+          >
+            Sedan (Dzire / Etios)
+          </button>
+          <button
+            onClick={() => setSelectedCategory("suv")}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap shrink-0 min-h-[38px] active:scale-95 ${
+              selectedCategory === "suv"
+                ? "bg-slate-950 text-amber-400 shadow-md"
+                : "bg-white text-slate-700 hover:bg-amber-100 border border-amber-200"
+            }`}
+          >
+            SUV &amp; SUV+ (Ertiga / Innova)
+          </button>
+          <button
+            onClick={() => setSelectedCategory("traveller")}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap shrink-0 min-h-[38px] active:scale-95 ${
+              selectedCategory === "traveller"
+                ? "bg-slate-950 text-amber-400 shadow-md"
+                : "bg-white text-slate-700 hover:bg-amber-100 border border-amber-200"
+            }`}
+          >
+            Tempo Traveller (13-26 Seater)
+          </button>
+        </div>
+
+        <div className="grid lg:grid-cols-12 gap-8 items-start">
+          <div className="lg:col-span-8 space-y-6">
+            {vehiclesList.map((car) => {
+              const currentPrice = getCarRate(car);
+
+              return (
+                <div
+                  key={car.id}
+                  className="bg-white rounded-3xl border-2 border-amber-200/90 shadow-md overflow-hidden p-5 sm:p-6 hover:border-amber-400 transition-all group"
+                >
+                  <div className="grid sm:grid-cols-12 gap-6 items-center">
+                    <div className="sm:col-span-5 space-y-3">
+                      <div className="relative h-36 sm:h-40 rounded-2xl overflow-hidden bg-slate-900 shadow-inner">
+                        <Image
+                          src={car.image}
+                          alt={car.name}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-500 opacity-90"
+                          sizes="(max-width: 768px) 100vw, 30vw"
+                        />
+                        <div className="absolute top-2 left-2">
+                          <span className="px-2.5 py-0.5 bg-amber-400 text-slate-950 text-[10px] font-black rounded-full shadow">
+                            {car.tag}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-slate-600 font-semibold">
+                        <span className="flex items-center gap-1 bg-puja-cream px-2.5 py-1 rounded-lg border border-amber-200">
+                          <Users className="w-3.5 h-3.5 text-amber-600" /> {car.seats} Seats
+                        </span>
+                        <span className="flex items-center gap-1 bg-puja-cream px-2.5 py-1 rounded-lg border border-amber-200">
+                          <Briefcase className="w-3.5 h-3.5 text-amber-600" /> {car.luggage.split("+")[0]}
+                        </span>
+                        <span className="bg-emerald-50 text-emerald-700 px-2 py-1 rounded-lg font-bold text-[11px] border border-emerald-200">
+                          AC Cab
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="sm:col-span-4 space-y-2">
+                      <h3 className="text-lg font-bold text-slate-950 font-royal">{car.name}</h3>
+                      <p className="text-xs text-slate-500 font-medium">{car.models}</p>
+
+                      <div className="space-y-1.5 pt-1 text-xs text-slate-700">
+                        <div className="flex items-center gap-1.5 font-bold text-slate-900">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+                          <span>
+                            {outstationData.fromCity} → {outstationData.toCity} (
+                            {outstationData.tripType === "roundTrip" ? "Round Trip" : "One Way Drop"})
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+                          <span>State Tolls &amp; Taxes Included</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+                          <span>Highway Chauffeur Allowance Included</span>
+                        </div>
+                      </div>
+                      <div className="text-[11px] text-slate-500 pt-0.5 font-medium">
+                        Extra km: ₹{car.outstationPerKm}/km
+                      </div>
+                    </div>
+
+                    <div className="sm:col-span-3 flex flex-row sm:flex-col items-center sm:items-end justify-between text-left sm:text-right pt-4 sm:pt-0 border-t sm:border-t-0 sm:border-l border-amber-100 sm:pl-5 gap-3">
+                      <div>
+                        <span className="text-[10px] text-slate-400 block line-through">
+                          ₹{(currentPrice + 1200).toLocaleString()}
+                        </span>
+                        <div className="text-2xl sm:text-3xl font-black text-amber-900 leading-none">
+                          ₹{currentPrice.toLocaleString()}
+                        </div>
+                        <span className="text-[10px] text-emerald-600 font-bold block mt-0.5 sm:mt-1">
+                          All-Inclusive Rate
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => handleSelectCar(car.id)}
+                        className="w-auto sm:w-full py-3 px-5 sm:px-4 bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-slate-950 font-black text-xs sm:text-sm rounded-xl shadow-md hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-1.5 min-h-[44px]"
+                      >
+                        <Zap className="w-3.5 h-3.5 fill-slate-950" />
+                        <span>BOOK NOW</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="lg:col-span-4 space-y-5">
+            <div className="bg-white rounded-3xl p-6 border-2 border-amber-300 shadow-md space-y-4">
+              <div className="flex items-center gap-3 pb-3 border-b border-amber-100">
+                <div className="w-10 h-10 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center font-bold">
+                  <ShieldCheck className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-slate-950">Outstation Assurance</h4>
+                  <span className="text-[11px] text-slate-500">100% Guaranteed On-Time Chauffeur</span>
+                </div>
+              </div>
+              <div className="space-y-2.5 text-xs text-slate-700">
+                <div className="flex items-start gap-2">
+                  <Check className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
+                  <span><strong>Zero Toll Hassle:</strong> FASTag highway toll booths handled by chauffeur.</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <Check className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
+                  <span><strong>Interstate Permits:</strong> Jharkhand &amp; Odisha border documentation pre-arranged.</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <Check className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
+                  <span><strong>Doorstep Pickup:</strong> Chauffeur reaches your home address on schedule.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      {/* Booking Checkout Modal */}
+      {isCheckoutOpen && selectedVehicle && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto animate-fadeIn">
+          <div className="bg-white w-full max-w-lg rounded-2xl sm:rounded-3xl border-2 border-amber-300 shadow-2xl overflow-hidden relative my-auto sm:my-8">
+            <div className="bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-400 p-4 sm:p-5 text-slate-950 relative">
+              <button
+                onClick={() => setIsCheckoutOpen(false)}
+                className="absolute top-3.5 right-3.5 sm:top-4 sm:right-4 w-8 h-8 rounded-full bg-black/10 hover:bg-black/20 flex items-center justify-center text-slate-900"
+              >
+                <X className="w-4 h-4" />
+              </button>
+              <h3 className="text-lg sm:text-xl font-bold font-royal text-slate-950">Review &amp; Confirm Booking</h3>
+              <p className="text-xs text-amber-950/80 mt-0.5">
+                {selectedVehicle.name} • {outstationData.fromCity} to {outstationData.toCity}
+              </p>
+            </div>
+
+            <div className="p-4 sm:p-6 space-y-4 bg-puja-cream max-h-[82vh] overflow-y-auto">
+              <form onSubmit={handleConfirmBooking} className="space-y-4">
+                <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-amber-200 flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] font-bold text-amber-700 uppercase">Selected Cab</span>
+                    <h4 className="text-sm font-bold text-slate-950">{selectedVehicle.name}</h4>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-lg sm:text-xl font-black text-amber-900">₹{checkoutPrice.toLocaleString()}</span>
+                    <span className="text-[10px] text-emerald-700 block font-bold">✓ Fixed Highway Fare</span>
+                  </div>
+                </div>
+
+                <div className="bg-white p-3.5 rounded-2xl border border-amber-200 gap-2 text-xs flex flex-col">
+                  <span className="text-[10px] uppercase font-bold text-emerald-700 flex items-center gap-1">
+                    <Calendar className="w-3 h-3" /> Pickup Schedule:
+                  </span>
+                  <strong className="text-slate-900">
+                    {outstationData.pickupDate} at {outstationData.pickupTime}
+                  </strong>
+                  {outstationData.tripType === "roundTrip" && outstationData.returnDate && (
+                    <span className="text-slate-600 text-[11px]">
+                      Return on {outstationData.returnDate} at {outstationData.returnTime}
+                    </span>
+                  )}
+                </div>
+
+                {/* Passenger Contact Details */}
+                <div className="bg-white p-3.5 rounded-2xl border border-amber-200 space-y-3">
+                  <div className="flex items-center gap-1.5 border-b border-amber-100 pb-2">
+                    <User className="w-3.5 h-3.5 text-amber-600" />
+                    <span className="text-[11px] font-bold text-slate-900 uppercase tracking-wider">
+                      Passenger / Primary Rider Information
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs font-bold text-slate-700 mb-1 block">
+                        Full Name <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Rahul Sen"
+                        value={userData.name === "Guest Traveler" ? "" : userData.name}
+                        onChange={(e) => setUserData((prev) => ({ ...prev, name: e.target.value }))}
+                        required
+                        className="w-full px-3 py-2.5 bg-slate-50 border border-amber-200 rounded-xl text-base sm:text-xs text-slate-900 focus:outline-none focus:border-amber-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-700 mb-1 block">
+                        WhatsApp / Phone <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="tel"
+                        placeholder="e.g. +91 98765 43210"
+                        value={userData.phone === "+91 9876543210" ? "" : userData.phone}
+                        onChange={(e) => setUserData((prev) => ({ ...prev, phone: e.target.value }))}
+                        required
+                        className="w-full px-3 py-2.5 bg-slate-50 border border-amber-200 rounded-xl text-base sm:text-xs text-slate-900 focus:outline-none focus:border-amber-500"
+                      />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className="text-xs font-bold text-slate-700 mb-1 block">
+                        Confirmation Email <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="email"
+                        placeholder="e.g. rahul.sen@example.com"
+                        value={userData.email === "guest@example.com" ? "" : userData.email}
+                        onChange={(e) => setUserData((prev) => ({ ...prev, email: e.target.value }))}
+                        required
+                        className="w-full px-3 py-2.5 bg-slate-50 border border-amber-200 rounded-xl text-base sm:text-xs text-slate-900 focus:outline-none focus:border-amber-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="md:col-span-2">
+                    <label className="text-xs font-bold text-slate-700 mb-1 block">
+                      Pickup Address in Kolkata <span className="text-red-500">*</span>
+                    </label>
+                    <textarea
+                      placeholder="e.g. Flat 4B, South City Residency, Prince Anwar Shah Road, Kolkata"
+                      value={pickupAddress}
+                      onChange={(e) => setPickupAddress(e.target.value)}
+                      required
+                      rows={2}
+                      className="w-full px-3 py-2.5 bg-white border border-amber-200 rounded-xl text-base sm:text-xs text-slate-900 focus:outline-none focus:border-amber-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-700 mb-1 block">Pincode</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. 700019"
+                      value={pickupPincode}
+                      onChange={(e) => setPickupPincode(e.target.value)}
+                      className="w-full px-3 py-2.5 bg-white border border-amber-200 rounded-xl text-base sm:text-xs text-slate-900 focus:outline-none focus:border-amber-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="p-3.5 bg-amber-100/90 rounded-2xl border border-amber-300 text-xs space-y-1.5">
+                  <div className="flex justify-between text-slate-700">
+                    <span>Total Trip Tariff:</span>
+                    <span className="font-bold">₹{checkoutPrice.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between text-slate-950 font-black text-sm pt-1 border-t border-amber-200">
+                    <span>Payable 25% Deposit to Lock:</span>
+                    <span className="text-amber-900">
+                      ₹{Math.round(checkoutPrice * 0.25).toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isProcessingPayment}
+                  className="w-full py-3.5 px-4 bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 disabled:opacity-60 text-slate-950 font-black text-sm rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 min-h-[48px] active:scale-95"
+                >
+                  {isProcessingPayment ? (
+                    <>
+                      <Clock className="w-4 h-4 animate-spin" />
+                      <span>Connecting to Cashfree...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Pay 25% Advance &amp; Confirm Cab</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </>
+                  )}
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function OutstationFleetPage() {
+  return (
+    <Suspense fallback={<div className="p-10 text-center text-sm font-bold text-slate-500">Loading Outstation Fleet...</div>}>
+      <OutstationFleetContent />
+    </Suspense>
+  );
+}

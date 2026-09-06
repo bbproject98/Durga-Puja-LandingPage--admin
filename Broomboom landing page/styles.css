@@ -1,0 +1,215 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Rozha+One&display=swap');
+
+:root {
+  --festive-crimson: #9B111E;
+  --festive-red: #D92525;
+  --festive-gold: #D4AF37;
+  --festive-amber: #F59E0B;
+  --festive-gold-light: #FDE047;
+  --festive-dark: #0D0614;
+  --festive-card-dark: #170C24;
+  --festive-cream: #FFFDF8;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background-color: #0A0410;
+  color: #F3F4F6;
+  overflow-x: hidden;
+}
+
+.font-festive {
+  font-family: 'Rozha One', 'Cinzel', serif;
+}
+
+.font-royal {
+  font-family: 'Cinzel', serif;
+}
+
+/* Festive Gradient Texts */
+.text-gold-gradient {
+  background: linear-gradient(135deg, #FFE27D 0%, #D4AF37 50%, #B8860B 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-crimson-gradient {
+  background: linear-gradient(135deg, #FF6B6B 0%, #E63946 50%, #9B111E 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Festive Glow & Shimmer */
+.glow-gold {
+  box-shadow: 0 0 25px rgba(212, 175, 55, 0.35);
+}
+
+.glow-crimson {
+  box-shadow: 0 0 30px rgba(217, 37, 37, 0.4);
+}
+
+.glow-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glow-card:hover {
+  box-shadow: 0 12px 35px rgba(212, 175, 55, 0.25);
+  transform: translateY(-4px);
+  border-color: rgba(212, 175, 55, 0.6) !important;
+}
+
+/* Custom Background Patterns */
+.bg-alpana-pattern {
+  background-image: radial-gradient(rgba(212, 175, 55, 0.12) 1.5px, transparent 1.5px),
+                    radial-gradient(rgba(217, 37, 37, 0.08) 1.5px, transparent 1.5px);
+  background-size: 36px 36px;
+  background-position: 0 0, 18px 18px;
+}
+
+.bg-festive-mesh {
+  background: radial-gradient(circle at 10% 20%, rgba(155, 17, 30, 0.45) 0%, transparent 40%),
+              radial-gradient(circle at 90% 10%, rgba(212, 175, 55, 0.25) 0%, transparent 45%),
+              radial-gradient(circle at 50% 80%, rgba(155, 17, 30, 0.35) 0%, transparent 50%),
+              #0B0412;
+}
+
+/* Traditional Bengali Alpana Border Motif SVG */
+.alpana-border-top {
+  position: relative;
+}
+.alpana-border-top::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: repeating-linear-gradient(
+    90deg,
+    #D4AF37,
+    #D4AF37 12px,
+    #9B111E 12px,
+    #9B111E 24px,
+    #FFF 24px,
+    #FFF 30px
+  );
+  opacity: 0.85;
+}
+
+/* Shimmer Button Effect */
+.btn-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.btn-shimmer::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    60deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.35) 50%,
+    transparent 80%
+  );
+  transform: rotate(30deg);
+  animation: shimmerEffect 4s infinite linear;
+}
+
+@keyframes shimmerEffect {
+  0% { transform: translateX(-100%) rotate(30deg); }
+  100% { transform: translateX(100%) rotate(30deg); }
+}
+
+/* Pulse animation for live status badge */
+@keyframes pulseGlow {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.05); }
+}
+.pulse-badge {
+  animation: pulseGlow 2.5s infinite ease-in-out;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0D0614;
+}
+::-webkit-scrollbar-thumb {
+  background: #3B1B54;
+  border-radius: 4px;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #9B111E;
+}
+
+/* Glassmorphism Classes */
+.glass-panel {
+  background: rgba(23, 12, 36, 0.75);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.glass-modal {
+  background: rgba(15, 8, 26, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+}
+
+/* Badge tags */
+.badge-gold {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.2) 0%, rgba(245, 158, 11, 0.3) 100%);
+  border: 1px solid rgba(212, 175, 55, 0.5);
+  color: #FDE047;
+}
+
+.badge-crimson {
+  background: linear-gradient(135deg, rgba(155, 17, 30, 0.3) 0%, rgba(217, 37, 37, 0.4) 100%);
+  border: 1px solid rgba(217, 37, 37, 0.6);
+  color: #FFA5A5;
+}
+
+/* Diya Floating Animation */
+@keyframes floatAnimation {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(1deg); }
+}
+
+.float-slow {
+  animation: floatAnimation 4s ease-in-out infinite;
+}
+
+/* Tooltip & Addon selections */
+.addon-card input:checked + div {
+  border-color: #D4AF37;
+  background-color: rgba(212, 175, 55, 0.15);
+}
+
+/* Step tracker */
+.step-dot.active {
+  background-color: #D4AF37;
+  color: #0A0410;
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.8);
+}
+.step-dot.completed {
+  background-color: #10B981;
+  color: #FFFFFF;
+}
+
+/* Print Friendly Styles for Itinerary download */
+@media print {
+  body {
+    background: #FFF !important;
+    color: #000 !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
