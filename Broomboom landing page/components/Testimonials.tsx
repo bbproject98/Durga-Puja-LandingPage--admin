@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Star, Quote, CheckCircle2, Smartphone, MapPin, Award } from "lucide-react";
+import { Star, CheckCircle2 } from "lucide-react";
 
 export const Testimonials: React.FC = () => {
   const reviews = [
@@ -10,58 +10,57 @@ export const Testimonials: React.FC = () => {
       role: "South City Resident, Kolkata",
       trip: "Booked Innova Crysta (South Kolkata Theme Circuit)",
       source: "Google Play Store Rider",
-      sourceIcon: "play",
       rating: 5,
       comment:
         "My 78-year-old parents could visit all 6 marquee South Kolkata pandals without fatigue! Driver Biplab knew the exact police bypass drop points closest to the VIP queues. Truly unforgettable experience!",
       initials: "SM",
-      bgClass: "bg-amber-100 text-amber-800"
+      bgClass: "bg-amber-100 text-amber-800",
+      avatar: "https://i.pravatar.cc/150?img=1", // 👨‍🦱 Sourav
     },
     {
       name: "Ananya Ganguly",
       role: "NRI from London, UK",
       trip: "Booked 13-Seater Urbania (All-Night Midnight Parikrama)",
       source: "Justdial Verified Traveler",
-      sourceIcon: "directory",
       rating: 5,
       comment:
         "Visiting Kolkata for Durga Puja after 6 years with 11 family members. The 13-seater Force Urbania made our midnight parikrama seamless! Super chilled AC, clean seats, and driver was so polite.",
       initials: "AG",
-      bgClass: "bg-yellow-100 text-yellow-800"
+      bgClass: "bg-yellow-100 text-yellow-800",
+      avatar: "https://i.pravatar.cc/150?img=5", // 👩 Ananya
     },
     {
       name: "Rohan Chatterjee",
       role: "Salt Lake Sector V, Kolkata",
       trip: "Booked Ertiga 6s (Kolkata to Mandarmani Beach Tour)",
       source: "WhatsApp Verified Booking",
-      sourceIcon: "direct",
       rating: 5,
       comment:
         "We took the 3-day Mandarmani beach package on Dashami morning. The driver drove very carefully on the highway and recommended the best crab curry joint at Kolaghat. 10/10 service!",
       initials: "RC",
-      bgClass: "bg-emerald-100 text-emerald-800"
+      bgClass: "bg-emerald-100 text-emerald-800",
+      avatar: "https://i.pravatar.cc/150?img=3", // 👨 Rohan
     },
     {
       name: "Debarati Banerjee",
       role: "Ballygunge Circular Road",
       trip: "Booked Sedan Dzire (North Kolkata Heritage Tour)",
       source: "Google Play Store Rider",
-      sourceIcon: "play",
       rating: 5,
       comment:
         "The Bonedi Bari heritage tour was magical. Sovabazar Rajbari, Bagbazar and sweet stops at Girish Chandra Dey — our driver managed the parking without us waiting a single minute in the crowd.",
       initials: "DB",
-      bgClass: "bg-amber-100 text-amber-800"
-    }
+      bgClass: "bg-amber-100 text-amber-800",
+      avatar: "https://i.pravatar.cc/150?img=7", // 👩 Debarati
+    },
   ];
 
   return (
-    <section 
-      id="reviews" 
+    <section
+      id="reviews"
       className="py-8 md:py-16 lg:py-12 bg-puja-cream border-b border-amber-200 relative"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto mb-12 lg:mb-10 space-y-2">
           <span className="px-3.5 py-1 rounded-full bg-amber-100 text-amber-900 border border-amber-300 text-xs font-black uppercase tracking-wider">
@@ -100,11 +99,20 @@ export const Testimonials: React.FC = () => {
               </div>
 
               <div className="pt-4 border-t border-amber-100 flex items-center gap-3">
-                <div
-                  className={`w-10 h-10 rounded-2xl flex items-center justify-center font-black text-xs flex-shrink-0 ${rev.bgClass}`}
-                >
-                  {rev.initials}
-                </div>
+                {/* Avatar or fallback initials */}
+                {rev.avatar ? (
+                  <img
+                    src={rev.avatar}
+                    alt={rev.name}
+                    className="w-10 h-10 rounded-2xl object-cover flex-shrink-0 border border-amber-200"
+                  />
+                ) : (
+                  <div
+                    className={`w-10 h-10 rounded-2xl flex items-center justify-center font-black text-xs flex-shrink-0 ${rev.bgClass}`}
+                  >
+                    {rev.initials}
+                  </div>
+                )}
                 <div className="overflow-hidden">
                   <h4 className="text-xs font-bold text-slate-950 truncate flex items-center gap-1">
                     <span>{rev.name}</span>
@@ -119,7 +127,6 @@ export const Testimonials: React.FC = () => {
             </div>
           ))}
         </div>
-
       </div>
     </section>
   );
