@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-// @ts-expect-error CSS is bundled by Next.js and has no TypeScript declarations.
 import "./globals.css";
 
 export const viewport: Viewport = {

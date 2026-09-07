@@ -3,16 +3,75 @@
 import React from "react";
 import {
   Star,
-  ShieldCheck,
-  Award,
   CheckCircle2,
   Clock,
-  Smartphone,
-  MapPin,
   Headphones,
   FileText,
   BadgeCheck,
 } from "lucide-react";
+
+// Google Play Store Triangle Icon
+const GooglePlayIcon: React.FC<{ className?: string }> = ({ className = "w-5 h-5" }) => (
+  <svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+    <path
+      d="M325.3 234.3L104.6 13l280.8 161.2-60.1 60.1z"
+      fill="#EA4335"
+    />
+    <path
+      d="M47 38.6c-5.8 8.4-9.3 19-9.3 31.6v371.6c0 12.6 3.5 23.2 9.3 31.6l239.3-237.4L47 38.6z"
+      fill="#4285F4"
+    />
+    <path
+      d="M325.3 277.7l60.1 60.1L104.6 499l220.7-221.3z"
+      fill="#34A853"
+    />
+    <path
+      d="M471.1 236.4l-85.7-49.2-60.1 68.8 60.1 60.1 85.7-49.2c16.3-9.3 24.3-24.6 24.3-30.2 0-5.7-8-21-24.3-30.5z"
+      fill="#FBBC04"
+    />
+  </svg>
+);
+
+// Justdial Badge Icon
+const JustdialIcon: React.FC<{ className?: string }> = ({ className = "w-5 h-5" }) => (
+  <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+    <rect width="48" height="48" rx="10" fill="#0076D7" />
+    <path
+      d="M17.5 12h5.5v19c0 3.6-2.5 6-6.5 6-3.8 0-6.2-2.2-6.5-5.5h5c.2 1.2 1 1.8 1.8 1.8 1.1 0 1.7-.8 1.7-2.3V12z"
+      fill="#FFFFFF"
+    />
+    <path
+      d="M36 12v24h-5.2v-2.8c-1.2 2-3.4 3.2-6.2 3.2-5.3 0-8.6-4.2-8.6-10.2 0-6.1 3.5-10.2 8.6-10.2 2.7 0 4.9 1.1 6.2 3.1V12H36zm-5.2 14.2c0-3.7-2.1-6.1-5.2-6.1-3 0-5.1 2.4-5.1 6.1s2.1 6.1 5.1 6.1c3.1 0 5.2-2.4 5.2-6.1z"
+      fill="#FF6A00"
+    />
+  </svg>
+);
+
+// Durga Puja Parikrama / Trishul & Diya Icon
+const DurgaPujaIcon: React.FC<{ className?: string }> = ({ className = "w-5 h-5" }) => (
+  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+    <path
+      d="M12 2v19M9 5c0 3.5 1.5 5.5 3 5.5s3-2 3-5.5"
+      stroke="#D97706"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M6 7c.5 4.5 3 7 6 7s5.5-2.5 6-7"
+      stroke="#DC2626"
+      strokeWidth="2"
+      strokeLinecap="round"
+    />
+    <path
+      d="M4 19c1.5 2 4.5 3 8 3s6.5-1 8-3H4z"
+      fill="#F59E0B"
+      stroke="#D97706"
+      strokeWidth="1.5"
+    />
+    <circle cx="12" cy="16" r="1.5" fill="#DC2626" />
+  </svg>
+);
 
 export const TrustedMetrics: React.FC = () => {
   return (
@@ -42,9 +101,9 @@ export const TrustedMetrics: React.FC = () => {
           <div className="p-6 lg:p-5 bg-white rounded-3xl border-2 border-amber-200 card-shadow space-y-3 text-center sm:text-left flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between gap-2 mb-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center font-bold">
-                    <Smartphone className="w-5 h-5" />
+                <div className="flex items-center gap-2.5">
+                  <div className="w-10 h-10 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0 shadow-sm">
+                    <GooglePlayIcon className="w-5 h-5" />
                   </div>
                   <div>
                     <h4 className="text-sm font-bold text-slate-950">Google Play Store</h4>
@@ -77,17 +136,17 @@ export const TrustedMetrics: React.FC = () => {
             </div>
           </div>
 
-          {/* Card 2: Justdial & Local Listings */}
+          {/* Card 2: Justdial */}
           <div className="p-6 lg:p-5 bg-white rounded-3xl border-2 border-amber-200 card-shadow space-y-3 text-center sm:text-left flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between gap-2 mb-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 rounded-2xl bg-yellow-100 text-yellow-800 flex items-center justify-center font-bold">
-                    <MapPin className="w-5 h-5" />
+                <div className="flex items-center gap-2.5">
+                  <div className="w-10 h-10 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0 shadow-sm overflow-hidden p-1.5">
+                    <JustdialIcon className="w-full h-full" />
                   </div>
                   <div>
-                    <h4 className="text-sm font-bold text-slate-950">Justdial &amp; Kolkata Directory</h4>
-                    <span className="text-[11px] text-slate-500">Local Travel Booking Hubs</span>
+                    <h4 className="text-sm font-bold text-slate-950">Justdial</h4>
+                    <span className="text-[11px] text-slate-500">Kolkata Travel Directory</span>
                   </div>
                 </div>
                 <span className="px-2.5 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-bold">
@@ -120,9 +179,9 @@ export const TrustedMetrics: React.FC = () => {
           <div className="p-6 lg:p-5 bg-white rounded-3xl border-2 border-amber-200 card-shadow space-y-3 text-center sm:text-left flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between gap-2 mb-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center font-bold">
-                    <Award className="w-5 h-5" />
+                <div className="flex items-center gap-2.5">
+                  <div className="w-10 h-10 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center shrink-0 shadow-sm">
+                    <DurgaPujaIcon className="w-6 h-6" />
                   </div>
                   <div>
                     <h4 className="text-sm font-bold text-slate-950">Puja Parikrama Desk</h4>
