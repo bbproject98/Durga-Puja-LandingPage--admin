@@ -33,11 +33,11 @@ type CashfreeInstance = {
 function loadCashfree(): Promise<CashfreeInstance> {
   return new Promise((resolve, reject) => {
     const win = window as Window & {
-      Cashfree?: (options: { mode: "sandbox" | "production" }) => CashfreeInstance;
+      Cashfree?: (options: { mode: "production" | "production" }) => CashfreeInstance;
     };
 
     if (win.Cashfree) {
-      resolve(win.Cashfree({ mode: "sandbox" }));
+      resolve(win.Cashfree({ mode: "production" }));
       return;
     }
 
@@ -47,7 +47,7 @@ function loadCashfree(): Promise<CashfreeInstance> {
 
     script.onload = () => {
       if (win.Cashfree) {
-        resolve(win.Cashfree({ mode: "sandbox" }));
+        resolve(win.Cashfree({ mode: "production" }));
       } else {
         reject(new Error("Unable to load Cashfree."));
       }
