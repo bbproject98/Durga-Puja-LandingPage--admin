@@ -15,6 +15,12 @@ interface LoginModalProps {
   onSuccess: (userData: { name: string; phone: string; email: string }) => void;
 }
 
+// Helper: turn "" / undefined into null so the DB stores NULL, not empty string
+const normalizeEmail = (e?: string): string | null => {
+  const trimmed = e?.trim();
+  return trimmed ? trimmed : null;
+};
+
 export const LoginModal: React.FC<LoginModalProps> = ({
   isOpen,
   onClose,
@@ -46,6 +52,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // ---- Required field validation ----
     if (!name.trim()) {
       alert("Please enter your name.");
       return;
@@ -54,19 +61,24 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       alert("Please enter a valid 10-digit mobile number.");
       return;
     }
-    if (!email.trim() || !email.includes("@")) {
-      alert("Please enter a valid email address.");
+
+    // ---- Email is OPTIONAL: validate ONLY if the user typed something ----
+    if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      alert("Please enter a valid email address, or leave it blank.");
       return;
     }
 
+    const normalizedEmail = normalizeEmail(email); // "" → null
+
+    // userData.email stays as string (for local UI) — empty string when blank
     const userData = { name: name.trim(), phone: phone.trim(), email: email.trim() };
 
     // 1. Post to Express + Prisma Backend
     try {
-      submitLead({
+      await submitLead({
         name: userData.name,
         phone: userData.phone,
-        email: userData.email,
+        email: normalizedEmail ?? "", // submitLead expects a string
         context: actionContext?.title || "General Request",
         action: actionContext?.type || "book",
       });
@@ -100,7 +112,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto animate-fadeIn">
       <div className="bg-white w-full max-w-md rounded-2xl sm:rounded-3xl border-2 border-amber-300 shadow-2xl overflow-hidden relative card-shadow my-auto sm:my-8">
-        
+
         {/* Festive Yellow Top Header Banner */}
         <div className="alpana-yellow-top bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-400 p-4 sm:p-6 text-slate-950 relative">
           <button
@@ -174,20 +186,23 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                 </span>
               </div>
 
-              {/* Email ID */}
+              {/* Email ID (Optional) */}
               <div>
                 <label className="text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">
                   <Mail className="w-3.5 h-3.5 text-amber-500" />
                   <span>Email ID</span>
+                  <span className="text-[10px] font-semibold text-slate-400 normal-case">(Optional)</span>
                 </label>
                 <input
                   type="email"
                   placeholder="e.g. sourav@gmail.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  required
                   className="w-full px-4 py-3 bg-white border border-amber-200 rounded-xl text-base sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200 transition-all"
                 />
+                <span className="text-[10px] text-slate-500 mt-1 block">
+                  ✓ Optional — add it if you'd like an email copy of your booking slip
+                </span>
               </div>
 
               {/* Action Button */}
@@ -211,4 +226,3 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     </div>
   );
 };
-

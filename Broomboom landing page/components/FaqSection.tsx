@@ -101,7 +101,7 @@ export const FaqSection: React.FC = () => {
             className="px-3.5 py-1.5 bg-amber-100 hover:bg-amber-200 text-amber-950 font-bold text-xs rounded-xl flex items-center gap-1.5 transition-colors"
           >
             <PhoneCall className="w-3 h-3" />
-            <span>+91 98765 43210</span>
+            <span>+91 8240765499</span>
           </a>
         </div>
 

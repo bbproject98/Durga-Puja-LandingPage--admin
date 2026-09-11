@@ -134,7 +134,7 @@ function ThankYouContent() {
       : null;
 
   const customerPhone =
-    bookingDetails?.customerPhone || "+91 98765 43210";
+    bookingDetails?.customerPhone || "+91 8240765499";
 
   const customerEmail =
     bookingDetails?.customerEmail || "guest@example.com";
@@ -432,7 +432,7 @@ function ThankYouContent() {
             <span className="hidden sm:inline">•</span>
             <div className="flex items-center gap-1">
               <Phone className="w-3.5 h-3.5 text-amber-600" />
-              <span>24/7 Puja Control Room: <strong>+91 98765 43210</strong></span>
+              <span>24/7 Puja Control Room: <strong>+91 8240765499</strong></span>
             </div>
           </div>
 

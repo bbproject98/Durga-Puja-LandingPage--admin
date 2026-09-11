@@ -11,13 +11,39 @@ interface RentalPackagesProps {
 }
 
 export const RentalPackages: React.FC<RentalPackagesProps> = ({ onActionClick }) => {
+  // Single source of truth for the booking action
+  const handleBook = (pkg: (typeof RENTAL_PACKAGES)[number]) => {
+    try {
+      localStorage.setItem("broomboom_active_package", pkg.id);
+      localStorage.setItem("broomboom_selected_tour", pkg.title);
+    } catch (e) {
+      console.warn("Storage error", e);
+    }
+    if (onActionClick) {
+      onActionClick("book", `Rental Package: ${pkg.title} (${pkg.id})`);
+    } else {
+      window.location.href = `/fleet?pkg=${pkg.id}`;
+    }
+  };
+
+  // Keyboard support for the clickable card
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLDivElement>,
+    pkg: (typeof RENTAL_PACKAGES)[number]
+  ) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      handleBook(pkg);
+    }
+  };
+
   return (
-    <section 
-      id="rental-packages" 
+    <section
+      id="rental-packages"
       className="py-8 md:py-16 lg:py-12 bg-white border-b border-amber-200 relative"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         {/* Section Heading */}
         <div className="text-center max-w-2xl mx-auto mb-10 lg:mb-8 space-y-2">
           <span className="px-3.5 py-1 rounded-full bg-amber-100 text-amber-900 border border-amber-300 text-xs font-black uppercase tracking-wider">
@@ -36,7 +62,12 @@ export const RentalPackages: React.FC<RentalPackagesProps> = ({ onActionClick })
           {RENTAL_PACKAGES.map((pkg) => (
             <div
               key={pkg.id}
-              className="bg-puja-cream h-full rounded-3xl overflow-hidden border-2 border-amber-200/90 card-shadow flex flex-col justify-between group hover:border-amber-400 transition-all p-4 lg:p-3.5 space-y-3 lg:space-y-2.5"
+              role="button"
+              tabIndex={0}
+              aria-label={`Book ${pkg.title} rental package`}
+              onClick={() => handleBook(pkg)}
+              onKeyDown={(e) => handleKeyDown(e, pkg)}
+              className="bg-puja-cream h-full rounded-3xl overflow-hidden border-2 border-amber-200/90 card-shadow flex flex-col justify-between group hover:border-amber-400 hover:shadow-lg active:scale-[0.99] transition-all p-4 lg:p-3.5 space-y-3 lg:space-y-2.5 cursor-pointer select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2"
             >
               {/* Top Content */}
               <div className="flex flex-col flex-1">
@@ -50,7 +81,7 @@ export const RentalPackages: React.FC<RentalPackagesProps> = ({ onActionClick })
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" />
-                  
+
                   {/* Badge */}
                   <div className="absolute top-2 left-2">
                     <span className="px-2 py-0.5 bg-amber-400 text-slate-950 text-[10px] font-black rounded-full shadow">
@@ -95,22 +126,14 @@ export const RentalPackages: React.FC<RentalPackagesProps> = ({ onActionClick })
                 </div>
               </div>
 
-              {/* Bottom BOOK NOW Button (FIXED) */}
+              {/* Bottom BOOK NOW Button */}
               <div className="mt-3 lg:mt-2 pt-3 lg:pt-2 shrink-0 border-t border-amber-200/80">
                 <button
                   type="button"
-                  onClick={() => {
-                    try {
-                      localStorage.setItem("broomboom_active_package", pkg.id);
-                      localStorage.setItem("broomboom_selected_tour", pkg.title);
-                    } catch (e) {
-                      console.warn("Storage error", e);
-                    }
-                    if (onActionClick) {
-                      onActionClick("book", `Rental Package: ${pkg.title} (${pkg.id})`);
-                    } else {
-                      window.location.href = `/fleet?pkg=${pkg.id}`;
-                    }
+                  onClick={(e) => {
+                    // Prevent the card's onClick from firing twice
+                    e.stopPropagation();
+                    handleBook(pkg);
                   }}
                   className="w-full btn-yellow-shimmer py-3 lg:py-2.5 px-4 lg:px-3 bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 active:scale-95 text-slate-950 font-black text-xs sm:text-sm rounded-xl shadow-md shadow-amber-400/30 hover:scale-102 transition-all flex items-center justify-center gap-2 uppercase tracking-wider cursor-pointer min-h-[44px] lg:min-h-[40px]"
                 >

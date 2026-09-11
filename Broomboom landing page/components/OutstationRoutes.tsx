@@ -62,7 +62,13 @@ export const OutstationRoutes: React.FC<OutstationRoutesProps> = ({ onActionClic
           {OUTSTATION_ROUTES.map((route) => (
             <div
               key={route.id}
-              className="bg-white rounded-3xl overflow-hidden border border-amber-200/90 card-shadow flex flex-col justify-between group hover:border-amber-400 transition-all"
+              onClick={(e) => {
+                // If the click originated inside a button, let the button handle it
+                if (e.target instanceof HTMLElement && e.target.closest("button")) return;
+                // Otherwise, trigger the card's primary button
+                e.currentTarget.querySelector("button")?.click();
+              }}
+              className="bg-white rounded-3xl overflow-hidden border border-amber-200/90 card-shadow flex flex-col justify-between group hover:border-amber-400 transition-all cursor-pointer"
             >
               <div>
                 {/* Route Image Banner */}

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
 import { AboutSection } from "@/components/AboutSection";
@@ -18,6 +18,9 @@ import { StickyMobileBar } from "@/components/StickyMobileBar";
 import { ConfirmedBooking } from "@/types";
 
 export default function Home() {
+  // Logged-in user state (persisted in localStorage)
+  const [currentUser, setCurrentUser] = useState<{ name: string; phone: string; email?: string } | null>(null);
+
   // Login popup state
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [activeActionContext, setActiveActionContext] = useState<{
@@ -30,16 +33,30 @@ export default function Home() {
   const [thankYouModalOpen, setThankYouModalOpen] = useState(false);
   const [confirmedBooking, setConfirmedBooking] = useState<ConfirmedBooking | null>(null);
 
-  // Triggered on ANY "Book" or "Explore" button on the entire homepage
-  const handleActionClick = (type: "book" | "explore", title: string) => {
-    setActiveActionContext({ type, title });
-    setLoginModalOpen(true);
-  };
+  // Sync user from localStorage on mount
+  useEffect(() => {
+    try {
+      const savedUser = localStorage.getItem("broomboom_user");
+      if (savedUser) {
+        const parsed = JSON.parse(savedUser);
+        if (parsed?.name && parsed?.name !== "Guest Traveler" && parsed?.phone) {
+          setCurrentUser(parsed);
+        }
+      }
+    } catch (e) {
+      console.warn("Storage load error", e);
+    }
+  }, []);
 
-  // Called when user submits Name, Phone, Email in the Login popup -> Redirects to appropriate Fleet page
-  const handleLoginSuccess = (userData: { name: string; phone: string; email: string }) => {
-    const title = activeActionContext?.title || "";
+  const handleLogout = useCallback(() => {
+    try {
+      localStorage.removeItem("broomboom_user");
+    } catch (_) {}
+    setCurrentUser(null);
+  }, []);
 
+  // Central routing helper based on the selected package or outstation tour
+  const proceedToDestination = useCallback((title: string) => {
     // 1. Save current active selection to local storage
     try {
       if (title) {
@@ -102,6 +119,42 @@ export default function Home() {
 
     // 4. Default redirect to Fleet / Car Selection page
     window.location.href = "/fleet";
+  }, []);
+
+  // Triggered on ANY "Book" or "Explore" button on the entire homepage
+  const handleActionClick = (type: "book" | "explore", title: string) => {
+    // Check if user is already logged in (state or localStorage)
+    let user = currentUser;
+    if (!user) {
+      try {
+        const savedUser = localStorage.getItem("broomboom_user");
+        if (savedUser) {
+          const parsed = JSON.parse(savedUser);
+          if (parsed?.name && parsed?.name !== "Guest Traveler" && parsed?.phone) {
+            user = parsed;
+            setCurrentUser(parsed);
+          }
+        }
+      } catch (_) {}
+    }
+
+    if (user && user.name && user.name !== "Guest Traveler") {
+      // User is already logged in once -> never ask for login again!
+      proceedToDestination(title);
+      return;
+    }
+
+    // Not yet logged in -> open login modal
+    setActiveActionContext({ type, title });
+    setLoginModalOpen(true);
+  };
+
+  // Called when user submits Name, Phone, Email in the Login popup -> Saves and Redirects
+  const handleLoginSuccess = (userData: { name: string; phone: string; email: string }) => {
+    setCurrentUser(userData);
+    setLoginModalOpen(false);
+    const title = activeActionContext?.title || "";
+    proceedToDestination(title);
   };
 
   const handleBookingConfirmed = (booking: ConfirmedBooking) => {
@@ -113,7 +166,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-puja-cream text-slate-900 relative pb-20 lg:pb-0">
       {/* 1. Sticky Festive Navbar */}
-      <Navbar onActionClick={handleActionClick} />
+      <Navbar onActionClick={handleActionClick} currentUser={currentUser} onLogout={handleLogout} />
 
       {/* 2. Banner (Hero) */}
       <Hero onActionClick={handleActionClick} />

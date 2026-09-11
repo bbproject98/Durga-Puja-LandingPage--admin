@@ -7,7 +7,7 @@ import { Sparkles, X } from "lucide-react";
 export const GallerySection: React.FC = () => {
   const images = [
     {
-      src: "/images/durga-puja-banner.jpg",
+      src: "/images/durga-puja-2026-broomboom-cabs.jpg",
       caption: "BroomBoom Iconic Yellow Cab & Pandal Hopping Trail",
       category: "BroomBoom Special",
     },
@@ -32,7 +32,7 @@ export const GallerySection: React.FC = () => {
       category: "Group Tour",
     },
     {
-      src: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80",
+      src: "/images/digha.jpg",
       caption: "Kolkata to Digha Festive Beach Holiday Drive",
       category: "Outstation Trip",
     },

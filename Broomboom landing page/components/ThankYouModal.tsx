@@ -136,7 +136,7 @@ export const ThankYouModal: React.FC<ThankYouModalProps> = ({ booking, onClose }
         <div className="mt-6 pt-4 border-t border-white/10 text-[11px] text-slate-400 flex items-center justify-center gap-2">
           <Phone className="w-3.5 h-3.5 text-amber-400" />
           <span>
-            Need urgent driver coordinates? Call 24/7 Helpline: <strong>+91 98765 43210</strong>
+            Need urgent driver coordinates? Call 24/7 Helpline: <strong>+91 8240765499</strong>
           </span>
         </div>
 

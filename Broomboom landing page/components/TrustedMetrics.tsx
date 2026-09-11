@@ -263,7 +263,7 @@ export const TrustedMetrics: React.FC = () => {
               </div>
               <h4 className="text-sm font-bold text-slate-950">24/7 Human Helpline</h4>
               <p className="text-xs text-slate-600 leading-relaxed font-normal">
-                Direct hotline to Kolkata operations managers (+91 98765 43210). No automated bots or long waiting times when you need support.
+                Direct hotline to Kolkata operations managers (+91 8240765499). No automated bots or long waiting times when you need support.
               </p>
             </div>
 

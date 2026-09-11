@@ -22,6 +22,7 @@ import {
     Clock as ClockIcon,
     Map,
     ChevronRight,
+     Receipt  
 } from "lucide-react";
 
 interface HeroProps {
@@ -31,7 +32,7 @@ interface HeroProps {
 
 export const Hero: React.FC<HeroProps> = ({
     onActionClick,
-    whatsappNumber = "+919876543210",
+    whatsappNumber = "+918240765499",
 }) => {
     const [selectedVehicle, setSelectedVehicle] = useState("SUV (6 Seater)");
     const [selectedRoute, setSelectedRoute] = useState("South Kolkata Mega Theme Circuit");
@@ -117,13 +118,23 @@ export const Hero: React.FC<HeroProps> = ({
                     <div className="grid lg:grid-cols-12 gap-4 lg:gap-10 items-start lg:items-center">
                         {/* ====== LEFT COLUMN ====== */}
                         <div className="lg:col-span-6 space-y-2 md:space-y-4 text-center lg:text-left">
-                            <h1 className="font-festive text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-slate-950 leading-[1.15] tracking-tight">
-                                Book Your Durga Puja <br />
-                                <span className="text-yellow-gradient">&amp; Outstation Cabs</span> in Kolkata
+                            <h1 className="font-festive text-2xl sm:text-4xl md:text-5xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-black text-slate-950 leading-snug tracking-tight text-balance">
+                                <span className="block">Celebrate Durga Puja</span>
+                                <span className="block text-yellow-gradient">2026 With BroomBoom Cabs</span>
                             </h1>
 
-                            <p className="text-xs sm:text-base md:text-lg text-slate-700 font-normal leading-relaxed max-w-xl mx-auto lg:mx-0">
-                                Sanitised AC cabs, verified route-master chauffeurs &amp; 100% zero surge tariff for comfortable Pandal Hopping and 12 Outstation Getaways.
+                            <p className="text-[11px] sm:text-sm md:text-base text-slate-600 font-normal leading-relaxed max-w-xl mx-auto lg:mx-0">
+                                Experience the magic of Kolkata Durga Puja with premium{" "}
+                                <strong className="font-semibold text-slate-900">
+                                    car rental and outstation cab packages
+                                </strong>{" "}
+                                designed to make your festive season stress-free. Whether you are
+                                navigating the city&apos;s radiant streets or embarking on a long
+                                weekend escape, BroomBoom Cabs offers seamless,{" "}
+                                <strong className="font-semibold text-slate-900">
+                                    100% fixed-rate travel
+                                </strong>{" "}
+                                across West Bengal and beyond.
                             </p>
 
                             {/* VALUE PROPS – hidden on mobile, visible on lg+ */}
@@ -133,6 +144,9 @@ export const Hero: React.FC<HeroProps> = ({
                                 </span>
                                 <span className="px-3 py-1.5 bg-white border border-amber-200 rounded-xl shadow-sm flex items-center gap-1.5">
                                     <ShieldCheck className="w-4 h-4 text-emerald-600" /> Zero Surge Guarantee
+                                </span>
+                                <span className="px-3 py-1.5 bg-white border border-amber-200 rounded-xl shadow-sm flex items-center gap-1.5">
+                                    <Receipt className="w-4 h-4 text-amber-600" /> Transparent Billing System
                                 </span>
                                 <span className="px-3 py-1.5 bg-white border border-amber-200 rounded-xl shadow-sm flex items-center gap-1.5">
                                     <CheckCircle2 className="w-4 h-4 text-amber-600" /> Senior-Friendly Drop Points
@@ -265,8 +279,8 @@ export const Hero: React.FC<HeroProps> = ({
                             <div className="hidden lg:block relative rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-amber-300 shadow-lg sm:shadow-2xl card-shadow group">
                                 <div className="relative aspect-[4/3] sm:aspect-[16/10] md:h-72 w-full bg-slate-900">
                                     <Image
-                                        src="/images/durga-puja-banner.jpg"
-                                        alt="BroomBoom Cabs Durga Puja Special Yellow Taxi & Pandal Celebration"
+                                        src="/images/durga-puja-2026-broomboom-cabs.jpg"
+                                        alt="durga-puja-2026-broomboom-cabs"
                                         fill
                                         priority
                                         className="object-cover object-center group-hover:scale-105 transition-transform duration-700"
