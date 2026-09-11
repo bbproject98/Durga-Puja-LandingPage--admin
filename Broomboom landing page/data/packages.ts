@@ -239,7 +239,7 @@ export const OUTSTATION_ROUTES: OutstationRoute[] = [
       "Breakfast halt at Ajoy River",
       "Interstate permit & tolls included",
     ],
-    image: "/images/deoghar.jpg",
+    image: "/images/Deoghar.jpg",
     prices: { sedan: 5499, suv: 6999, suvPlus: 8499 },
   },
   {

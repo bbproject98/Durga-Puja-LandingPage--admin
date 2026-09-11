@@ -35,9 +35,9 @@ export const metadata: Metadata = {
 
   // Icons
   icons: {
-    icon: "/images/broomboom-logo.png",
-    shortcut: "/images/broomboom-logo.png",
-    apple: "/images/broomboom-logo.png",
+    icon: "/images/broomboom-logo.jpg",
+    shortcut: "/images/broomboom-logo.jpg",
+    apple: "/images/broomboom-logo.jpg",
   },
 
   // Open Graph
