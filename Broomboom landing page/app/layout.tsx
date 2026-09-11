@@ -12,6 +12,11 @@ export const metadata: Metadata = {
   title: "BroomBoom Cabs | Kolkata Durga Puja Pandal Hopping & Chauffeur Rental 2026",
   description:
     "Book premium AC Sedan, SUV, Innova Crysta & Tempo Travellers (13, 15, 17 Seater) with BroomBoom Cabs for Kolkata Durga Puja Pandal Hopping & Outstation Trips. Zero Surge, Verified Drivers & VIP Passes.",
+  icons: {
+    icon: "/images/broomboom-logo.png",
+    shortcut: "/images/broomboom-logo.png",
+    apple: "/images/broomboom-logo.png",
+  },
   keywords: [
     "BroomBoom Cabs",
     "Durga Puja Kolkata car rental",

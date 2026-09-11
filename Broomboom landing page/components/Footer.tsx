@@ -280,7 +280,7 @@ export const Footer: React.FC<FooterProps> = ({ onActionClick }) => {
 
                 <div>
                   <span className="text-white font-bold block">
-                    +91 98765 43210
+                    +91 8240765499
                   </span>
 
                   <span className="text-xs text-slate-400">
@@ -294,7 +294,7 @@ export const Footer: React.FC<FooterProps> = ({ onActionClick }) => {
                 <Mail className="w-4 h-4 text-amber-400 mt-0.5 shrink-0" />
 
                 <span className="text-slate-300">
-                  support@broomboom.com
+                  support@broomboomcabs.com
                 </span>
               </li>
 

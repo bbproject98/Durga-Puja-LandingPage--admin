@@ -10,7 +10,7 @@ export const FLEET_DATA: Record<string, Vehicle> = {
     category: "sedan",
     tag: "Most Popular for Small Families & Couples",
     badgeType: "gold",
-    image: "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&w=800&q=80",
+    image: "/images/sedan.png",
     basePrice: 4551, // 8hr 80km standard
     baseHours: 8,
     baseKm: 80,
@@ -53,7 +53,7 @@ export const FLEET_DATA: Record<string, Vehicle> = {
     category: "suv",
     tag: "Best Value for Joint Families",
     badgeType: "crimson",
-    image: "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=800&q=80",
+    image: "/images/ertiga.png",
     basePrice: 5551, // 8hr 80km standard
     baseHours: 8,
     baseKm: 80,
@@ -139,7 +139,7 @@ export const FLEET_DATA: Record<string, Vehicle> = {
     category: "traveller",
     tag: "Ideal for Large Joint Families & Friends Groups",
     badgeType: "gold",
-    image: "https://images.unsplash.com/photo-1570125909232-eb263c188f7e?auto=format&fit=crop&w=800&q=80",
+    image: "/images/tempo13.png",
     basePrice: 10051, // 8hr 80km standard
     baseHours: 8,
     baseKm: 80,
@@ -182,7 +182,7 @@ export const FLEET_DATA: Record<string, Vehicle> = {
     category: "traveller",
     tag: "Perfect for Corporate Teams & Para Clubs",
     badgeType: "crimson",
-    image: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=800&q=80",
+    image: "/images/tempo17.png",
     basePrice: 11051, // 8hr 80km standard
     baseHours: 8,
     baseKm: 80,
@@ -225,7 +225,7 @@ export const FLEET_DATA: Record<string, Vehicle> = {
     category: "traveller",
     tag: "Maximum Group Capacity & Royalty",
     badgeType: "gold",
-    image: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=800&q=80",
+    image: "/images/tempo24.png",
     basePrice: 13051, // 8hr 80km standard
     baseHours: 8,
     baseKm: 80,

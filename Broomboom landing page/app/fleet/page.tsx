@@ -215,7 +215,7 @@ function FleetContent() {
         userData.name || "Guest Traveler",
 
       customerPhone:
-        userData.phone || "+91 98765 43210",
+        userData.phone || "+91 8240765499",
 
       customerEmail:
         userData.email || "guest@example.com",
@@ -422,7 +422,7 @@ function FleetContent() {
               className="px-3.5 py-2 bg-amber-100 hover:bg-amber-200 text-amber-950 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors"
             >
               <PhoneCall className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">24x7 Helpline:</span> +91 98765 43210
+              <span className="hidden sm:inline">24x7 Helpline:</span> +91 8240765499
             </a>
           </div>
         </div>
@@ -484,7 +484,7 @@ function FleetContent() {
                 : "bg-white text-slate-700 hover:bg-amber-100 border border-amber-200"
             }`}
           >
-            Tempo Traveller (13, 15, 17 Seaters)
+            Tempo Traveller (13, 17, 24 Seaters)
           </button>
         </div>
 
@@ -564,7 +564,8 @@ function FleetContent() {
 
                     <div className="sm:col-span-3 flex flex-row sm:flex-col items-center sm:items-end justify-between text-left sm:text-right pt-4 sm:pt-0 border-t sm:border-t-0 sm:border-l border-amber-100 sm:pl-5 gap-3">
                       <div>
-                        <span className="text-[10px] text-slate-400 block line-through">
+                        {/* After */}
+                         <span className="text-sm font-semibold text-slate-500 block line-through decoration-red-500 decoration-2">
                           ₹{(currentPrice + 800).toLocaleString()}
                         </span>
                         <div className="text-2xl sm:text-3xl font-black text-amber-900 leading-none">
@@ -781,8 +782,8 @@ function FleetContent() {
                       </label>
                       <input
                         type="tel"
-                        placeholder="e.g. +91 98765 43210"
-                        value={userData.phone === "+91 9876543210" ? "" : userData.phone}
+                        placeholder="e.g. +91 8240765499"
+                        value={userData.phone === "+91 8240765499" ? "" : userData.phone}
                         onChange={(e) => setUserData((prev) => ({ ...prev, phone: e.target.value }))}
                         required
                         className="w-full px-3 py-2.5 bg-slate-50 border border-amber-200 rounded-xl text-base sm:text-xs text-slate-900 focus:outline-none focus:border-amber-500"
@@ -936,7 +937,7 @@ function FleetContent() {
             BroomBoom Cabs • Kolkata Durga Puja &amp; Outstation Chauffeur Rentals
           </p>
           <p className="text-slate-500">
-            24x7 Operations Hubs: Salt Lake Sector V • Southern Avenue • Kolkata Airport (CCU) • Helpline: +91 98765 43210
+            24x7 Operations Hubs: Salt Lake Sector V • Southern Avenue • Kolkata Airport (CCU) • Helpline: +91 8240765499
           </p>
           <p className="text-[11px] text-slate-400 pt-2">
             © 2026 BroomBoom Cabs. All Rights Reserved. Shubho Sharodiya!

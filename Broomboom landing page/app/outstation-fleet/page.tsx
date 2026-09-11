@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, Suspense } from "react";
+import React, { useState, useEffect, useMemo, useRef, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -55,6 +55,29 @@ const INDIAN_STATES = [
   "Delhi", "Maharashtra", "Karnataka", "Tamil Nadu"
 ];
 
+/* ------------------------------------------------------------------ */
+/*  INCLUSIONS & EXCLUSIONS DATA                                      */
+/* ------------------------------------------------------------------ */
+const getInclusions = (tripType: "oneWay" | "roundTrip"): string[] => [
+  "Fuel charges for the entire journey",
+  "Experienced highway chauffeur + driver bhatta (allowance)",
+  "All state tolls, FASTag & interstate permit charges",
+  "AC vehicle with free doorstep pickup across Kolkata",
+  "GST & booking platform charges",
+  tripType === "roundTrip"
+    ? "Return journey on your chosen date with the same cab"
+    : "Direct one-way drop to your destination city",
+];
+
+const getExclusions = (): string[] => [
+  "Parking charges at hotels, resorts or tourist spots",
+  "Monument / sightseeing entry tickets & guide fees",
+  "Night driving charges between 11:00 PM – 06:00 AM",
+  "Extra kilometres beyond the included route limit",
+  "Extra waiting hours beyond the free waiting period",
+  "Meals, personal expenses & anything not listed in inclusions",
+];
+
 function OutstationFleetContent() {
   const searchParams = useSearchParams();
   const toCityParam = searchParams.get("toCity") || "Digha";
@@ -84,6 +107,7 @@ function OutstationFleetContent() {
   const [pickupPincode, setPickupPincode] = useState("");
   const [pickupState, setPickupState] = useState("West Bengal");
   const [isStateOpen, setIsStateOpen] = useState(false);
+  const stateDropdownRef = useRef<HTMLDivElement>(null);
 
   const [selectedVehicleKey, setSelectedVehicleKey] = useState<string | null>(null);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
@@ -101,6 +125,20 @@ function OutstationFleetContent() {
       const savedUser = localStorage.getItem("broomboom_user");
       if (savedUser) setUserData(JSON.parse(savedUser));
     } catch (e) {}
+  }, []);
+
+  // Close state dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        stateDropdownRef.current &&
+        !stateDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsStateOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const vehiclesList = Object.values(FLEET_DATA).filter((v) => {
@@ -175,7 +213,7 @@ function OutstationFleetContent() {
 
       const bookingData = {
         customerName: userData.name || "Guest Traveler",
-        customerPhone: userData.phone || "+91 98765 43210",
+        customerPhone: userData.phone || "+91 8240765499",
         customerEmail: userData.email || "guest@example.com",
         vehicleName: selectedVehicle.name,
         vehicleModels: selectedVehicle.models,
@@ -311,7 +349,7 @@ function OutstationFleetContent() {
                     Highway Helpline:
                     </span>
 
-                    +91 98765 43210
+                    +91 8240765499
                 </a>
 
                 </div>
@@ -378,6 +416,7 @@ function OutstationFleetContent() {
           <div className="lg:col-span-8 space-y-6">
             {vehiclesList.map((car) => {
               const currentPrice = getCarRate(car);
+              const isDetailsOpen = expandedDetailsCarId === car.id;
 
               return (
                 <div
@@ -441,7 +480,7 @@ function OutstationFleetContent() {
 
                     <div className="sm:col-span-3 flex flex-row sm:flex-col items-center sm:items-end justify-between text-left sm:text-right pt-4 sm:pt-0 border-t sm:border-t-0 sm:border-l border-amber-100 sm:pl-5 gap-3">
                       <div>
-                        <span className="text-[10px] text-slate-400 block line-through">
+                        <span className="text-sm font-semibold text-slate-400 block line-through decoration-red-500 decoration-2">
                           ₹{(currentPrice + 1200).toLocaleString()}
                         </span>
                         <div className="text-2xl sm:text-3xl font-black text-amber-900 leading-none">
@@ -460,6 +499,71 @@ function OutstationFleetContent() {
                       </button>
                     </div>
                   </div>
+
+                  {/* ---------------- INCLUSIONS & EXCLUSIONS ---------------- */}
+                  <div className="mt-5 pt-4 border-t border-amber-100">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setExpandedDetailsCarId(isDetailsOpen ? null : car.id)
+                      }
+                      aria-expanded={isDetailsOpen}
+                      className="flex items-center gap-1.5 text-xs font-bold text-amber-800 hover:text-amber-950 transition-colors"
+                    >
+                      <Info className="w-3.5 h-3.5" />
+                      <span>
+                        {isDetailsOpen ? "Hide" : "View"} Inclusions &amp; Exclusions
+                      </span>
+                      <ChevronDown
+                        className={`w-3.5 h-3.5 transition-transform duration-300 ${
+                          isDetailsOpen ? "rotate-180" : ""
+                        }`}
+                      />
+                    </button>
+
+                    {isDetailsOpen && (
+                      <div className="mt-3 grid sm:grid-cols-2 gap-3 animate-fadeIn">
+                        {/* Inclusions */}
+                        <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-3.5">
+                          <h5 className="text-[11px] font-black uppercase tracking-wider text-emerald-800 flex items-center gap-1.5 mb-2">
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            Inclusions
+                          </h5>
+                          <ul className="space-y-1.5">
+                            {getInclusions(outstationData.tripType).map((item) => (
+                              <li
+                                key={item}
+                                className="flex items-start gap-1.5 text-[11px] text-slate-700 leading-snug"
+                              >
+                                <Check className="w-3.5 h-3.5 text-emerald-600 mt-[1px] flex-shrink-0" />
+                                <span>{item}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        {/* Exclusions */}
+                        <div className="bg-red-50 border border-red-200 rounded-2xl p-3.5">
+                          <h5 className="text-[11px] font-black uppercase tracking-wider text-red-800 flex items-center gap-1.5 mb-2">
+                            <XCircle className="w-3.5 h-3.5" />
+                            Exclusions
+                          </h5>
+                          <ul className="space-y-1.5">
+                            {getExclusions().map((item) => (
+                              <li
+                                key={item}
+                                className="flex items-start gap-1.5 text-[11px] text-slate-700 leading-snug"
+                              >
+                                <X className="w-3.5 h-3.5 text-red-500 mt-[1px] flex-shrink-0" />
+                                <span>{item}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  {/* -------------- END INCLUSIONS & EXCLUSIONS -------------- */}
                 </div>
               );
             })}
@@ -567,8 +671,8 @@ function OutstationFleetContent() {
                       </label>
                       <input
                         type="tel"
-                        placeholder="e.g. +91 98765 43210"
-                        value={userData.phone === "+91 9876543210" ? "" : userData.phone}
+                        placeholder="e.g. +91 8240765499"
+                        value={userData.phone === "+91 8240765499" ? "" : userData.phone}
                         onChange={(e) => setUserData((prev) => ({ ...prev, phone: e.target.value }))}
                         required
                         className="w-full px-3 py-2.5 bg-slate-50 border border-amber-200 rounded-xl text-base sm:text-xs text-slate-900 focus:outline-none focus:border-amber-500"
@@ -605,7 +709,9 @@ function OutstationFleetContent() {
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-slate-700 mb-1 block">Pincode</label>
+                    <label className="text-xs font-bold text-slate-700 mb-1 block">
+                      Pincode
+                    </label>
                     <input
                       type="text"
                       placeholder="e.g. 700019"
@@ -613,6 +719,59 @@ function OutstationFleetContent() {
                       onChange={(e) => setPickupPincode(e.target.value)}
                       className="w-full px-3 py-2.5 bg-white border border-amber-200 rounded-xl text-base sm:text-xs text-slate-900 focus:outline-none focus:border-amber-500"
                     />
+                  </div>
+
+                  {/* State Dropdown */}
+                  <div>
+                    <label className="text-xs font-bold text-slate-700 mb-1 block">
+                      State <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative" ref={stateDropdownRef}>
+                      <button
+                        type="button"
+                        onClick={() => setIsStateOpen((prev) => !prev)}
+                        aria-haspopup="listbox"
+                        aria-expanded={isStateOpen}
+                        className="w-full px-3 py-2.5 bg-white border border-amber-200 rounded-xl text-base sm:text-xs text-slate-900 focus:outline-none focus:border-amber-500 flex items-center justify-between gap-2 text-left"
+                      >
+                        <span className="flex items-center gap-1.5 truncate">
+                          <MapPin className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
+                          {pickupState}
+                        </span>
+                        <ChevronDown
+                          className={`w-3.5 h-3.5 text-slate-500 transition-transform duration-200 flex-shrink-0 ${
+                            isStateOpen ? "rotate-180" : ""
+                          }`}
+                        />
+                      </button>
+
+                      {isStateOpen && (
+                        <div
+                          role="listbox"
+                          className="absolute z-30 mt-1 w-full bg-white border border-amber-200 rounded-xl shadow-xl max-h-48 overflow-y-auto py-1"
+                        >
+                          {INDIAN_STATES.map((state) => (
+                            <button
+                              key={state}
+                              type="button"
+                              role="option"
+                              aria-selected={pickupState === state}
+                              onClick={() => {
+                                setPickupState(state);
+                                setIsStateOpen(false);
+                              }}
+                              className={`w-full text-left px-3 py-2 text-xs transition-colors ${
+                                pickupState === state
+                                  ? "bg-amber-100 font-bold text-amber-900"
+                                  : "text-slate-700 hover:bg-amber-50"
+                              }`}
+                            >
+                              {state}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
 
