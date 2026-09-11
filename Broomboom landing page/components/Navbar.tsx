@@ -1,13 +1,15 @@
 "use client";
 
 import React, { useState } from "react";
-import { Zap, Menu, X } from "lucide-react";
+import { Zap, Menu, X, User, LogOut } from "lucide-react";
 
 interface NavbarProps {
   onActionClick: (type: "book" | "explore", title: string) => void;
+  currentUser?: { name: string; phone: string; email?: string } | null;
+  onLogout?: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ onActionClick }) => {
+export const Navbar: React.FC<NavbarProps> = ({ onActionClick, currentUser, onLogout }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -111,8 +113,27 @@ export const Navbar: React.FC<NavbarProps> = ({ onActionClick }) => {
 
         </nav>
 
-        {/* Desktop Book Button */}
+        {/* Desktop Book Button & User Status */}
         <div className="hidden sm:flex items-center gap-3">
+          {currentUser && (
+            <div className="flex items-center gap-2 bg-amber-50 border border-amber-300/80 rounded-xl px-3 py-1.5 text-xs text-slate-800 shadow-sm">
+              <User className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+              <div className="flex flex-col text-left">
+                <span className="text-[9px] text-slate-500 font-medium leading-none">Logged In</span>
+                <span className="font-bold text-slate-950 truncate max-w-[120px] leading-tight">{currentUser.name}</span>
+              </div>
+              {onLogout && (
+                <button
+                  type="button"
+                  onClick={onLogout}
+                  title="Logout / Change Account"
+                  className="ml-1 text-[10px] text-amber-800 hover:text-red-600 font-bold underline cursor-pointer"
+                >
+                  Logout
+                </button>
+              )}
+            </div>
+          )}
 
           <button
             onClick={() =>
@@ -297,8 +318,31 @@ export const Navbar: React.FC<NavbarProps> = ({ onActionClick }) => {
             📞 Contact &amp; Helpline
           </a>
 
-          {/* Mobile Book Button */}
+          {/* Mobile User Status & Book Button */}
           <div className="pt-2 border-t border-slate-100 flex flex-col gap-2">
+            {currentUser && (
+              <div className="flex items-center justify-between p-2.5 bg-amber-50 rounded-xl border border-amber-200 text-xs text-slate-800">
+                <div className="flex items-center gap-2 truncate">
+                  <User className="w-4 h-4 text-amber-600 shrink-0" />
+                  <div className="truncate">
+                    <span className="text-[10px] text-slate-500 block leading-tight">Logged in as</span>
+                    <span className="font-bold text-slate-900 truncate block">{currentUser.name}</span>
+                  </div>
+                </div>
+                {onLogout && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      onLogout();
+                    }}
+                    className="text-[11px] text-amber-800 hover:text-red-600 font-bold underline shrink-0 px-2 py-1"
+                  >
+                    Logout
+                  </button>
+                )}
+              </div>
+            )}
 
             <button
               onClick={() => {

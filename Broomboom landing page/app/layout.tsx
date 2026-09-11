@@ -9,28 +9,42 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "BroomBoom Cabs | Kolkata Durga Puja Pandal Hopping & Chauffeur Rental 2026",
+  // Primary Meta Tags
+  title: "Celebrate Durga Puja 2026 with BroomBoom Cabs",
   description:
-    "Book premium AC Sedan, SUV, Innova Crysta & Tempo Travellers (13, 15, 17 Seater) with BroomBoom Cabs for Kolkata Durga Puja Pandal Hopping & Outstation Trips. Zero Surge, Verified Drivers & VIP Passes.",
+    "Experience the magic of Kolkata Durga Puja Car rental and outstation cabs packages with seamless travel solutions designed to make your festive season stress-free. Whether you are navigating the city’s radiant streets or embarking on a long weekend escape, BroomBoom Cabs offers premium, 100% fixed-rate travel across West Bengal and beyond.",
+  keywords: [
+    "durga puja 2026",
+    "kolkata durga puja 2026",
+    "durga puja car rental",
+    "outstation durga puja",
+    "kolkata car rental for pandal hopping",
+    "puja car rental",
+  ],
+  robots: { index: true, follow: true },
+
+  // Verification & ownership
+  verification: {
+    other: {
+      "facebook-domain-verification": "cn9ly9midci1qm2kb9tokwvglffd7g",
+    },
+  },
+  other: {
+    copyright: "2026 BroomBoom Transportation Services Private Limited",
+  },
+
+  // Icons
   icons: {
     icon: "/images/broomboom-logo.png",
     shortcut: "/images/broomboom-logo.png",
     apple: "/images/broomboom-logo.png",
   },
-  keywords: [
-    "BroomBoom Cabs",
-    "Durga Puja Kolkata car rental",
-    "Pandal hopping cab Kolkata",
-    "Innova Crysta rental Durga Puja",
-    "Tempo traveller 13 15 17 seater Kolkata puja",
-    "VIP pandal pass Kolkata",
-    "Digha Mandarmani puja outstation cab",
-    "Shantiniketan puja tour car",
-  ],
+
+  // Open Graph
   openGraph: {
-    title: "BroomBoom Cabs — Kolkata Durga Puja Pandal Hopping 2026",
+    title: "Celebrate Durga Puja 2026 with BroomBoom Cabs",
     description:
-      "Celebrate Durga Puja without traffic & parking hassle. 4 to 17 seater AC fleet with route specialist chauffeurs by BroomBoom Cabs.",
+      "Experience the magic of Kolkata Durga Puja Car rental and outstation cabs packages with seamless travel solutions designed to make your festive season stress-free.",
     type: "website",
   },
 };

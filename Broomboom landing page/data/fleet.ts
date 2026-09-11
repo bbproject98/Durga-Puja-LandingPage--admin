@@ -11,6 +11,8 @@ export const FLEET_DATA: Record<string, Vehicle> = {
     tag: "Most Popular for Small Families & Couples",
     badgeType: "gold",
     image: "/images/sedan.png",
+    altRental: "sedan-durga-puja-rental-broomboom-cabs",
+    altOutstation: "sedan-durga-puja-outstation-broomboom-cabs",
     basePrice: 4551, // 8hr 80km standard
     baseHours: 8,
     baseKm: 80,
@@ -54,6 +56,8 @@ export const FLEET_DATA: Record<string, Vehicle> = {
     tag: "Best Value for Joint Families",
     badgeType: "crimson",
     image: "/images/ertiga.png",
+    altRental: "suv-durga-puja-rental-broomboom-cabs",
+    altOutstation: "suv-durga-puja-outstation-broomboom-cabs",
     basePrice: 5551, // 8hr 80km standard
     baseHours: 8,
     baseKm: 80,
@@ -96,7 +100,9 @@ export const FLEET_DATA: Record<string, Vehicle> = {
     category: "suv",
     tag: "VIP Luxury & Ultimate Comfort",
     badgeType: "gold",
-    image: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80",
+    image: "/images/innova.png",
+    altRental: "suv-plus-durga-puja-rental-broomboom-cabs",
+    altOutstation: "suv-plus-durga-puja-outstation-broomboom-cabs",
     basePrice: 7551, // 8hr 80km standard
     baseHours: 8,
     baseKm: 80,
@@ -140,6 +146,8 @@ export const FLEET_DATA: Record<string, Vehicle> = {
     tag: "Ideal for Large Joint Families & Friends Groups",
     badgeType: "gold",
     image: "/images/tempo13.png",
+    altRental: "13-seater-traveller-durga-puja-rental-broomboom-cabs",
+    altOutstation: "13-seater-traveller-durga-puja-outstation-broomboom-cabs",
     basePrice: 10051, // 8hr 80km standard
     baseHours: 8,
     baseKm: 80,
@@ -183,6 +191,8 @@ export const FLEET_DATA: Record<string, Vehicle> = {
     tag: "Perfect for Corporate Teams & Para Clubs",
     badgeType: "crimson",
     image: "/images/tempo17.png",
+    altRental: "17-seater-traveller-durga-puja-rental-broomboom-cabs",
+    altOutstation: "17-seater-traveller-durga-puja-outstation-broomboom-cabs",
     basePrice: 11051, // 8hr 80km standard
     baseHours: 8,
     baseKm: 80,
@@ -226,6 +236,8 @@ export const FLEET_DATA: Record<string, Vehicle> = {
     tag: "Maximum Group Capacity & Royalty",
     badgeType: "gold",
     image: "/images/tempo24.png",
+    altRental: "24-seater-traveller-durga-puja-rental-broomboom-cabs",
+    altOutstation: "24-seater-traveller-durga-puja-outstation-broomboom-cabs",
     basePrice: 13051, // 8hr 80km standard
     baseHours: 8,
     baseKm: 80,

@@ -334,9 +334,26 @@ function OutstationFleetContent() {
                     Logged In As
                     </span>
 
-                    <span className="text-xs font-bold text-slate-900">
-                    {userData.name}
-                    </span>
+                    <div className="flex items-center gap-1.5 justify-end">
+                      <span className="text-xs font-bold text-slate-900">
+                      {userData.name}
+                      </span>
+                      {userData.name !== "Guest Traveler" && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            try {
+                              localStorage.removeItem("broomboom_user");
+                            } catch (_) {}
+                            setUserData({ name: "Guest Traveler", phone: "+91 8240765499", email: "guest@example.com" });
+                          }}
+                          className="text-[10px] text-amber-800 hover:text-red-600 font-bold underline cursor-pointer"
+                          title="Change / Logout"
+                        >
+                          (Change)
+                        </button>
+                      )}
+                    </div>
                 </div>
 
                 <a
@@ -425,15 +442,15 @@ function OutstationFleetContent() {
                 >
                   <div className="grid sm:grid-cols-12 gap-6 items-center">
                     <div className="sm:col-span-5 space-y-3">
-                      <div className="relative h-36 sm:h-40 rounded-2xl overflow-hidden bg-slate-900 shadow-inner">
+                      <div className="relative aspect-[3/2] w-full rounded-2xl overflow-hidden bg-gradient-to-b from-slate-50 to-slate-100/90 border border-amber-200/80 shadow-sm flex items-center justify-center">
                         <Image
                           src={car.image}
-                          alt={car.name}
+                          alt={car.altOutstation ?? car.name}
                           fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-500 opacity-90"
+                          className="object-contain p-1.5 group-hover:scale-105 transition-transform duration-500"
                           sizes="(max-width: 768px) 100vw, 30vw"
                         />
-                        <div className="absolute top-2 left-2">
+                        <div className="absolute top-2 left-2 z-10">
                           <span className="px-2.5 py-0.5 bg-amber-400 text-slate-950 text-[10px] font-black rounded-full shadow">
                             {car.tag}
                           </span>

@@ -20,6 +20,8 @@ export interface Vehicle {
   features: string[];
   inclusions: string[];
   exclusions: string[];
+  altRental?: string;
+  altOutstation?: string;
 }
 
 export type PackageType = 'pandal' | 'outstation';

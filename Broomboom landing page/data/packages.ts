@@ -57,7 +57,7 @@ export const RENTAL_PACKAGES: RentalPackage[] = [
       "Driver Allowance & Fuel Included",
       "Free 24h Cancellation",
     ],
-    image: "https://images.unsplash.com/photo-1558431382-27e303142255?auto=format&fit=crop&w=800&q=80",
+    image: "/images/d1.png",
   },
   {
     id: "pkg_8hr_80km",
@@ -82,7 +82,7 @@ export const RENTAL_PACKAGES: RentalPackage[] = [
       "All West Bengal Toll Taxes Handled",
       "Senior Citizen Drop Points",
     ],
-    image: "https://images.unsplash.com/photo-1567157577867-05ccb1388e66?auto=format&fit=crop&w=800&q=80",
+    image: "/images/d2.png",
   },
   {
     id: "pkg_10hr_100km",
@@ -107,7 +107,7 @@ export const RENTAL_PACKAGES: RentalPackage[] = [
       "Police Route Barricade Bypass Guide",
       "Complimentary Water Bottles",
     ],
-    image: "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=800&q=80",
+    image: "/images/d3.jpg",
   },
   {
     id: "pkg_12hr_120km",
@@ -132,7 +132,7 @@ export const RENTAL_PACKAGES: RentalPackage[] = [
       "24x7 Control Room Live Monitoring",
       "Emergency Standby Vehicle Backup",
     ],
-    image: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80",
+    image: "/images/d4.jpg",
   },
 ];
 
@@ -152,7 +152,7 @@ export const OUTSTATION_ROUTES: OutstationRoute[] = [
       "Kolaghat Hilsa & Tea Stop",
       "Sanitised roundtrip AC cab",
     ],
-    image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80",
+    image: "/images/digha.jpg",
     prices: { sedan: 3299, suv: 4299, suvPlus: 5499 },
   },
   {
@@ -169,7 +169,7 @@ export const OUTSTATION_ROUTES: OutstationRoute[] = [
       "Shantipur Handloom & Sweet hub",
       "Day trip / overnight booking",
     ],
-    image: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=800&q=80",
+    image: "/images/mayapur.jpg",
     prices: { sedan: 2499, suv: 3599, suvPlus: 4599 }, // approximate – not in matrix, kept original as base
   },
   {
@@ -186,7 +186,7 @@ export const OUTSTATION_ROUTES: OutstationRoute[] = [
       "Kolaghat food plaza halt",
       "Full festive weekend support",
     ],
-    image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80",
+    image: "/images/mandarmani.jpg",
     prices: { sedan: 3299, suv: 4299, suvPlus: 5499 },
   },
   {
@@ -203,7 +203,7 @@ export const OUTSTATION_ROUTES: OutstationRoute[] = [
       "Shaktigarh Lyangcha tasting stop",
       "Chauffeur trained on Durgapur Exp",
     ],
-    image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80",
+    image: "/images/Santiniketan.jpg",
     prices: { sedan: 2999, suv: 3799, suvPlus: 4799 },
   },
   {
@@ -220,7 +220,7 @@ export const OUTSTATION_ROUTES: OutstationRoute[] = [
       "Jharkhand interstate permit handled",
       "Dual driver option on request",
     ],
-    image: "https://images.unsplash.com/photo-1433086966358-54859d0ed716?auto=format&fit=crop&w=800&q=80",
+    image: "/images/ranchi.jpg",
     prices: { sedan: 5999, suv: 7499, suvPlus: 8999 },
   },
 
@@ -239,7 +239,7 @@ export const OUTSTATION_ROUTES: OutstationRoute[] = [
       "Breakfast halt at Ajoy River",
       "Interstate permit & tolls included",
     ],
-    image: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=800&q=80",
+    image: "/images/deoghar.jpg",
     prices: { sedan: 5499, suv: 6999, suvPlus: 8499 },
   },
   {
@@ -256,7 +256,7 @@ export const OUTSTATION_ROUTES: OutstationRoute[] = [
       "Dalma Hill forest reserve stop",
       "Corporate & family trip ready",
     ],
-    image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=800&q=80",
+    image: "/images/jamsedpur.jpg",
     prices: { sedan: 4499, suv: 5799, suvPlus: 6999 },
   },
   {
@@ -273,7 +273,7 @@ export const OUTSTATION_ROUTES: OutstationRoute[] = [
       "Dhauli peace pagoda & elephant safari",
       "Odisha interstate permit managed",
     ],
-    image: "https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=800&q=80",
+    image: "/images/Bhu.jpg",
     prices: { sedan: 6499, suv: 8299, suvPlus: 9999 },
   },
   {
@@ -290,7 +290,7 @@ export const OUTSTATION_ROUTES: OutstationRoute[] = [
       "Puri sea walk & local seafood",
       "Overnight / 2‑day custom trips",
     ],
-    image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80",
+    image: "/images/puri.jpg",
     prices: { sedan: 7299, suv: 9299, suvPlus: 10999 },
   },
   {
@@ -307,7 +307,7 @@ export const OUTSTATION_ROUTES: OutstationRoute[] = [
       "Darjeeling tea garden stop",
       "Hill‑trained chauffeur provided",
     ],
-    image: "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=800&q=80",
+    image: "/images/dar.jpg",
     prices: { sedan: 8499, suv: 10499, suvPlus: 12499 },
   },
   {
@@ -324,7 +324,7 @@ export const OUTSTATION_ROUTES: OutstationRoute[] = [
       "Nathula Pass (permit arranged)",
       "Sikkim entry permit assistance",
     ],
-    image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80",
+    image: "/images/gan.jpg",
     prices: { sedan: 9499, suv: 11499, suvPlus: 13499 },
   },{
   id: "kolkata-gangasagar",
@@ -340,7 +340,7 @@ export const OUTSTATION_ROUTES: OutstationRoute[] = [
     "Kapil Muni Temple & holy dip at Gangasagar",
     "Fresh coconut water & local sweet stalls",
   ],
-  image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80",
+  image: "/images/gangasagar.jpg",
   prices: { sedan: 3499, suv: 4599, suvPlus: 5799 },
 },
 ];
