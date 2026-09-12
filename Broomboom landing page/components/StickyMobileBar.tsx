@@ -18,7 +18,7 @@ export const StickyMobileBar: React.FC<StickyMobileBarProps> = ({ onActionClick 
       </div>
       <div className="flex items-center gap-2">
         <a
-          href="https://wa.me/919876543210?text=Hi%20BroomBoom%20Cabs,%20I%20want%20to%20book%20a%20cab%20for%20Durga%20Puja."
+          href="https://wa.me/8240765499?text=Hi%20BroomBoom%20Cabs,%20I%20want%20to%20book%20a%20cab%20for%20Durga%20Puja."
           target="_blank"
           rel="noopener noreferrer"
           aria-label="WhatsApp Support"
