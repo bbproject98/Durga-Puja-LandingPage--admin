@@ -12,9 +12,11 @@ import {
   X,
   ExternalLink,
   ShieldCheck,
-  Users
+  Users,
+  Building2,
 } from "lucide-react";
 import { removeAuthToken, getStoredAdminUser } from "../lib/api";
+import { FRANCHISE_LANDING_PAGE_URL } from "../lib/config";
 import { useNotifications } from "../context/NotificationContext";
 
 interface AdminSidebarProps {
@@ -170,20 +172,69 @@ export default function AdminSidebar({
           })}
 
           <div className="pt-6 px-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+            Franchise Operations
+          </div>
+
+          <a
+            href={FRANCHISE_LANDING_PAGE_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:text-amber-400 hover:bg-navy-800/80 transition-colors group"
+          >
+            <div className="flex items-center gap-3">
+              <ExternalLink className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />
+              <span>Franchise Landing Page</span>
+            </div>
+            <span className="text-[9px] px-1.5 py-0.5 rounded font-mono font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">
+              PORTAL
+            </span>
+          </a>
+
+          {/* Franchise Leads (Single clean link) */}
+          <Link
+            href="/admin/franchise"
+            onClick={onMobileClose}
+            className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
+              isActive("/admin/franchise")
+                ? "bg-amber-500 text-navy-950 font-semibold shadow-md shadow-amber-500/20"
+                : "text-slate-300 hover:text-white hover:bg-navy-800/80"
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <Building2
+                className={`w-5 h-5 ${
+                  isActive("/admin/franchise")
+                    ? "text-navy-950"
+                    : "text-slate-400 group-hover:text-white"
+                }`}
+              />
+              <span>Franchise Leads</span>
+            </div>
+            <span
+              className={`text-[10px] px-2 py-0.5 rounded-full font-mono uppercase font-bold transition-all ${
+                isActive("/admin/franchise")
+                  ? "bg-navy-950 text-amber-400"
+                  : "bg-navy-800 text-slate-400 border border-navy-700"
+              }`}
+            >
+              LEADS
+            </span>
+          </Link>
+
+          <div className="pt-5 px-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
             System Links
           </div>
 
           <a
-            href="http://localhost:3000"
+            href="https://durgapuja.broomboomcabs.com/"
             target="_blank"
             rel="noreferrer"
-            className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-amber-400 hover:bg-navy-800/60 transition-colors"
+            className="flex items-center justify-between px-3.5 py-2 rounded-xl text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-navy-800/60 transition-colors"
           >
             <div className="flex items-center gap-3">
-              <ExternalLink className="w-4 h-4" />
-              <span>Customer Website</span>
+              <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+              <span>Durga Puja Rentals</span>
             </div>
-            <span className="text-[10px] text-slate-500 font-mono">:3000</span>
           </a>
         </div>
 

@@ -2,7 +2,11 @@
  * BroomBoom Admin Panel Configuration
  */
 
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const rawApiUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:9000").trim();
+export const API_BASE_URL = rawApiUrl.replace(/\/+$/, "");
+export const FRANCHISE_API_URL = process.env.NEXT_PUBLIC_FRANCHISE_API_URL || "http://localhost:3000";
+export const FRANCHISE_LANDING_PAGE_URL =
+  process.env.NEXT_PUBLIC_FRANCHISE_URL || "https://broomboom.com/franchise";
 
 export const APP_CONFIG = {
   name: "BroomBoom Cabs",
@@ -10,12 +14,20 @@ export const APP_CONFIG = {
   version: "1.0.0",
   tagline: "Kolkata Puja & Outstation Chauffeur Rentals",
   supportContact: "+91 98300 00000",
+  franchiseLandingPage: FRANCHISE_LANDING_PAGE_URL,
   endpoints: {
     health: `${API_BASE_URL}/api/health`,
     bookings: `${API_BASE_URL}/api/bookings`,
     fleet: `${API_BASE_URL}/api/fleet`,
     packages: `${API_BASE_URL}/api/packages`,
     leads: `${API_BASE_URL}/api/leads`,
+    franchise: {
+      leads: `${FRANCHISE_API_URL}/api/leads`,
+      hubs: `${FRANCHISE_API_URL}/api/hubs`,
+      brochure: `${FRANCHISE_API_URL}/api/brochure`,
+      analytics: `${FRANCHISE_API_URL}/api/analytics`,
+      export: `${FRANCHISE_API_URL}/api/export`,
+    },
   },
 };
 

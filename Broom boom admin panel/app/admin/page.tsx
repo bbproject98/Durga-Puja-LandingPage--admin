@@ -9,6 +9,8 @@ import {
   fetchPackages,
   fetchLeads,
   updateLeadStatus,
+  fetchFranchiseAnalytics,
+  FranchiseAnalytics,
   Booking,
   Vehicle,
   Package,
@@ -20,42 +22,36 @@ import {
   CarFront,
   Sparkles,
   ArrowRight,
-  Clock,
-  UserCheck,
-  Phone,
-  Mail,
   RefreshCw,
   PlusCircle,
-  MapPin,
-  Search,
-  Activity,
-  Calendar,
   Users,
+  Building2,
+  CheckCircle2,
 } from "lucide-react";
-import Pagination from "./components/Pagination";
-
 
 export default function AdminDashboardPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [packages, setPackages] = useState<Package[]>([]);
   const [leads, setLeads] = useState<Lead[]>([]);
+  const [franchiseStats, setFranchiseStats] = useState<FranchiseAnalytics | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [leadSearch, setLeadSearch] = useState("");
 
   const loadData = async () => {
     try {
-      const [b, v, p, l] = await Promise.all([
+      const [b, v, p, l, fa] = await Promise.all([
         fetchBookings(),
         fetchVehicles(),
         fetchPackages(),
         fetchLeads(),
+        fetchFranchiseAnalytics().catch(() => null),
       ]);
       setBookings(b);
       setVehicles(v);
       setPackages(p);
       setLeads(l);
+      if (fa) setFranchiseStats(fa);
     } catch (err) {
       console.error("Failed loading dashboard data:", err);
     } finally {
@@ -96,44 +92,6 @@ export default function AdminDashboardPage() {
   const totalRevenue = bookings.reduce((sum, b) => sum + (b.totalTariff || 0), 0);
   const advanceCollected = bookings.reduce((sum, b) => sum + (b.advancePaid || 0), 0);
   const balancePending = bookings.reduce((sum, b) => sum + (b.balancePayable || 0), 0);
-
-  // Filtered Leads
-  const filteredLeads = useMemo(() => {
-    const q = leadSearch.toLowerCase().trim();
-    if (!q) return leads;
-    return leads.filter(
-      (l) =>
-        l.name.toLowerCase().includes(q) ||
-        l.email.toLowerCase().includes(q) ||
-        l.phone.includes(q) ||
-        (l.action && l.action.toLowerCase().includes(q)) ||
-        (l.status && l.status.toLowerCase().includes(q))
-    );
-  }, [leads, leadSearch]);
-
-  // Leads Pagination state & calculation
-  const [leadsPage, setLeadsPage] = useState(1);
-  const [leadsPageSize, setLeadsPageSize] = useState(5);
-
-  useEffect(() => {
-    setLeadsPage(1);
-  }, [leadSearch]);
-
-  const totalLeadsPages = Math.ceil(filteredLeads.length / leadsPageSize) || 1;
-  const paginatedLeads = useMemo(() => {
-    const start = (leadsPage - 1) * leadsPageSize;
-    return filteredLeads.slice(start, start + leadsPageSize);
-  }, [filteredLeads, leadsPage, leadsPageSize]);
-
-  // Upcoming Bookings Pagination state & calculation
-  const [bookingsPage, setBookingsPage] = useState(1);
-  const [bookingsPageSize, setBookingsPageSize] = useState(5);
-
-  const totalBookingsPages = Math.ceil(bookings.length / bookingsPageSize) || 1;
-  const paginatedUpcomingBookings = useMemo(() => {
-    const start = (bookingsPage - 1) * bookingsPageSize;
-    return bookings.slice(start, start + bookingsPageSize);
-  }, [bookings, bookingsPage, bookingsPageSize]);
 
 
   return (
@@ -212,318 +170,127 @@ export default function AdminDashboardPage() {
         />
       </div>
 
-      {/* SECTION: User Leads (Name, Email, Phone, Action, Date and Time) */}
-      <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
-        <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2.5">
-              <h2 className="text-lg font-bold text-slate-900 tracking-tight">
-                User Leads
-              </h2>
-              <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 font-mono font-semibold">
-                {filteredLeads.length} Total
-              </span>
-            </div>
-            <p className="text-xs text-slate-500 mt-0.5">
-              User login details, contact inquiries, requested actions, and timestamp history.
-            </p>
+      {/* Franchise Network Expansion Banner */}
+      <div className="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-slate-50 border border-amber-500/20 rounded-3xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-amber-500 text-navy-950 flex items-center justify-center font-bold shadow-md shadow-amber-500/20 shrink-0">
+            <Building2 className="w-6 h-6" />
           </div>
-
-          <div className="w-full sm:w-auto">
-            {/* Search Input for Leads */}
-            <div className="relative sm:w-72">
-              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="Search leads by name, email, phone..."
-                value={leadSearch}
-                onChange={(e) => setLeadSearch(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-colors"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-xs">
-            <thead>
-              <tr className="border-b border-slate-200 bg-slate-50/70 text-slate-500 font-semibold uppercase tracking-wider">
-                <th className="py-3.5 px-3 text-center w-12 font-mono">#</th>
-                <th className="py-3.5 px-6">Name</th>
-                <th className="py-3.5 px-6">Email Address</th>
-                <th className="py-3.5 px-6">Phone Number</th>
-                <th className="py-3.5 px-6">Action</th>
-                <th className="py-3.5 px-6">Date &amp; Time</th>
-                <th className="py-3.5 px-6 text-right">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filteredLeads.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-400">
-                    No user leads matching your search.
-                  </td>
-                </tr>
-              ) : (
-                paginatedLeads.map((lead, index) => (
-                  <tr key={lead.id} className="hover:bg-amber-50/20 transition-colors">
-                    {/* Row Count / Serial Number (1 2 3 4...) */}
-                    <td className="py-4 px-3 text-center font-mono">
-                      <span className="w-6 h-6 rounded-full bg-slate-100 text-slate-700 font-bold flex items-center justify-center mx-auto text-[11px] border border-slate-200">
-                        {(leadsPage - 1) * leadsPageSize + index + 1}
-                      </span>
-                    </td>
-
-                    {/* Name */}
-                    <td className="py-4 px-6">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-500 to-amber-300 text-navy-950 font-bold flex items-center justify-center text-xs shrink-0 shadow-xs">
-                          {lead.name.slice(0, 2).toUpperCase()}
-                        </div>
-                        <div>
-                          <p className="font-bold text-slate-900 text-xs">{lead.name}</p>
-                          {lead.context && (
-                            <p className="text-[10px] text-slate-400 truncate max-w-[180px]">
-                              {lead.context}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </td>
-
-
-                    {/* Email */}
-                    <td className="py-4 px-6">
-                      <a
-                        href={`mailto:${lead.email}`}
-                        className="text-slate-700 hover:text-amber-600 font-medium inline-flex items-center gap-1.5 transition-colors"
-                        title="Send email"
-                      >
-                        <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                        <span>{lead.email}</span>
-                      </a>
-                    </td>
-
-                    {/* Phone Number */}
-                    <td className="py-4 px-6">
-                      <a
-                        href={`tel:${lead.phone}`}
-                        className="text-slate-700 hover:text-amber-600 font-mono font-medium inline-flex items-center gap-1.5 transition-colors"
-                        title="Call user"
-                      >
-                        <Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                        <span>{lead.phone}</span>
-                      </a>
-                    </td>
-
-                    {/* Action */}
-                    <td className="py-4 px-6">
-                      <span
-                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold ${
-                          lead.action === "User Login"
-                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                            : lead.action === "Book Package"
-                            ? "bg-amber-50 text-amber-800 border border-amber-200"
-                            : lead.action === "Explore Fleet" || lead.action === "Explore Outstation"
-                            ? "bg-blue-50 text-blue-700 border border-blue-200"
-                            : "bg-purple-50 text-purple-700 border border-purple-200"
-                        }`}
-                      >
-                        <Activity className="w-3 h-3 shrink-0" />
-                        <span>{lead.action || "User Login"}</span>
-                      </span>
-                    </td>
-
-                    {/* Date and Time */}
-                    <td className="py-4 px-6 text-slate-600">
-                      <div className="flex items-center gap-1.5">
-                        <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                        <span className="font-medium text-slate-700">
-                          {formatDateTime(lead.createdAt)}
-                        </span>
-                      </div>
-                    </td>
-
-                    {/* Status */}
-                    <td className="py-4 px-6 text-right">
-                      <span
-                        className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider ${
-                          lead.status === "ACTIVE"
-                            ? "bg-emerald-100 text-emerald-800"
-                            : lead.status === "NEW"
-                            ? "bg-blue-100 text-blue-800"
-                            : lead.status === "CONTACTED"
-                            ? "bg-amber-100 text-amber-800"
-                            : "bg-slate-100 text-slate-700"
-                        }`}
-                      >
-                        {lead.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* User Leads Pagination */}
-        <Pagination
-          currentPage={leadsPage}
-          totalPages={totalLeadsPages}
-          totalItems={filteredLeads.length}
-          pageSize={leadsPageSize}
-          onPageChange={setLeadsPage}
-          onPageSizeChange={(sz) => {
-            setLeadsPageSize(sz);
-            setLeadsPage(1);
-          }}
-          pageSizeOptions={[5, 10, 20]}
-        />
-      </div>
-
-
-      {/* Upcoming Bookings Queue (Sorted ASC) */}
-      <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
-        <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-bold text-slate-900 tracking-tight">
-                Upcoming Chauffeur Departures
-              </h2>
-              <span className="text-[11px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-mono font-semibold">
-                SORTED ASC
+              <h3 className="font-bold text-base text-slate-900">Franchise &amp; Territory Network</h3>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 font-bold border border-amber-300">
+                CENTRAL CONSOLE
               </span>
             </div>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Earliest scheduled Puja pandal tours and outstation trips at the top
+            <p className="text-xs text-slate-600 mt-0.5">
+              {franchiseStats?.totalLeads ?? 0} Franchise Inquiries &bull; {franchiseStats?.activeHubs ?? 3} Active Fleet Hubs &bull; {franchiseStats?.brochureDownloads ?? 0} Prospectus Downloads
+            </p>
+          </div>
+        </div>
+        <Link
+          href="/admin/franchise"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-navy-900 hover:bg-navy-800 text-white text-xs font-bold transition-all shadow-md shrink-0"
+        >
+          <span>Open Franchise Console</span>
+          <ArrowRight className="w-3.5 h-3.5 text-amber-400" />
+        </Link>
+      </div>
+      {/* Quick Category Access Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Bookings Category Card */}
+        <div className="p-6 rounded-3xl bg-white border border-slate-200/80 shadow-xs flex flex-col justify-between hover:border-amber-400/80 hover:shadow-md transition-all group">
+          <div>
+            <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-600 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+              <CalendarCheck className="w-6 h-6" />
+            </div>
+            <div className="flex items-center justify-between">
+              <h3 className="font-bold text-base text-slate-900">Bookings Management</h3>
+              <span className="text-xs font-mono font-bold px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800">
+                {bookings.length} Total
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+              Track confirmed Puja parikrama trips, view chauffeur dispatch sequences, and manage advance &amp; pending payments.
             </p>
           </div>
 
-          <Link
-            href="/admin/bookings"
-            className="text-xs font-semibold text-amber-600 hover:text-amber-700 inline-flex items-center gap-1 group"
-          >
-            <span>View All {bookings.length} Bookings</span>
-            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-          </Link>
+          <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-700">
+              ₹{balancePending.toLocaleString("en-IN")} Pending Due
+            </span>
+            <Link
+              href="/admin/bookings"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 hover:text-amber-700 group-hover:translate-x-0.5 transition-transform"
+            >
+              <span>Open Bookings</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-sm">
-            <thead>
-              <tr className="border-b border-slate-200 bg-slate-50/60 text-slate-500 font-semibold text-xs uppercase tracking-wider">
-                <th className="py-3 px-3 text-center w-12 font-mono">#</th>
-                <th className="py-3 px-6">Departure Date &amp; Time</th>
-                <th className="py-3 px-6">Booking ID</th>
-                <th className="py-3 px-6">Customer</th>
-                <th className="py-3 px-6">Vehicle / Package</th>
-                <th className="py-3 px-6">Tariff Breakdown</th>
-                <th className="py-3 px-6 text-right">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {paginatedUpcomingBookings.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-400 text-sm">
-                    No upcoming bookings found.
-                  </td>
-                </tr>
-              ) : (
-                paginatedUpcomingBookings.map((b, index) => (
-                  <tr key={b.id} className="hover:bg-slate-50/60 transition-colors">
-                    {/* Row Count / Serial Number (1 2 3 4...) */}
-                    <td className="py-4 px-3 text-center font-mono">
-                      <span className="w-6 h-6 rounded-full bg-slate-100 text-slate-700 font-bold flex items-center justify-center mx-auto text-[11px] border border-slate-200">
-                        {(bookingsPage - 1) * bookingsPageSize + index + 1}
-                      </span>
-                    </td>
+        {/* User Leads Category Card */}
+        <div className="p-6 rounded-3xl bg-white border border-slate-200/80 shadow-xs flex flex-col justify-between hover:border-amber-400/80 hover:shadow-md transition-all group">
+          <div>
+            <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+              <Users className="w-6 h-6" />
+            </div>
+            <div className="flex items-center justify-between">
+              <h3 className="font-bold text-base text-slate-900">User Inquiries &amp; Leads</h3>
+              <span className="text-xs font-mono font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                {leads.length} Leads
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+              Customer auth logins, phone inquiries, package inquiries, and requested outstation quotes with timestamps.
+            </p>
+          </div>
 
-                    <td className="py-4 px-6 font-medium text-slate-900">
-                      <div className="flex items-center gap-2">
-                        <Clock className="w-4 h-4 text-amber-600" />
-                        <div>
-                          <p className="font-semibold text-xs">{b.travelDate}</p>
-                          <p className="text-[11px] text-slate-500">{b.pickupTime} hrs</p>
-                        </div>
-                      </div>
-                    </td>
-
-
-                    <td className="py-4 px-6">
-                      <span className="font-mono text-xs font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
-                        {b.bookingId}
-                      </span>
-                    </td>
-
-                    <td className="py-4 px-6">
-                      <div className="text-xs">
-                        <p className="font-bold text-slate-800">{b.customerName}</p>
-                        <p className="text-slate-500 flex items-center gap-1 mt-0.5">
-                          <Phone className="w-3 h-3 text-slate-400" />
-                          <span>{b.customerPhone}</span>
-                        </p>
-                      </div>
-                    </td>
-
-                    <td className="py-4 px-6">
-                      <div className="text-xs">
-                        <p className="font-semibold text-slate-800">{b.vehicleName}</p>
-                        <p className="text-slate-500 truncate max-w-xs">{b.packageTitle}</p>
-                      </div>
-                    </td>
-
-                    <td className="py-4 px-6">
-                      <div className="text-xs">
-                        <p className="font-bold text-slate-900">₹{b.totalTariff.toLocaleString("en-IN")}</p>
-                        <p className="text-[11px] text-emerald-600">
-                          Paid: ₹{b.advancePaid.toLocaleString("en-IN")}
-                          {b.balancePayable > 0 && (
-                            <span className="text-amber-700 ml-1">
-                              (Bal: ₹{b.balancePayable.toLocaleString("en-IN")})
-                            </span>
-                          )}
-                        </p>
-                      </div>
-                    </td>
-
-                    <td className="py-4 px-6 text-right">
-                      <span
-                        className={`inline-block px-2.5 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wider ${
-                          b.status === "PAYMENT_PENDING"
-                            ? "bg-amber-100 text-amber-800 border border-amber-300"
-                            : b.status === "CONFIRMED"
-                            ? "bg-blue-100 text-blue-800 border border-blue-200"
-                            : b.status === "IN_PROGRESS"
-                            ? "bg-indigo-100 text-indigo-800 border border-indigo-200"
-                            : b.status === "COMPLETED"
-                            ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
-                            : "bg-rose-100 text-rose-800 border border-rose-200"
-                        }`}
-                      >
-                        {b.status.replace(/_/g, " ")}
-                      </span>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+          <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
+            <span className="text-xs text-emerald-600 font-semibold flex items-center gap-1">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              <span>Live Inquiries</span>
+            </span>
+            <Link
+              href="/admin/leads"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 hover:text-amber-700 group-hover:translate-x-0.5 transition-transform"
+            >
+              <span>Open Leads</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
         </div>
 
-        {/* Upcoming Bookings Pagination */}
-        <Pagination
-          currentPage={bookingsPage}
-          totalPages={totalBookingsPages}
-          totalItems={bookings.length}
-          pageSize={bookingsPageSize}
-          onPageChange={setBookingsPage}
-          onPageSizeChange={(sz) => {
-            setBookingsPageSize(sz);
-            setBookingsPage(1);
-          }}
-          pageSizeOptions={[5, 10, 20]}
-        />
+        {/* Franchise Leads Category Card */}
+        <div className="p-6 rounded-3xl bg-white border border-slate-200/80 shadow-xs flex flex-col justify-between hover:border-amber-400/80 hover:shadow-md transition-all group">
+          <div>
+            <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+              <Building2 className="w-6 h-6" />
+            </div>
+            <div className="flex items-center justify-between">
+              <h3 className="font-bold text-base text-slate-900">Franchise Leads</h3>
+              <span className="text-xs font-mono font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900">
+                {franchiseStats?.totalLeads ?? 0} Inquiries
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+              Multi-tier franchise investor applications, commercial space details, applicant liquid capital, and onboarding notes.
+            </p>
+          </div>
+
+          <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
+            <span className="text-xs text-slate-600 font-semibold">
+              District Hubs &amp; Master Tiers
+            </span>
+            <Link
+              href="/admin/franchise"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 hover:text-amber-700 group-hover:translate-x-0.5 transition-transform"
+            >
+              <span>Open Franchise Leads</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+        </div>
       </div>
 
 

@@ -18,7 +18,7 @@ import {
 import Pagination from "../components/Pagination";
 
 
-const STATUS_OPTIONS = ["NEW", "ACTIVE", "CONTACTED", "CONVERTED", "LOST"];
+const STATUS_OPTIONS = ["NEW", "EXISTING", "LOYAL", "ACTIVE", "CONTACTED", "CONVERTED", "LOST"];
 
 export default function LeadsPage() {
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -55,14 +55,17 @@ export default function LeadsPage() {
   };
 
   const getStatusBadge = (status: string) => {
-    const styles = {
+    const s = (status || "").toUpperCase();
+    const styles: Record<string, string> = {
       NEW: "bg-blue-100 text-blue-800 border-blue-200",
+      EXISTING: "bg-cyan-100 text-cyan-800 border-cyan-200",
+      LOYAL: "bg-emerald-100 text-emerald-800 border-emerald-300 font-bold",
       ACTIVE: "bg-emerald-100 text-emerald-800 border-emerald-200",
       CONTACTED: "bg-amber-100 text-amber-800 border-amber-200",
       CONVERTED: "bg-purple-100 text-purple-800 border-purple-200",
       LOST: "bg-rose-100 text-rose-800 border-rose-200",
     };
-    return styles[status as keyof typeof styles] || "bg-slate-100 text-slate-800";
+    return styles[s] || "bg-slate-100 text-slate-800 border-slate-200";
   };
 
   const getActionIcon = (action: string) => {
@@ -75,12 +78,14 @@ export default function LeadsPage() {
     const q = search.toLowerCase().trim();
     return leads.filter((lead) => {
       const matchesSearch =
-        lead.name.toLowerCase().includes(q) ||
-        lead.email.toLowerCase().includes(q) ||
-        lead.phone.includes(q) ||
+        (lead.name && lead.name.toLowerCase().includes(q)) ||
+        (lead.email && lead.email.toLowerCase().includes(q)) ||
+        (lead.phone && lead.phone.includes(q)) ||
         (lead.action && lead.action.toLowerCase().includes(q)) ||
         (lead.context && lead.context.toLowerCase().includes(q));
-      const matchesStatus = statusFilter === "all" || lead.status === statusFilter;
+      const matchesStatus =
+        statusFilter === "all" ||
+        (lead.status || "").toUpperCase() === statusFilter.toUpperCase();
       return matchesSearch && matchesStatus;
     });
   }, [leads, search, statusFilter]);
@@ -208,9 +213,15 @@ export default function LeadsPage() {
 
                       <td className="py-3 px-4">
                         <div className="space-y-1">
-                          <a href={`mailto:${lead.email}`} className="text-slate-600 hover:text-amber-600 inline-flex items-center gap-1 text-xs">
-                            <Mail className="w-3.5 h-3.5 text-slate-400" /> {lead.email}
-                          </a>
+                          {lead.email ? (
+                            <a href={`mailto:${lead.email}`} className="text-slate-600 hover:text-amber-600 inline-flex items-center gap-1 text-xs">
+                              <Mail className="w-3.5 h-3.5 text-slate-400" /> {lead.email}
+                            </a>
+                          ) : (
+                            <span className="text-slate-400 italic text-[11px] inline-flex items-center gap-1">
+                              <Mail className="w-3.5 h-3.5 text-slate-300" /> No email
+                            </span>
+                          )}
                           <a href={`tel:${lead.phone}`} className="text-slate-600 hover:text-amber-600 inline-flex items-center gap-1 text-xs font-mono">
                             <Phone className="w-3.5 h-3.5 text-slate-400" /> {lead.phone}
                           </a>

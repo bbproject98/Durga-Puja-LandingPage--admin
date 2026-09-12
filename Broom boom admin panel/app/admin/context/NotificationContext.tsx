@@ -134,7 +134,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
           type: "LEAD",
           title: `New Lead: ${l.name}`,
           subtitle: `${l.phone} • ${l.action || "Inquiry Captured"}`,
-          detail: l.context || l.email,
+          detail: l.context || l.email || undefined,
           timestamp: l.createdAt || new Date().toISOString(),
           read: isRead,
           link: "/admin/leads",

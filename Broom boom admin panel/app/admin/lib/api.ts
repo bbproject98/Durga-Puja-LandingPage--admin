@@ -1,4 +1,4 @@
-import { API_BASE_URL } from "./config";
+import { API_BASE_URL, FRANCHISE_API_URL } from "./config";
 
 export type BookingStatus =
   | "PAYMENT_PENDING"
@@ -18,6 +18,7 @@ export interface Booking {
   vehicleModels: string;
   vehicleSeats: number;
   packageTitle: string;
+  tripType?: "ONE_WAY" | "ROUND_TRIP" | string | null;
   travelDate: string;
   pickupTime: string;
   returnDate?: string | null;
@@ -82,7 +83,7 @@ export interface Lead {
   id: string;
   name: string;
   phone: string;
-  email: string;
+  email?: string | null;
   context?: string | null;
   action?: string | null;
   status: string;
@@ -496,6 +497,7 @@ export async function createBooking(data: Partial<Booking>): Promise<Booking> {
     vehicleModels: data.vehicleModels || "Swift Dzire",
     vehicleSeats: data.vehicleSeats || 4,
     packageTitle: data.packageTitle || "South Kolkata Mega Theme Pandal Parikrama",
+    tripType: data.tripType || (data.returnDate ? "ROUND_TRIP" : "ONE_WAY"),
     travelDate: data.travelDate || new Date().toISOString().split("T")[0],
     pickupTime: data.pickupTime || "12:00",
     returnDate: data.returnDate || null,
@@ -741,10 +743,10 @@ export async function fetchLeads(): Promise<Lead[]> {
         : Array.isArray(json.leads)
         ? json.leads
         : [];
-      if (list.length > 0) return list;
+      return list;
     }
-  } catch {
-    // local fallback
+  } catch (err) {
+    console.warn("fetchLeads backend unreachable, using fallback:", err);
   }
 
   const local = getLocalItem<Lead[]>("broomboom_leads", DEFAULT_LEADS);
@@ -802,4 +804,499 @@ export async function updateBooking(id: string, data: Partial<Booking>): Promise
   updatedList[idx] = updatedBooking;
   setLocalItem("broomboom_bookings", updatedList);
   return updatedBooking;
+}
+
+// -------------------------------------------------------------
+// Franchise Network Interfaces & Functions
+// -------------------------------------------------------------
+export type FranchisePackageTier = "silver" | "gold" | "platinum" | "undecided";
+export type FranchiseLeadStatus = "NEW" | "CONTACTED" | "UNDER_REVIEW" | "APPROVED" | "REJECTED";
+
+export interface FranchiseLead {
+  id: string;
+  applicationId: string;
+  fullName: string;
+  mobile: string;
+  alternatePhone?: string;
+  email?: string;
+  state?: string;
+  city: string;
+  pincode?: string;
+  proposedAddress?: string;
+  spaceStatus?: string;
+  carpetArea?: string;
+  preferredPackage: FranchisePackageTier;
+  packageName: string;
+  investmentBudget?: string;
+  financeRequired?: string;
+  loanAssistance?: string;
+  currentProfession?: string;
+  hasExperience?: string;
+  message?: string;
+  source?: string;
+  status: FranchiseLeadStatus;
+  adminNotes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface FranchiseHub {
+  id: string;
+  city: string;
+  state: string;
+  type: string;
+  tier: string;
+  address: string;
+  phone: string;
+  openHours: string;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface BrochureDownload {
+  id: string;
+  name: string;
+  mobile: string;
+  city: string;
+  downloadedAt: string;
+}
+
+export interface FranchiseAnalytics {
+  totalLeads: number;
+  newLeadsToday: number;
+  activeHubs: number;
+  brochureDownloads: number;
+  tierDistribution: Record<string, number>;
+  statusDistribution: Record<string, number>;
+}
+
+const DEFAULT_FRANCHISE_LEADS: FranchiseLead[] = [
+  {
+    id: "lead-bb-01",
+    applicationId: "BB-2026-8801",
+    fullName: "Rajesh Kumar Verma",
+    mobile: "+91 98301 44520",
+    email: "rajesh.verma@example.com",
+    city: "Kolkata",
+    state: "West Bengal",
+    pincode: "700019",
+    preferredPackage: "gold",
+    packageName: "Gold Partner (District Exclusive Hub)",
+    investmentBudget: "₹5 Lakhs - ₹10 Lakhs",
+    spaceStatus: "Owned Commercial",
+    carpetArea: "350 sq ft",
+    currentProfession: "Fleet Operator & Transport Business",
+    hasExperience: "Yes, 8+ years",
+    status: "NEW",
+    adminNotes: "Territory: South Kolkata & Garia. High priority.",
+    createdAt: "2026-09-09T10:30:00.000Z",
+    updatedAt: "2026-09-09T10:30:00.000Z",
+  },
+  {
+    id: "lead-bb-02",
+    applicationId: "BB-2026-8802",
+    fullName: "Pooja Banerjee",
+    mobile: "+91 97482 11980",
+    email: "pooja.b@example.com",
+    city: "Siliguri",
+    state: "West Bengal",
+    pincode: "734001",
+    preferredPackage: "platinum",
+    packageName: "Platinum Partner (Regional Master Franchise)",
+    investmentBudget: "₹15 Lakhs+",
+    spaceStatus: "Rented Showroom",
+    carpetArea: "600 sq ft",
+    currentProfession: "Automotive Showroom Owner",
+    hasExperience: "Yes, 12 years in automobile sales",
+    status: "UNDER_REVIEW",
+    adminNotes: "North Bengal regional master franchise request. Scheduled zoom call.",
+    createdAt: "2026-09-08T15:45:00.000Z",
+    updatedAt: "2026-09-08T17:00:00.000Z",
+  },
+  {
+    id: "lead-bb-03",
+    applicationId: "BB-2026-8803",
+    fullName: "Amitabh Sen",
+    mobile: "+91 94330 88219",
+    email: "amitabh.sen@example.com",
+    city: "Durgapur",
+    state: "West Bengal",
+    pincode: "713216",
+    preferredPackage: "silver",
+    packageName: "Silver Partner (Booking Kiosk)",
+    investmentBudget: "₹2.5 Lakhs - ₹5 Lakhs",
+    spaceStatus: "Mall Kiosk Space",
+    carpetArea: "150 sq ft",
+    currentProfession: "Travel Agency Proprietor",
+    hasExperience: "Yes, 5 years",
+    status: "CONTACTED",
+    adminNotes: "Kiosk near City Centre mall. Sent commercial brochure.",
+    createdAt: "2026-09-07T12:15:00.000Z",
+    updatedAt: "2026-09-07T14:20:00.000Z",
+  },
+];
+
+const DEFAULT_FRANCHISE_HUBS: FranchiseHub[] = [
+  {
+    id: "hub-01",
+    city: "Kolkata Central Hub",
+    state: "West Bengal",
+    type: "Regional Master Fleet Hub",
+    tier: "Platinum",
+    address: "Park Street & Camac St Junction, Kolkata 700016",
+    phone: "1800-BROOM-BOOM",
+    openHours: "24/7 Dispatch Desk",
+    isActive: true,
+    createdAt: "2026-01-01T00:00:00.000Z",
+  },
+  {
+    id: "hub-02",
+    city: "Salt Lake Sector V",
+    state: "West Bengal",
+    type: "District Tech City Hub",
+    tier: "Gold",
+    address: "Godrej Waterside, Tower 1, Sector V, Salt Lake, Kolkata 700091",
+    phone: "+91 98300 00000",
+    openHours: "8:00 AM - 10:00 PM",
+    isActive: true,
+    createdAt: "2026-01-15T00:00:00.000Z",
+  },
+  {
+    id: "hub-03",
+    city: "Siliguri Junction",
+    state: "West Bengal",
+    type: "Gateway Outstation Hub",
+    tier: "Gold",
+    address: "Hill Cart Road, Near Siliguri Junction, Siliguri 734001",
+    phone: "+91 98300 00000",
+    openHours: "7:00 AM - 10:00 PM",
+    isActive: true,
+    createdAt: "2026-02-01T00:00:00.000Z",
+  },
+];
+
+export async function fetchFranchiseLeads(params?: {
+  status?: string;
+  package?: string;
+  query?: string;
+}): Promise<{ leads: FranchiseLead[]; total: number }> {
+  try {
+    const url = new URL(`${FRANCHISE_API_URL}/api/leads`);
+    if (params?.status && params.status !== "ALL") url.searchParams.set("status", params.status);
+    if (params?.package && params.package !== "ALL") url.searchParams.set("package", params.package);
+    if (params?.query) url.searchParams.set("query", params.query);
+
+    const res = await fetch(url.toString(), {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    });
+
+    if (res.ok) {
+      const json = await res.json();
+      const leads: FranchiseLead[] = json.leads || json.data || [];
+      return { leads, total: json.total ?? leads.length };
+    }
+  } catch (err) {
+    console.warn("Franchise API offline; loading local fallback leads", err);
+  }
+
+  const local = getLocalItem<FranchiseLead[]>("broomboom_franchise_leads", DEFAULT_FRANCHISE_LEADS);
+  let filtered = [...local];
+  if (params?.status && params.status !== "ALL") {
+    filtered = filtered.filter((l) => l.status === params.status);
+  }
+  if (params?.package && params.package !== "ALL") {
+    filtered = filtered.filter((l) => l.preferredPackage === params.package?.toLowerCase());
+  }
+  if (params?.query) {
+    const q = params.query.toLowerCase();
+    filtered = filtered.filter(
+      (l) =>
+        l.fullName.toLowerCase().includes(q) ||
+        l.city.toLowerCase().includes(q) ||
+        l.mobile.includes(q) ||
+        l.applicationId.toLowerCase().includes(q)
+    );
+  }
+  return { leads: filtered, total: filtered.length };
+}
+
+export async function fetchFranchiseLeadById(id: string): Promise<FranchiseLead | null> {
+  try {
+    const res = await fetch(`${FRANCHISE_API_URL}/api/leads/${id}`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    });
+    if (res.ok) {
+      const json = await res.json();
+      return json.lead || json.data || null;
+    }
+  } catch (err) {
+    console.warn("Franchise API offline; lookup in local fallback", err);
+  }
+
+  const local = getLocalItem<FranchiseLead[]>("broomboom_franchise_leads", DEFAULT_FRANCHISE_LEADS);
+  return local.find((l) => l.id === id || l.applicationId === id) || null;
+}
+
+export async function updateFranchiseLead(
+  id: string,
+  data: Partial<FranchiseLead>
+): Promise<FranchiseLead> {
+  try {
+    const res = await fetch(`${FRANCHISE_API_URL}/api/leads/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    if (res.ok) {
+      const json = await res.json();
+      return json.lead;
+    }
+  } catch (err) {
+    console.warn("Franchise API offline; updating in local storage", err);
+  }
+
+  const local = getLocalItem<FranchiseLead[]>("broomboom_franchise_leads", DEFAULT_FRANCHISE_LEADS);
+  const idx = local.findIndex((l) => l.id === id || l.applicationId === id);
+  if (idx === -1) throw new Error("Franchise Lead not found");
+  const updated: FranchiseLead = {
+    ...local[idx],
+    ...data,
+    updatedAt: new Date().toISOString(),
+  };
+  const updatedList = [...local];
+  updatedList[idx] = updated;
+  setLocalItem("broomboom_franchise_leads", updatedList);
+  return updated;
+}
+
+export async function createFranchiseLead(
+  data: Partial<FranchiseLead>
+): Promise<FranchiseLead> {
+  const newLead: FranchiseLead = {
+    id: `lead-bb-${Date.now()}`,
+    applicationId: `BB-2026-${Math.floor(1000 + Math.random() * 9000)}`,
+    fullName: data.fullName || "New Applicant",
+    mobile: data.mobile || "+91 90000 00000",
+    alternatePhone: data.alternatePhone || "",
+    email: data.email || "",
+    state: data.state || "West Bengal",
+    city: data.city || "Kolkata",
+    pincode: data.pincode || "",
+    proposedAddress: data.proposedAddress || "",
+    spaceStatus: data.spaceStatus || "Owned Commercial",
+    carpetArea: data.carpetArea || "300 sq ft",
+    preferredPackage: (data.preferredPackage as FranchisePackageTier) || "gold",
+    packageName: data.packageName || "Gold Partner (District Exclusive Hub)",
+    investmentBudget: data.investmentBudget || "₹5 Lakhs - ₹10 Lakhs",
+    financeRequired: data.financeRequired || "Self-Funded / Ready Capital",
+    loanAssistance: data.loanAssistance || "No (Self-Funded)",
+    currentProfession: data.currentProfession || "",
+    hasExperience: data.hasExperience || "",
+    message: data.message || "",
+    source: data.source || "Manual Admin Entry",
+    status: data.status || "NEW",
+    adminNotes: data.adminNotes || "",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  try {
+    const res = await fetch(`${FRANCHISE_API_URL}/api/leads`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newLead),
+    });
+    if (res.ok) {
+      const json = await res.json();
+      return json.lead || json.data;
+    }
+  } catch (err) {
+    console.warn("Franchise API offline; saving lead in local storage", err);
+  }
+
+  const local = getLocalItem<FranchiseLead[]>("broomboom_franchise_leads", DEFAULT_FRANCHISE_LEADS);
+  setLocalItem("broomboom_franchise_leads", [newLead, ...local]);
+  return newLead;
+}
+
+export async function deleteFranchiseLead(id: string): Promise<boolean> {
+  try {
+    const res = await fetch(`${FRANCHISE_API_URL}/api/leads/${id}`, {
+      method: "DELETE",
+    });
+    if (res.ok) return true;
+  } catch (err) {
+    console.warn("Franchise API offline; deleting in local storage", err);
+  }
+
+  const local = getLocalItem<FranchiseLead[]>("broomboom_franchise_leads", DEFAULT_FRANCHISE_LEADS);
+  setLocalItem(
+    "broomboom_franchise_leads",
+    local.filter((l) => l.id !== id && l.applicationId !== id)
+  );
+  return true;
+}
+
+export async function fetchFranchiseHubs(activeOnly = false): Promise<FranchiseHub[]> {
+  try {
+    const url = `${FRANCHISE_API_URL}/api/hubs${activeOnly ? "?activeOnly=true" : ""}`;
+    const res = await fetch(url, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    });
+    if (res.ok) {
+      const json = await res.json();
+      return json.hubs || json.data || [];
+    }
+  } catch (err) {
+    console.warn("Franchise API offline; loading local fallback hubs", err);
+  }
+
+  const local = getLocalItem<FranchiseHub[]>("broomboom_franchise_hubs", DEFAULT_FRANCHISE_HUBS);
+  return activeOnly ? local.filter((h) => h.isActive) : local;
+}
+
+export async function createFranchiseHub(hub: Partial<FranchiseHub>): Promise<FranchiseHub> {
+  try {
+    const res = await fetch(`${FRANCHISE_API_URL}/api/hubs`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(hub),
+    });
+    if (res.ok) {
+      const json = await res.json();
+      return json.hub || json.data;
+    }
+  } catch (err) {
+    console.warn("Franchise API offline; saving hub in local storage", err);
+  }
+
+  const local = getLocalItem<FranchiseHub[]>("broomboom_franchise_hubs", DEFAULT_FRANCHISE_HUBS);
+  const newHub: FranchiseHub = {
+    id: `hub-${Date.now()}`,
+    city: hub.city || "New Hub City",
+    state: hub.state || "West Bengal",
+    type: hub.type || "District Fleet Hub",
+    tier: hub.tier || "Gold",
+    address: hub.address || "",
+    phone: hub.phone || "1800-BROOM-BOOM",
+    openHours: hub.openHours || "9:00 AM - 8:00 PM",
+    isActive: hub.isActive !== undefined ? hub.isActive : true,
+    createdAt: new Date().toISOString(),
+  };
+  setLocalItem("broomboom_franchise_hubs", [newHub, ...local]);
+  return newHub;
+}
+
+export async function updateFranchiseHub(
+  id: string,
+  hub: Partial<FranchiseHub>
+): Promise<FranchiseHub> {
+  try {
+    const res = await fetch(`${FRANCHISE_API_URL}/api/hubs/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(hub),
+    });
+    if (res.ok) {
+      const json = await res.json();
+      return json.hub || json.data;
+    }
+  } catch (err) {
+    console.warn("Franchise API offline; updating hub in local storage", err);
+  }
+
+  const local = getLocalItem<FranchiseHub[]>("broomboom_franchise_hubs", DEFAULT_FRANCHISE_HUBS);
+  const idx = local.findIndex((h) => h.id === id);
+  if (idx === -1) throw new Error("Franchise Hub not found");
+  const updated: FranchiseHub = { ...local[idx], ...hub };
+  const updatedList = [...local];
+  updatedList[idx] = updated;
+  setLocalItem("broomboom_franchise_hubs", updatedList);
+  return updated;
+}
+
+export async function deleteFranchiseHub(id: string): Promise<boolean> {
+  try {
+    const res = await fetch(`${FRANCHISE_API_URL}/api/hubs/${id}`, {
+      method: "DELETE",
+    });
+    if (res.ok) return true;
+  } catch (err) {
+    console.warn("Franchise API offline; deleting hub in local storage", err);
+  }
+
+  const local = getLocalItem<FranchiseHub[]>("broomboom_franchise_hubs", DEFAULT_FRANCHISE_HUBS);
+  setLocalItem(
+    "broomboom_franchise_hubs",
+    local.filter((h) => h.id !== id)
+  );
+  return true;
+}
+
+export async function fetchFranchiseBrochures(): Promise<BrochureDownload[]> {
+  try {
+    const res = await fetch(`${FRANCHISE_API_URL}/api/brochure`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    });
+    if (res.ok) {
+      const json = await res.json();
+      return json.brochures || json.data || [];
+    }
+  } catch (err) {
+    console.warn("Franchise API offline; loading local fallback brochures", err);
+  }
+
+  return getLocalItem<BrochureDownload[]>("broomboom_franchise_brochures", [
+    {
+      id: "br-1",
+      name: "Sanjay Singhania",
+      mobile: "+91 98311 00291",
+      city: "Howrah",
+      downloadedAt: "2026-09-08T11:20:00.000Z",
+    },
+  ]);
+}
+
+export async function fetchFranchiseAnalytics(): Promise<FranchiseAnalytics> {
+  try {
+    const res = await fetch(`${FRANCHISE_API_URL}/api/analytics`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    });
+    if (res.ok) {
+      const json = await res.json();
+      return json.stats;
+    }
+  } catch (err) {
+    console.warn("Franchise API offline; calculating analytics from fallback data", err);
+  }
+
+  const leads = getLocalItem<FranchiseLead[]>("broomboom_franchise_leads", DEFAULT_FRANCHISE_LEADS);
+  const hubs = getLocalItem<FranchiseHub[]>("broomboom_franchise_hubs", DEFAULT_FRANCHISE_HUBS);
+  const brochures = getLocalItem<BrochureDownload[]>("broomboom_franchise_brochures", []);
+
+  const tierDistribution: Record<string, number> = {};
+  const statusDistribution: Record<string, number> = {};
+
+  leads.forEach((l) => {
+    tierDistribution[l.preferredPackage] = (tierDistribution[l.preferredPackage] || 0) + 1;
+    statusDistribution[l.status] = (statusDistribution[l.status] || 0) + 1;
+  });
+
+  return {
+    totalLeads: leads.length,
+    newLeadsToday: leads.filter((l) => l.status === "NEW").length,
+    activeHubs: hubs.filter((h) => h.isActive).length,
+    brochureDownloads: brochures.length,
+    tierDistribution,
+    statusDistribution,
+  };
+}
+
+export function getFranchiseExportUrl(): string {
+  return `${FRANCHISE_API_URL}/api/export`;
 }
