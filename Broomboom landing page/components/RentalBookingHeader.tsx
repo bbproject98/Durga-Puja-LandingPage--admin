@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useMemo } from "react";
-import { Check, X, ChevronDown } from "lucide-react";
+import { Check, X, ChevronDown, CalendarDays } from "lucide-react";
 import { RENTAL_PACKAGES, RentalPackage } from "@/data/packages";
 
 // --- Helpers ---
@@ -59,6 +59,17 @@ const isToday = (dateStr: string): boolean => {
 };
 
 const getTodayStr = (): string => new Date().toISOString().split("T")[0];
+
+const formatDisplayDate = (dateStr: string): string => {
+  if (!dateStr) return "Select date";
+  const parsed = new Date(`${dateStr}T00:00:00`);
+  if (isNaN(parsed.getTime())) return dateStr;
+  return parsed.toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
 
 // --- Custom Time Dropdown Component ---
 interface TimeDropdownProps {
@@ -147,6 +158,61 @@ const TimeDropdown: React.FC<TimeDropdownProps> = ({ value, onChange, selectedDa
           ))}
         </div>
       )}
+    </div>
+  );
+};
+
+// --- Custom Clickable Date Field ---
+interface DateFieldProps {
+  value: string;
+  onChange: (date: string) => void;
+  min?: string;
+  className?: string;
+}
+
+const DateField: React.FC<DateFieldProps> = ({ value, onChange, min, className = "" }) => {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const openPicker = () => {
+    const el = inputRef.current;
+    if (!el) return;
+    // showPicker() is supported in Chrome 99+, Edge 99+, Safari 16+, Firefox 101+
+    if (typeof el.showPicker === "function") {
+      try {
+        el.showPicker();
+        return;
+      } catch {
+        /* fall through to focus */
+      }
+    }
+    el.focus();
+  };
+
+  return (
+    <div className={`relative w-full sm:w-[140px] group ${className}`}>
+      {/* Visible bar — the whole thing is covered by the invisible input below */}
+      <div className="pointer-events-none bg-slate-900 text-white text-xs px-2.5 sm:px-3 py-2 rounded-lg border border-slate-700 group-focus-within:border-amber-400 w-full flex items-center justify-between min-h-[38px]">
+        <span className="truncate">{formatDisplayDate(value)}</span>
+        <CalendarDays className="w-3.5 h-3.5 ml-2 opacity-60 shrink-0" />
+      </div>
+
+      {/* Invisible native date input stretched over the entire bar */}
+      <input
+        ref={inputRef}
+        type="date"
+        value={value}
+        min={min}
+        onChange={(e) => onChange(e.target.value)}
+        onClick={openPicker}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            openPicker();
+          }
+        }}
+        aria-label="Select date"
+        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+      />
     </div>
   );
 };
@@ -268,17 +334,17 @@ export const RentalBookingHeader: React.FC<RentalBookingHeaderProps> = ({
                     <option value="New Town">New Town</option>
                   </select>
                 </div>
+
+                {/* Pickup Date — fully clickable bar */}
                 <div className="w-[calc(50%-5px)] sm:w-auto">
                   <label className="text-[10px] text-slate-400 block uppercase font-bold mb-1">Pickup Date</label>
-                  <input
-                    type="date"
+                  <DateField
                     value={tempDate}
-                    onChange={(e) => setTempDate(e.target.value)}
                     min={today}
-                    className="bg-slate-900 text-white text-xs px-2.5 sm:px-3 py-2 rounded-lg border border-slate-700 focus:outline-none focus:border-amber-400 w-full sm:w-[140px]"
-                  >
-                  </input>
+                    onChange={(newDate) => setTempDate(newDate)}
+                  />
                 </div>
+
                 <div className="w-full sm:w-auto">
                   <label className="text-[10px] text-slate-400 block uppercase font-bold mb-1">Pickup Time</label>
                   <TimeDropdown
@@ -310,32 +376,32 @@ export const RentalBookingHeader: React.FC<RentalBookingHeaderProps> = ({
       </div>
 
       {/* --- BOTTOM ROW: SAVAARI STYLE PACKAGE TABS --- */}
-        <div className="w-full bg-white border-b border-slate-200 py-3 sm:py-5 flex sm:justify-center overflow-x-auto scrollbar-hide px-4">
-          <div className="inline-flex rounded-lg shadow-sm border border-slate-200 shrink-0" role="group">
-            {RENTAL_PACKAGES.map((pkg, index) => {
-              const isActive = selectedPackage.id === pkg.id;
-              const isFirst = index === 0;
-              const isLast = index === RENTAL_PACKAGES.length - 1;
+      <div className="w-full bg-white border-b border-slate-200 py-3 sm:py-5 flex sm:justify-center overflow-x-auto scrollbar-hide px-4">
+        <div className="inline-flex rounded-lg shadow-sm border border-slate-200 shrink-0" role="group">
+          {RENTAL_PACKAGES.map((pkg, index) => {
+            const isActive = selectedPackage.id === pkg.id;
+            const isFirst = index === 0;
+            const isLast = index === RENTAL_PACKAGES.length - 1;
 
-              const borderClasses = isLast ? "" : "border-r border-slate-200";
-              const roundedClasses = isFirst ? "rounded-l-lg" : isLast ? "rounded-r-lg" : "";
+            const borderClasses = isLast ? "" : "border-r border-slate-200";
+            const roundedClasses = isFirst ? "rounded-l-lg" : isLast ? "rounded-r-lg" : "";
 
-              return (
-                <button
-                  key={pkg.id}
-                  onClick={() => onSelectPackage(pkg)}
-                  className={`whitespace-nowrap px-4 sm:px-8 py-2.5 sm:py-3 text-[11px] sm:text-xs font-bold transition-colors ${borderClasses} ${roundedClasses} ${
-                    isActive
-                      ? "bg-black text-yellow-400 shadow-inner"
-                      : "bg-white text-slate-700 hover:bg-slate-100 hover:text-slate-900"
-                  }`}
-                >
-                  {pkg.hoursKm.replace("Hours", "hrs").replace(" / ", " | ").replace("KMs", "km")}
-                </button>
-              );
-            })}
-          </div>
+            return (
+              <button
+                key={pkg.id}
+                onClick={() => onSelectPackage(pkg)}
+                className={`whitespace-nowrap px-4 sm:px-8 py-2.5 sm:py-3 text-[11px] sm:text-xs font-bold transition-colors ${borderClasses} ${roundedClasses} ${
+                  isActive
+                    ? "bg-black text-yellow-400 shadow-inner"
+                    : "bg-white text-slate-700 hover:bg-slate-100 hover:text-slate-900"
+                }`}
+              >
+                {pkg.hoursKm.replace("Hours", "hrs").replace(" / ", " | ").replace("KMs", "km")}
+              </button>
+            );
+          })}
         </div>
+      </div>
     </div>
   );
 };

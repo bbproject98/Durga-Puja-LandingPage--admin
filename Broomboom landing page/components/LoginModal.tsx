@@ -78,7 +78,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       await submitLead({
         name: userData.name,
         phone: userData.phone,
-        email: normalizedEmail ?? "", // submitLead expects a string
+        email: normalizedEmail,
         context: actionContext?.title || "General Request",
         action: actionContext?.type || "book",
       });

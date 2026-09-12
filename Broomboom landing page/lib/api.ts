@@ -7,12 +7,12 @@ import { FLEET_DATA } from "@/data/fleet";
 import { RENTAL_PACKAGES, OUTSTATION_ROUTES } from "@/data/packages";
 import { Vehicle, PackageItem } from "@/types";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:9000").replace(/\/+$/, "");
 
 export interface LeadPayload {
   name: string;
   phone: string;
-  email: string;
+  email?: string | null;
   context?: string;
   action?: "book" | "explore";
 }
@@ -20,7 +20,7 @@ export interface LeadPayload {
 export interface BookingPayload {
   customerName: string;
   customerPhone: string;
-  customerEmail: string;
+  customerEmail?: string | null;
 
   vehicleName: string;
   vehicleModels?: string;

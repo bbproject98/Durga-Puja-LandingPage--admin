@@ -138,20 +138,20 @@ export const Hero: React.FC<HeroProps> = ({
                             </p>
 
                             {/* VALUE PROPS – hidden on mobile, visible on lg+ */}
-                            <div className="hidden lg:flex lg:flex-wrap lg:items-center lg:justify-start gap-2 pt-1 text-xs font-semibold text-slate-700">
-                                <span className="px-3 py-1.5 bg-white border border-amber-200 rounded-xl shadow-sm flex items-center gap-1.5">
-                                    <Car className="w-4 h-4 text-amber-600" /> 4 to 17 Seaters (Sedan, SUV, Urbania)
-                                </span>
-                                <span className="px-3 py-1.5 bg-white border border-amber-200 rounded-xl shadow-sm flex items-center gap-1.5">
-                                    <ShieldCheck className="w-4 h-4 text-emerald-600" /> Zero Surge Guarantee
-                                </span>
-                                <span className="px-3 py-1.5 bg-white border border-amber-200 rounded-xl shadow-sm flex items-center gap-1.5">
-                                    <Receipt className="w-4 h-4 text-amber-600" /> Transparent Billing System
-                                </span>
-                                <span className="px-3 py-1.5 bg-white border border-amber-200 rounded-xl shadow-sm flex items-center gap-1.5">
-                                    <CheckCircle2 className="w-4 h-4 text-amber-600" /> Senior-Friendly Drop Points
-                                </span>
-                            </div>
+                                <div className="hidden lg:inline-grid lg:grid-cols-2 gap-2 pt-1 text-xs font-semibold text-slate-700">
+                                    <span className="px-3 py-1.5 bg-white border border-amber-200 rounded-xl shadow-sm flex items-center gap-1.5 whitespace-nowrap">
+                                        <Car className="w-4 h-4 text-amber-600" /> 4 to 17 Seaters (Sedan, SUV, Urbania)
+                                    </span>
+                                    <span className="px-3 py-1.5 bg-white border border-amber-200 rounded-xl shadow-sm flex items-center gap-1.5 whitespace-nowrap">
+                                        <ShieldCheck className="w-4 h-4 text-emerald-600" /> Zero Surge Guarantee
+                                    </span>
+                                    <span className="px-3 py-1.5 bg-white border border-amber-200 rounded-xl shadow-sm flex items-center gap-1.5 whitespace-nowrap">
+                                        <Receipt className="w-4 h-4 text-amber-600" /> Transparent Billing System
+                                    </span>
+                                    <span className="px-3 py-1.5 bg-white border border-amber-200 rounded-xl shadow-sm flex items-center gap-1.5 whitespace-nowrap">
+                                        <CheckCircle2 className="w-4 h-4 text-amber-600" /> Senior-Friendly Drop Points
+                                    </span>
+                                </div>
 
                             {/* Action Buttons – Single row on mobile */}
                             <div className="pt-0 sm:pt-1 flex flex-row items-center justify-center lg:justify-start gap-2 sm:gap-3 w-full">

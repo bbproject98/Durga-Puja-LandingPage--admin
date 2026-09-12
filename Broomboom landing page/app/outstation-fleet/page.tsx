@@ -51,32 +51,97 @@ function loadCashfree(): Promise<CashfreeInstance> {
 }
 
 const INDIAN_STATES = [
-  "West Bengal", "Jharkhand", "Odisha", "Bihar", "Assam", 
-  "Delhi", "Maharashtra", "Karnataka", "Tamil Nadu"
+  "West Bengal", "Jharkhand", "Odisha", "Bihar", "Assam",
+  "Sikkim", "Delhi", "Maharashtra", "Karnataka", "Tamil Nadu"
 ];
 
 /* ------------------------------------------------------------------ */
-/*  INCLUSIONS & EXCLUSIONS DATA                                      */
+/*  DESTINATION KM MAP (fallback when route data doesn't have km)     */
 /* ------------------------------------------------------------------ */
-const getInclusions = (tripType: "oneWay" | "roundTrip"): string[] => [
-  "Fuel charges for the entire journey",
-  "Experienced highway chauffeur + driver bhatta (allowance)",
-  "All state tolls, FASTag & interstate permit charges",
-  "AC vehicle with free doorstep pickup across Kolkata",
-  "GST & booking platform charges",
-  tripType === "roundTrip"
-    ? "Return journey on your chosen date with the same cab"
-    : "Direct one-way drop to your destination city",
-];
+const DESTINATION_KM_MAP: Record<string, number> = {
+  gangtok: 720,
+  darjeeling: 680,
+  digha: 185,
+  mandarmani: 170,
+  sundarban: 110,
+  sundarbans: 110,
+  puri: 500,
+  bhubaneswar: 440,
+  ranchi: 410,
+  jamshedpur: 310,
+  patna: 590,
+  gaya: 620,
+  bodh: 620,
+  shillong: 1030,
+  guwahati: 1030,
+  siliguri: 560,
+  kalimpong: 690,
+  lachung: 900,
+  pelling: 780,
+  bokaro: 340,
+  dhanbad: 290,
+  asansol: 210,
+  bakkhali: 140,
+  kolkata: 0,
+};
 
-const getExclusions = (): string[] => [
-  "Parking charges at hotels, resorts or tourist spots",
-  "Monument / sightseeing entry tickets & guide fees",
-  "Night driving charges between 11:00 PM – 06:00 AM",
-  "Extra kilometres beyond the included route limit",
-  "Extra waiting hours beyond the free waiting period",
-  "Meals, personal expenses & anything not listed in inclusions",
-];
+/* ------------------------------------------------------------------ */
+/*  INCLUSIONS & EXCLUSIONS DATA (DYNAMIC BY TRIP + CAR)              */
+/* ------------------------------------------------------------------ */
+type TripDetails = {
+  tripType: "oneWay" | "roundTrip";
+  includedKm: number;
+  includedHours: number;
+  extraKmRate?: number;
+  extraHourRate?: number;
+  freeWaitingHours?: number;
+};
+
+const getInclusions = (trip: TripDetails): string[] => {
+  const tripLabel = trip.tripType === "roundTrip" ? "round trip" : "one-way trip";
+
+  return [
+    "Fuel charges for the entire journey",
+    "Experienced highway chauffeur + driver bhatta (allowance)",
+    "AC vehicle with free doorstep pickup across Kolkata",
+    `${trip.includedKm} km included for this ${tripLabel}`,
+    `${trip.includedHours} hours included for this ${tripLabel}`,
+    trip.tripType === "roundTrip"
+      ? "Return journey on your chosen date with the same cab"
+      : "Direct one-way drop to your destination city",
+  ];
+};
+
+const getExclusions = (trip: TripDetails): string[] => {
+  const extraKmRate = trip.extraKmRate ?? 20;
+  const freeWaitingHours = trip.freeWaitingHours ?? 0;
+
+  const extraHourText =
+    trip.extraHourRate != null
+      ? `Extra waiting hours beyond ${freeWaitingHours} free waiting hour(s): ₹${trip.extraHourRate}/hour`
+      : `Extra waiting hours beyond ${freeWaitingHours} free waiting hour(s)`;
+
+  return [
+    "All state tolls, FASTag & interstate permit charges",
+    "GST & booking platform charges",
+    "Parking charges at hotels, resorts or tourist spots",
+    "Monument / sightseeing entry tickets & guide fees",
+    "Night driving charges between 11:00 PM – 06:00 AM",
+    `Extra kilometres beyond ${trip.includedKm} km: ₹${extraKmRate}/km`,
+    extraHourText,
+    "Meals, personal expenses & anything not listed in inclusions",
+  ];
+};
+
+type OutstationData = {
+  tripType: "oneWay" | "roundTrip";
+  fromCity: string;
+  toCity: string;
+  pickupDate: string;
+  pickupTime: string;
+  returnDate: string;
+  returnTime: string;
+};
 
 function OutstationFleetContent() {
   const searchParams = useSearchParams();
@@ -84,15 +149,29 @@ function OutstationFleetContent() {
 
   const [isMounted, setIsMounted] = useState(false);
 
-  const [outstationData, setOutstationData] = useState({
-    tripType: "oneWay" as "oneWay" | "roundTrip",
+  const [outstationData, setOutstationData] = useState<OutstationData>({
+    tripType: "oneWay",
     fromCity: "Kolkata",
     toCity: toCityParam,
-    pickupDate: "", 
+    pickupDate: "",
     pickupTime: "08:00 AM",
     returnDate: "",
     returnTime: "10:00 AM",
   });
+
+  /* ------------------------------------------------------------------ */
+  /*  SAFE MERGE UPDATER — prevents state wipeout from header           */
+  /* ------------------------------------------------------------------ */
+  const handleUpdateDetails = (
+    updates:
+      | Partial<OutstationData>
+      | ((prev: OutstationData) => Partial<OutstationData>)
+  ) => {
+    setOutstationData((prev) => {
+      const next = typeof updates === "function" ? updates(prev) : updates;
+      return { ...prev, ...next };
+    });
+  };
 
   const [selectedCategory, setSelectedCategory] = useState<"all" | "sedan" | "suv" | "traveller">("all");
   const [expandedDetailsCarId, setExpandedDetailsCarId] = useState<string | null>(null);
@@ -115,10 +194,10 @@ function OutstationFleetContent() {
 
   useEffect(() => {
     setIsMounted(true);
-    
+
     setOutstationData((prev) => ({
       ...prev,
-      pickupDate: new Date().toISOString().split("T")[0]
+      pickupDate: new Date().toISOString().split("T")[0],
     }));
 
     try {
@@ -126,6 +205,13 @@ function OutstationFleetContent() {
       if (savedUser) setUserData(JSON.parse(savedUser));
     } catch (e) {}
   }, []);
+
+  // Sync toCity param → state whenever URL changes
+  useEffect(() => {
+    if (toCityParam) {
+      setOutstationData((prev) => ({ ...prev, toCity: toCityParam }));
+    }
+  }, [toCityParam]);
 
   // Close state dropdown when clicking outside
   useEffect(() => {
@@ -148,30 +234,105 @@ function OutstationFleetContent() {
 
   const selectedVehicle = selectedVehicleKey ? FLEET_DATA[selectedVehicleKey] : null;
 
-  const getCarRate = (car: any) => {
-    const route = OUTSTATION_ROUTES.find((r) =>
-      r.title.toLowerCase().includes(outstationData.toCity.toLowerCase())
+  /* ------------------------------------------------------------------ */
+  /*  FIND ROUTE for current destination (case-insensitive)              */
+  /* ------------------------------------------------------------------ */
+  const matchedRoute = useMemo(() => {
+    const city = (outstationData.toCity || "").trim().toLowerCase();
+    if (!city) return null;
+
+    return (
+      OUTSTATION_ROUTES.find((r) =>
+        r.title.toLowerCase().includes(city)
+      ) ?? null
     );
+  }, [outstationData.toCity]);
 
-    if (!route) return car.basePrice;
+  /* ------------------------------------------------------------------ */
+  /*  SAFE PRICE RESOLVER — never returns NaN                            */
+  /* ------------------------------------------------------------------ */
+  const getCarRate = (car: any): number => {
+    const route = matchedRoute;
 
+    // One-way price from route or car fallback
     let baseRate = 0;
-    if (car.category === "sedan") {
-      baseRate = route.prices.sedan;
-    } else if (car.category === "suv") {
-      const isSuvPlus = car.name.toLowerCase().includes("innova") || car.seats >= 7;
-      baseRate = isSuvPlus ? route.prices.suvPlus : route.prices.suv;
-    } else {
-      baseRate = Math.round(route.prices.suvPlus * 1.5);
+
+    if (route) {
+      if (car.category === "sedan") {
+        baseRate = Number(route.prices?.sedan) || 0;
+      } else if (car.category === "suv") {
+        const isSuvPlus =
+          car.name.toLowerCase().includes("innova") || car.seats >= 7;
+        baseRate =
+          Number(isSuvPlus ? route.prices?.suvPlus : route.prices?.suv) || 0;
+      } else {
+        baseRate = Math.round((Number(route.prices?.suvPlus) || 0) * 1.5);
+      }
     }
 
-    return outstationData.tripType === "roundTrip" ? baseRate * 2 : baseRate;
+    if (!baseRate) {
+      baseRate = Number(car.basePrice) || 0;
+    }
+
+    const rate =
+      outstationData.tripType === "roundTrip" ? baseRate * 2 : baseRate;
+
+    return Number.isFinite(rate) ? rate : 0;
+  };
+
+  /* ------------------------------------------------------------------ */
+  /*  DYNAMIC TRIP DETAILS PER CAR                                       */
+  /* ------------------------------------------------------------------ */
+  const getTripDetailsForCar = (car: any): TripDetails => {
+    const route: any = matchedRoute;
+    const city = (outstationData.toCity || "").trim().toLowerCase();
+
+    const routeKm =
+      route?.distanceKm ??
+      route?.km ??
+      route?.distance ??
+      route?.totalKm ??
+      null;
+
+    let mapKm: number | null = null;
+    if (!routeKm) {
+      const key = Object.keys(DESTINATION_KM_MAP).find((k) => city.includes(k));
+      if (key) mapKm = DESTINATION_KM_MAP[key];
+    }
+
+    const oneWayKm = Number(routeKm ?? mapKm ?? 250) || 250;
+
+    const includedKm =
+      outstationData.tripType === "roundTrip" ? oneWayKm * 2 : oneWayKm;
+
+    const oneWayHours =
+      route?.durationHours ??
+      route?.hours ??
+      Math.max(8, Math.ceil(oneWayKm / 40));
+
+    const includedHours =
+      outstationData.tripType === "roundTrip"
+        ? Math.max(16, Math.ceil(Number(oneWayHours) * 2))
+        : Number(oneWayHours);
+
+    return {
+      tripType: outstationData.tripType,
+      includedKm,
+      includedHours,
+      extraKmRate: Number(car?.outstationPerKm) || 20,
+      extraHourRate: 150,
+      freeWaitingHours: 2,
+    };
   };
 
   const checkoutPrice = useMemo(() => {
     if (!selectedVehicle) return 0;
-    return getCarRate(selectedVehicle);
-  }, [selectedVehicle, outstationData]);
+    const rate = getCarRate(selectedVehicle);
+    return Number.isFinite(rate) ? rate : 0;
+  }, [selectedVehicle, outstationData, matchedRoute]);
+
+  const advanceAmount = Math.round(checkoutPrice * 0.25) || 0;
+  const balanceAmount = checkoutPrice - advanceAmount;
 
   const handleSelectCar = (vehicleKey: string) => {
     setSelectedVehicleKey(vehicleKey);
@@ -181,7 +342,6 @@ function OutstationFleetContent() {
   const handleConfirmBooking = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // 1. Validate customer & address details
     if (!userData.name.trim() || userData.name === "Guest Traveler") {
       alert("Please enter your name for chauffeur coordination.");
       return;
@@ -208,8 +368,8 @@ function OutstationFleetContent() {
 
     try {
       const totalTariff = checkoutPrice;
-      const advancePaid = Math.round(totalTariff * 0.25);
-      const balancePayable = totalTariff - advancePaid;
+      const advancePaid = advanceAmount;
+      const balancePayable = balanceAmount;
 
       const bookingData = {
         customerName: userData.name || "Guest Traveler",
@@ -241,7 +401,6 @@ function OutstationFleetContent() {
         result.data?.booking?.bookingId ||
         `BBC-OUT-${Math.floor(100000 + Math.random() * 900000)}`;
 
-      // Cache booking details in localStorage for immediate thank-you page display
       try {
         const confirmedBooking = {
           refId: result.data?.booking?.bookingId || bookingRef,
@@ -289,90 +448,75 @@ function OutstationFleetContent() {
   }
 
   return (
-    // FIX 1: Removed `justify-between` from this wrapper
     <div className="min-h-screen bg-puja-cream text-slate-900 flex flex-col font-sans">
-     {/* Header */}
-            <header className="sticky top-0 z-40 bg-white border-b border-amber-200 shadow-sm backdrop-blur-md">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 py-3 flex items-center justify-between">
+      {/* Header */}
+      <header className="sticky top-0 z-40 bg-white border-b border-amber-200 shadow-sm backdrop-blur-md">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link
+              href="/"
+              className="flex items-center gap-2.5 sm:gap-3 group shrink-0"
+              aria-label="BroomBoom Cabs Home"
+            >
+              <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-full overflow-hidden shrink-0">
+                <img
+                  src="/images/broomboom-logo.png"
+                  alt="BroomBoom Cabs"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+              </div>
 
-                <div className="flex items-center gap-4">
+              <div className="flex flex-col justify-center">
+                <span className="px-2 py-0.5 w-fit text-[8px] sm:text-[9px] font-black bg-amber-400 text-slate-950 rounded border border-amber-500/40 tracking-wide">
+                  PUJA 2026
+                </span>
 
-                {/* BroomBoom Logo + Puja Information */}
-                <Link
-                    href="/"
-                    className="flex items-center gap-2.5 sm:gap-3 group shrink-0"
-                    aria-label="BroomBoom Cabs Home"
-                >
-                    {/* Round Logo */}
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-full overflow-hidden shrink-0">
-                    <img
-                        src="/images/broomboom-logo.png"
-                        alt="BroomBoom Cabs"
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    </div>
+                <p className="text-[8px] sm:text-[10px] text-slate-500 tracking-widest uppercase font-semibold mt-1">
+                  Kolkata Durga Puja Travel
+                </p>
+              </div>
+            </Link>
+          </div>
 
-                    {/* Puja Information */}
-                    <div className="flex flex-col justify-center">
-                    <span className="px-2 py-0.5 w-fit text-[8px] sm:text-[9px] font-black bg-amber-400 text-slate-950 rounded border border-amber-500/40 tracking-wide">
-                        PUJA 2026
-                    </span>
+          <div className="flex items-center gap-3">
+            <div className="hidden sm:block text-right">
+              <span className="text-[10px] text-slate-500 block font-medium">
+                Logged In As
+              </span>
 
-                    <p className="text-[8px] sm:text-[10px] text-slate-500 tracking-widest uppercase font-semibold mt-1">
-                        Kolkata Durga Puja Travel
-                    </p>
-                    </div>
-                </Link>
-
-                </div>
-
-                {/* Right Side */}
-                <div className="flex items-center gap-3">
-
-                <div className="hidden sm:block text-right">
-                    <span className="text-[10px] text-slate-500 block font-medium">
-                    Logged In As
-                    </span>
-
-                    <div className="flex items-center gap-1.5 justify-end">
-                      <span className="text-xs font-bold text-slate-900">
-                      {userData.name}
-                      </span>
-                      {userData.name !== "Guest Traveler" && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            try {
-                              localStorage.removeItem("broomboom_user");
-                            } catch (_) {}
-                            setUserData({ name: "Guest Traveler", phone: "+91 8240765499", email: "guest@example.com" });
-                          }}
-                          className="text-[10px] text-amber-800 hover:text-red-600 font-bold underline cursor-pointer"
-                          title="Change / Logout"
-                        >
-                          (Change)
-                        </button>
-                      )}
-                    </div>
-                </div>
-
-                <a
-                    href="tel:+919876543210"
-                    className="px-3.5 py-2 bg-amber-100 hover:bg-amber-200 text-amber-950 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors"
-                >
-                    <PhoneCall className="w-3.5 h-3.5" />
-
-                    <span className="hidden sm:inline">
-                    Highway Helpline:
-                    </span>
-
-                    +91 8240765499
-                </a>
-
-                </div>
-
+              <div className="flex items-center gap-1.5 justify-end">
+                <span className="text-xs font-bold text-slate-900">
+                  {userData.name}
+                </span>
+                {userData.name !== "Guest Traveler" && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      try {
+                        localStorage.removeItem("broomboom_user");
+                      } catch (_) {}
+                      setUserData({ name: "Guest Traveler", phone: "+91 8240765499", email: "guest@example.com" });
+                    }}
+                    className="text-[10px] text-amber-800 hover:text-red-600 font-bold underline cursor-pointer"
+                    title="Change / Logout"
+                  >
+                    (Change)
+                  </button>
+                )}
+              </div>
             </div>
-            </header>
+
+            <a
+              href="tel:+919876543210"
+              className="px-3.5 py-2 bg-amber-100 hover:bg-amber-200 text-amber-950 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors"
+            >
+              <PhoneCall className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Highway Helpline:</span>
+              +91 8240765499
+            </a>
+          </div>
+        </div>
+      </header>
 
       <OutstationBookingHeader
         tripType={outstationData.tripType}
@@ -382,7 +526,7 @@ function OutstationFleetContent() {
         pickupTime={outstationData.pickupTime}
         returnDate={outstationData.returnDate}
         returnTime={outstationData.returnTime}
-        onUpdateDetails={setOutstationData}
+        onUpdateDetails={handleUpdateDetails}
       />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 w-full flex-1 pb-20 lg:pb-8">
@@ -434,6 +578,7 @@ function OutstationFleetContent() {
             {vehiclesList.map((car) => {
               const currentPrice = getCarRate(car);
               const isDetailsOpen = expandedDetailsCarId === car.id;
+              const tripDetails = getTripDetailsForCar(car);
 
               return (
                 <div
@@ -483,15 +628,14 @@ function OutstationFleetContent() {
                         </div>
                         <div className="flex items-center gap-1.5">
                           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
-                          <span>State Tolls &amp; Taxes Included</span>
+                          <span>
+                            {tripDetails.includedKm} km &amp; {tripDetails.includedHours} hours included
+                          </span>
                         </div>
                         <div className="flex items-center gap-1.5">
                           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
-                          <span>Highway Chauffeur Allowance Included</span>
+                          <span>Fuel &amp; Driver Bhatta Included</span>
                         </div>
-                      </div>
-                      <div className="text-[11px] text-slate-500 pt-0.5 font-medium">
-                        Extra km: ₹{car.outstationPerKm}/km
                       </div>
                     </div>
 
@@ -540,14 +684,13 @@ function OutstationFleetContent() {
 
                     {isDetailsOpen && (
                       <div className="mt-3 grid sm:grid-cols-2 gap-3 animate-fadeIn">
-                        {/* Inclusions */}
                         <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-3.5">
                           <h5 className="text-[11px] font-black uppercase tracking-wider text-emerald-800 flex items-center gap-1.5 mb-2">
                             <CheckCircle2 className="w-3.5 h-3.5" />
                             Inclusions
                           </h5>
                           <ul className="space-y-1.5">
-                            {getInclusions(outstationData.tripType).map((item) => (
+                            {getInclusions(tripDetails).map((item) => (
                               <li
                                 key={item}
                                 className="flex items-start gap-1.5 text-[11px] text-slate-700 leading-snug"
@@ -559,14 +702,13 @@ function OutstationFleetContent() {
                           </ul>
                         </div>
 
-                        {/* Exclusions */}
                         <div className="bg-red-50 border border-red-200 rounded-2xl p-3.5">
                           <h5 className="text-[11px] font-black uppercase tracking-wider text-red-800 flex items-center gap-1.5 mb-2">
                             <XCircle className="w-3.5 h-3.5" />
                             Exclusions
                           </h5>
                           <ul className="space-y-1.5">
-                            {getExclusions().map((item) => (
+                            {getExclusions(tripDetails).map((item) => (
                               <li
                                 key={item}
                                 className="flex items-start gap-1.5 text-[11px] text-slate-700 leading-snug"
@@ -580,7 +722,6 @@ function OutstationFleetContent() {
                       </div>
                     )}
                   </div>
-                  {/* -------------- END INCLUSIONS & EXCLUSIONS -------------- */}
                 </div>
               );
             })}
@@ -604,13 +745,31 @@ function OutstationFleetContent() {
                 </div>
                 <div className="flex items-start gap-2">
                   <Check className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
-                  <span><strong>Interstate Permits:</strong> Jharkhand &amp; Odisha border documentation pre-arranged.</span>
+                  <span><strong>Interstate Permits:</strong> Jharkhand, Odisha &amp; Sikkim border documentation pre-arranged.</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <Check className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
                   <span><strong>Doorstep Pickup:</strong> Chauffeur reaches your home address on schedule.</span>
                 </div>
               </div>
+            </div>
+
+            <div className="bg-amber-400 rounded-3xl p-6 border-2 border-amber-500 shadow-md space-y-4">
+              <h4 className="text-lg font-bold text-slate-950 font-royal uppercase tracking-wide">
+                Need Help Selecting?
+              </h4>
+              <p className="text-xs text-amber-950 font-medium leading-relaxed">
+                Our Kolkata festival route specialists can customize multiple days, timings, and large group travellers.
+              </p>
+              <a
+                href="https://wa.me/918240765499"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full py-3.5 px-4 bg-slate-950 hover:bg-slate-900 text-amber-400 font-bold text-sm rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 min-h-[48px] active:scale-95"
+              >
+                <MessageCircle className="w-4 h-4" />
+                <span>Chat on WhatsApp</span>
+              </a>
             </div>
           </div>
         </div>
@@ -660,7 +819,6 @@ function OutstationFleetContent() {
                   )}
                 </div>
 
-                {/* Passenger Contact Details */}
                 <div className="bg-white p-3.5 rounded-2xl border border-amber-200 space-y-3">
                   <div className="flex items-center gap-1.5 border-b border-amber-100 pb-2">
                     <User className="w-3.5 h-3.5 text-amber-600" />
@@ -738,7 +896,6 @@ function OutstationFleetContent() {
                     />
                   </div>
 
-                  {/* State Dropdown */}
                   <div>
                     <label className="text-xs font-bold text-slate-700 mb-1 block">
                       State <span className="text-red-500">*</span>
@@ -800,7 +957,7 @@ function OutstationFleetContent() {
                   <div className="flex justify-between text-slate-950 font-black text-sm pt-1 border-t border-amber-200">
                     <span>Payable 25% Deposit to Lock:</span>
                     <span className="text-amber-900">
-                      ₹{Math.round(checkoutPrice * 0.25).toLocaleString()}
+                      ₹{advanceAmount.toLocaleString()}
                     </span>
                   </div>
                 </div>

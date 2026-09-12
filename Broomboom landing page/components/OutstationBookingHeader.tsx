@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useMemo } from "react";
-import { Check, X, ChevronDown, ArrowRight } from "lucide-react";
+import { Check, X, ChevronDown, ArrowRight, CalendarDays } from "lucide-react";
 
 // --- Helpers ---
 const generateTimeSlots = (): string[] => {
@@ -55,11 +55,22 @@ const isToday = (dateStr: string): boolean => {
 
 const getTodayStr = (): string => new Date().toISOString().split("T")[0];
 
+const formatDisplayDate = (dateStr: string): string => {
+  if (!dateStr) return "Select date";
+  const parsed = new Date(`${dateStr}T00:00:00`);
+  if (isNaN(parsed.getTime())) return dateStr;
+  return parsed.toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
+
 // --- Custom Time Dropdown Component ---
 interface TimeDropdownProps {
   value: string;
   onChange: (time: string) => void;
-  selectedDate: string; 
+  selectedDate: string;
 }
 
 const TimeDropdown: React.FC<TimeDropdownProps> = ({ value, onChange, selectedDate }) => {
@@ -138,6 +149,60 @@ const TimeDropdown: React.FC<TimeDropdownProps> = ({ value, onChange, selectedDa
           ))}
         </div>
       )}
+    </div>
+  );
+};
+
+// --- Custom Clickable Date Field ---
+interface DateFieldProps {
+  value: string;
+  onChange: (date: string) => void;
+  min?: string;
+}
+
+const DateField: React.FC<DateFieldProps> = ({ value, onChange, min }) => {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const openPicker = () => {
+    const el = inputRef.current;
+    if (!el) return;
+    // showPicker() is supported in Chrome 99+, Edge 99+, Safari 16+, Firefox 101+
+    if (typeof el.showPicker === "function") {
+      try {
+        el.showPicker();
+        return;
+      } catch {
+        /* fall through to focus */
+      }
+    }
+    el.focus();
+  };
+
+  return (
+    <div className="relative w-full sm:w-[130px] min-h-[38px] group">
+      {/* Visible bar — the whole thing is covered by the invisible input below */}
+      <div className="pointer-events-none bg-slate-900 text-white text-base sm:text-xs px-3 py-2 rounded-lg border border-slate-700 group-focus-within:border-amber-400 w-full min-h-[38px] flex items-center justify-between">
+        <span className="truncate">{formatDisplayDate(value)}</span>
+        <CalendarDays className="w-3.5 h-3.5 ml-2 opacity-60 shrink-0" />
+      </div>
+
+      {/* Invisible native date input stretched over the entire bar */}
+      <input
+        ref={inputRef}
+        type="date"
+        value={value}
+        min={min}
+        onChange={(e) => onChange(e.target.value)}
+        onClick={openPicker}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            openPicker();
+          }
+        }}
+        aria-label="Select date"
+        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+      />
     </div>
   );
 };
@@ -341,21 +406,19 @@ export const OutstationBookingHeader: React.FC<OutstationBookingHeaderProps> = (
                     </select>
                   </div>
 
-                  {/* Pickup */}
+                  {/* Pickup — fully clickable bar */}
                   <div className="col-span-1 sm:w-auto">
                     <label className="text-[10px] text-slate-400 block uppercase font-bold mb-1">Pickup Date</label>
-                    <input
-                      type="date"
+                    <DateField
                       value={tempDate}
-                      onChange={(e) => {
-                        setTempDate(e.target.value);
+                      min={today}
+                      onChange={(newDate) => {
+                        setTempDate(newDate);
                         // Prevent return date being before new pickup date
-                        if (tempTripType === "roundTrip" && tempReturnDate < e.target.value) {
-                          setTempReturnDate(e.target.value);
+                        if (tempTripType === "roundTrip" && tempReturnDate < newDate) {
+                          setTempReturnDate(newDate);
                         }
                       }}
-                      min={today}
-                      className="bg-slate-900 text-white text-base sm:text-xs px-3 py-2 rounded-lg border border-slate-700 focus:outline-none focus:border-amber-400 w-full sm:w-[130px] min-h-[38px]"
                     />
                   </div>
                   <div className="col-span-1 sm:w-auto">
@@ -363,17 +426,15 @@ export const OutstationBookingHeader: React.FC<OutstationBookingHeaderProps> = (
                     <TimeDropdown value={tempTime} onChange={setTempTime} selectedDate={tempDate} />
                   </div>
 
-                  {/* Return (Conditional) */}
+                  {/* Return (Conditional) — fully clickable bar */}
                   {tempTripType === "roundTrip" && (
                     <>
                       <div className="col-span-1 sm:w-auto">
                         <label className="text-[10px] text-amber-400 block uppercase font-bold mb-1">Return Date</label>
-                        <input
-                          type="date"
+                        <DateField
                           value={tempReturnDate}
-                          onChange={(e) => setTempReturnDate(e.target.value)}
                           min={tempDate || today}
-                          className="bg-slate-900 text-white text-base sm:text-xs px-3 py-2 rounded-lg border border-slate-700 focus:outline-none focus:border-amber-400 w-full sm:w-[130px] min-h-[38px]"
+                          onChange={(newDate) => setTempReturnDate(newDate)}
                         />
                       </div>
                       <div className="col-span-1 sm:w-auto">
