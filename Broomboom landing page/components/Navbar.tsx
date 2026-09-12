@@ -48,7 +48,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onActionClick, currentUser, onLo
             {/* Round Logo */}
             <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-full overflow-hidden shrink-0">
               <img
-                src="/images/broomboom-logo.png"
+                src="/images/Broomboom-logo.png"
                 alt="BroomBoom Cabs"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               />

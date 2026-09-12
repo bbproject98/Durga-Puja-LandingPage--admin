@@ -20,11 +20,7 @@ import {
   Mail,
   MapPin,
 } from "lucide-react";
-
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
-  process.env.NEXT_PUBLIC_BACKEND_URL ||
-  "http://localhost:5000";
+import { getApiBaseUrl } from "@/lib/api";
 
 function ThankYouContent() {
   const searchParams = useSearchParams();
@@ -58,7 +54,7 @@ function ThankYouContent() {
 
     const fetchBooking = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/api/bookings/${encodeURIComponent(orderId)}`);
+        const res = await fetch(`${getApiBaseUrl()}/api/bookings/${encodeURIComponent(orderId)}`);
         if (!res.ok) throw new Error("Booking not found");
         const json = await res.json();
         const data = json.data || json;

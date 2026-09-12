@@ -7,7 +7,17 @@ import { FLEET_DATA } from "@/data/fleet";
 import { RENTAL_PACKAGES, OUTSTATION_ROUTES } from "@/data/packages";
 import { Vehicle, PackageItem } from "@/types";
 
-const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:9000").replace(/\/+$/, "");
+export const getApiBaseUrl = (): string => {
+  if (typeof window !== "undefined") {
+    const host = window.location.hostname;
+    // When running on any broomboomcabs.com domain in production, use the browser's exact origin
+    // This makes requests same-origin, completely eliminating CORS issues
+    if (host.includes("broomboomcabs.com")) {
+      return window.location.origin;
+    }
+  }
+  return (process.env.NEXT_PUBLIC_API_URL || "http://localhost:9000").replace(/\/+$/, "");
+};
 
 export interface LeadPayload {
   name: string;
@@ -43,10 +53,14 @@ export interface BookingPayload {
 
 // 1. Submit Lead (From Login / Quick Access popup)
 export async function submitLead(payload: LeadPayload) {
+  const baseUrl = getApiBaseUrl();
   try {
-    const res = await fetch(`${API_BASE_URL}/api/leads`, {
+    const res = await fetch(`${baseUrl}/api/leads`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
       body: JSON.stringify(payload),
     });
     if (!res.ok) {
@@ -62,10 +76,11 @@ export async function submitLead(payload: LeadPayload) {
 
 // 2. Fetch Fleet from Backend (with local fallback)
 export async function fetchFleet(category?: string): Promise<Record<string, Vehicle>> {
+  const baseUrl = getApiBaseUrl();
   try {
     const url = category && category !== "all" 
-      ? `${API_BASE_URL}/api/fleet?category=${category}` 
-      : `${API_BASE_URL}/api/fleet`;
+      ? `${baseUrl}/api/fleet?category=${category}` 
+      : `${baseUrl}/api/fleet`;
 
     const res = await fetch(url, { next: { revalidate: 60 } });
     if (!res.ok) throw new Error("Failed to fetch fleet");
@@ -87,8 +102,9 @@ export async function fetchFleet(category?: string): Promise<Record<string, Vehi
 
 // 3. Fetch Packages from Backend (with local fallback)
 export async function fetchPackages(type?: "rental" | "outstation"): Promise<any[]> {
+  const baseUrl = getApiBaseUrl();
   try {
-    const url = type ? `${API_BASE_URL}/api/packages?type=${type}` : `${API_BASE_URL}/api/packages`;
+    const url = type ? `${baseUrl}/api/packages?type=${type}` : `${baseUrl}/api/packages`;
     const res = await fetch(url, { next: { revalidate: 60 } });
     if (!res.ok) throw new Error("Failed to fetch packages");
     
@@ -103,32 +119,44 @@ export async function fetchPackages(type?: "rental" | "outstation"): Promise<any
   }
 }
 
-// 4. Create and Confirm Booking in Backend
 // 4. Create Booking + Cashfree Payment Order
 export async function submitBooking(payload: BookingPayload) {
-  const res = await fetch(`${API_BASE_URL}/api/bookings`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-  });
+  const baseUrl = getApiBaseUrl();
+  try {
+    const res = await fetch(`${baseUrl}/api/bookings`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
 
-  const result = await res.json().catch(() => ({}));
+    const result = await res.json().catch(() => ({}));
 
-  if (!res.ok) {
-    throw new Error(
-      result.message || "Failed to create booking and payment order"
-    );
+    if (!res.ok) {
+      throw new Error(
+        result.message || `Failed to create booking and payment order (status ${res.status})`
+      );
+    }
+
+    return result;
+  } catch (err: any) {
+    console.error("Booking API error:", err);
+    if (err.name === "TypeError" && err.message?.includes("fetch")) {
+      throw new Error(
+        `Unable to reach booking server at ${baseUrl}. Please verify your network connection or call +91 8240765499.`
+      );
+    }
+    throw err;
   }
-
-  return result;
 }
 
 // 5. Fetch Booking by Reference ID
 export async function fetchBookingById(bookingId: string) {
+  const baseUrl = getApiBaseUrl();
   try {
-    const res = await fetch(`${API_BASE_URL}/api/bookings/${bookingId}`);
+    const res = await fetch(`${baseUrl}/api/bookings/${bookingId}`);
     if (!res.ok) throw new Error("Booking not found");
     return await res.json();
   } catch (error) {
@@ -139,8 +167,9 @@ export async function fetchBookingById(bookingId: string) {
 
 // 6. Check Backend Health
 export async function checkBackendHealth() {
+  const baseUrl = getApiBaseUrl();
   try {
-    const res = await fetch(`${API_BASE_URL}/api/health`);
+    const res = await fetch(`${baseUrl}/api/health`);
     return await res.json();
   } catch (error) {
     return { success: false, status: "OFFLINE" };
