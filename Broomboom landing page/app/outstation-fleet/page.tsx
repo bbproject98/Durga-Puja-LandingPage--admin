@@ -86,6 +86,31 @@ const DESTINATION_KM_MAP: Record<string, number> = {
 };
 
 /* ------------------------------------------------------------------ */
+/*  PARSE ROUTE NUMBERS FROM STRINGS LIKE "185 KM" / "4.5 Hours"      */
+/* ------------------------------------------------------------------ */
+const parseNumericValue = (value?: string | number | null): number | null => {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (!value) return null;
+
+  const match = String(value).match(/(\d+(?:\.\d+)?)/);
+  if (!match) return null;
+
+  const num = Number(match[1]);
+  return Number.isFinite(num) ? num : null;
+};
+
+const getRouteKm = (route: any): number | null =>
+  parseNumericValue(route?.distanceKm) ??
+  parseNumericValue(route?.km) ??
+  parseNumericValue(route?.distance) ??
+  parseNumericValue(route?.totalKm);
+
+const getRouteHours = (route: any): number | null =>
+  parseNumericValue(route?.durationHours) ??
+  parseNumericValue(route?.hours) ??
+  parseNumericValue(route?.estimatedTime);
+
+/* ------------------------------------------------------------------ */
 /*  INCLUSIONS & EXCLUSIONS DATA (DYNAMIC BY TRIP + CAR)              */
 /* ------------------------------------------------------------------ */
 type TripDetails = {
@@ -235,16 +260,27 @@ function OutstationFleetContent() {
   const selectedVehicle = selectedVehicleKey ? FLEET_DATA[selectedVehicleKey] : null;
 
   /* ------------------------------------------------------------------ */
-  /*  FIND ROUTE for current destination (case-insensitive)              */
+  /*  FIND ROUTE for current destination (case-insensitive, normalized)  */
   /* ------------------------------------------------------------------ */
   const matchedRoute = useMemo(() => {
-    const city = (outstationData.toCity || "").trim().toLowerCase();
-    if (!city) return null;
+    const rawCity = (outstationData.toCity || "").trim();
+    if (!rawCity) return null;
+
+    const normalize = (value: string) =>
+      value.toLowerCase().replace(/[^a-z0-9]/g, "");
+
+    const city = normalize(rawCity);
 
     return (
-      OUTSTATION_ROUTES.find((r) =>
-        r.title.toLowerCase().includes(city)
-      ) ?? null
+      OUTSTATION_ROUTES.find((r) => {
+        const title = normalize(r.title);
+        const routeCity = normalize(r.title.replace(/^kolkata\s+to\s+/i, ""));
+        return (
+          title.includes(city) ||
+          routeCity.includes(city) ||
+          city.includes(routeCity)
+        );
+      }) ?? null
     );
   }, [outstationData.toCity]);
 
@@ -287,12 +323,7 @@ function OutstationFleetContent() {
     const route: any = matchedRoute;
     const city = (outstationData.toCity || "").trim().toLowerCase();
 
-    const routeKm =
-      route?.distanceKm ??
-      route?.km ??
-      route?.distance ??
-      route?.totalKm ??
-      null;
+    const routeKm = getRouteKm(route);
 
     let mapKm: number | null = null;
     if (!routeKm) {
@@ -300,20 +331,24 @@ function OutstationFleetContent() {
       if (key) mapKm = DESTINATION_KM_MAP[key];
     }
 
-    const oneWayKm = Number(routeKm ?? mapKm ?? 250) || 250;
-
-    const includedKm =
-      outstationData.tripType === "roundTrip" ? oneWayKm * 2 : oneWayKm;
+    const oneWayKm = Math.max(1, Math.round(routeKm ?? mapKm ?? 250));
 
     const oneWayHours =
-      route?.durationHours ??
-      route?.hours ??
+      getRouteHours(route) ??
       Math.max(8, Math.ceil(oneWayKm / 40));
+
+    const oneWayIncludedKm = oneWayKm;
+    const oneWayIncludedHours = Math.max(1, Math.ceil(oneWayHours));
+
+    const includedKm =
+      outstationData.tripType === "roundTrip"
+        ? oneWayIncludedKm * 2
+        : oneWayIncludedKm;
 
     const includedHours =
       outstationData.tripType === "roundTrip"
-        ? Math.max(16, Math.ceil(Number(oneWayHours) * 2))
-        : Number(oneWayHours);
+        ? oneWayIncludedHours * 2
+        : oneWayIncludedHours;
 
     return {
       tripType: outstationData.tripType,
@@ -460,9 +495,16 @@ function OutstationFleetContent() {
             >
               <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-full overflow-hidden shrink-0">
                 <img
-                  src="/images/broomboom-logo.png"
+                  src="/images/Broomboom-logo.png"
                   alt="BroomBoom Cabs"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    if (!target.dataset.tried) {
+                      target.dataset.tried = "true";
+                      target.src = "/images/Broomboom-logo.png";
+                    }
+                  }}
                 />
               </div>
 

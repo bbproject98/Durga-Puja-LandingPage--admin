@@ -2,39 +2,57 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { Sparkles, X } from "lucide-react";
+import { Sparkles, X, MapPin } from "lucide-react";
 
 export const GallerySection: React.FC = () => {
   const images = [
     {
-      src: "/images/durga-puja-2026-broomboom-cabs.jpg",
-      caption: "BroomBoom Iconic Yellow Cab & Pandal Hopping Trail",
-      category: "BroomBoom Special",
+      src: "/images/south-indian-temple-pandal.jpg",
+      caption: "Majestic South Indian Temple Theme Pandal",
+      category: "Temple Art",
+      clubName: "South Indian Temple Pandal kolkata durga puja",
+      alt: "south-indian-temple-pandal-durga-puja-broomboom-cabs",
+      description: "A stunning recreation of a traditional South Indian temple gopuram, adorned with vibrant colors and intricate sculptures of deities. This pandal brings the divine grandeur of Southern temple architecture to the heart of Kolkata's Durga Puja celebrations.",
     },
     {
-      src: "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&w=800&q=80",
-      caption: "Sedan Fleet for Heritage Bonedi Bari Parikrama",
-      category: "Fleet Comfort",
+      src: "/images/solay.jpg",
+      caption: "Iconic 'Sholay' Movie Theme Pandal - Kolkata Puja Special",
+      category: "Theme Pandal",
+      clubName: "Simla Sporting Club kolkata durga puja",
+      alt: "simla-sporting-club-durga-puja-broomboom-cabs",
+      description: "Step into the retro world of Bollywood's iconic classic 'Sholay' at this stunning Durga Puja pandal. A visual tribute to Gabbar, Jai, and Veeru that movie buffs simply cannot miss!",
     },
     {
-      src: "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=800&q=80",
-      caption: "South Kolkata Theme Pandals Illumination Tour",
-      category: "Theme Art",
+      src: "/images/golden-pandal.jpg",
+      caption: "Grand Illuminated Golden Pandal - Mesmerizing Night View",
+      category: "Grand Illumination",
+      clubName: "Sreebhumi Sporting Club kolkata durga puja",
+      alt: "sreebhumi-sporting-club-durga-puja-broomboom-cabs",
+      description: "Witness the breathtaking grandeur of Kolkata's Durga Puja with this stunningly illuminated golden pandal. The intricate architecture and mesmerizing lights create a magical festive atmosphere that draws thousands of visitors every night.",
     },
     {
-      src: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80",
-      caption: "VIP Innova Crysta for Senior-Citizen Puja Visit",
-      category: "Luxury Travel",
+      src: "/images/durga-idol.jpg",
+      caption: "Divine Durga Idol - Artistic Brilliance of Sharodutsav",
+      category: "Idol Art",
+      clubName: "Mudiali Club kolkata durga puja",
+      alt: "mudiali-club-durga-puja-broomboom-cabs",
+      description: "Feast your eyes on the breathtaking craftsmanship of Maa Durga's idol. With intricate detailing, vibrant colors, and a majestic aura, this artistic masterpiece perfectly captures the spiritual essence of Kolkata's Durga Puja.",
     },
     {
-      src: "https://images.unsplash.com/photo-1570125909232-eb263c188f7e?auto=format&fit=crop&w=800&q=80",
-      caption: "Force Urbania 13-Seater Joint Family Midnight Tour",
-      category: "Group Tour",
+      src: "/images/lalabagan-nabankur.jpg",
+      caption: "Eco-Friendly 'Nabankur' Pandal - A Mini Forest in the City",
+      category: "Eco-Friendly Pandal",
+      clubName: "Lalabagan Nabankur kolkata durga puja",
+      alt: "lalabagan-nabankur-durga-puja-broomboom-cabs",
+      description: "Celebrating its 65th year with a sustainable theme, this pandal is a breathtaking 'greenhouse' of over 8,000 living plants. Designed by artist Prasanta Pal, the theme 'Nabankur' (new life) beautifully symbolizes growth and environmental awareness, creating a lush, breathing forest in the heart of North Kolkata.",
     },
     {
-      src: "/images/digha.jpg",
-      caption: "Kolkata to Digha Festive Beach Holiday Drive",
-      category: "Outstation Trip",
+      src: "/images/66-pally-kerala-temple.jpg",
+      caption: "Kerala Temple Theme Pandal - A Grand South Indian Welcome",
+      category: "Temple Architecture",
+      clubName: "66 Pally kolkata durga puja",
+      alt: "66-pally-durga-puja-broomboom-cabs",
+      description: "Step through a magnificent red gateway inspired by traditional Kerala temple architecture. This iconic South Kolkata pandal recreates the grandeur of a Kannur temple, complete with massive stone lamps and towering headgears reminiscent of Theyyam regalia. A must-visit for lovers of authentic South Indian art and culture.",
     },
   ];
 
@@ -71,7 +89,7 @@ export const GallerySection: React.FC = () => {
             >
               <Image
                 src={item.src}
-                alt={item.caption}
+                alt={item.alt} // Uses the custom alt tag
                 fill
                 className="object-cover group-hover:scale-110 transition-transform duration-500"
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -79,7 +97,7 @@ export const GallerySection: React.FC = () => {
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent" />
 
               <div className="absolute top-3 left-3">
-                <span className="px-2.5 py-0.5 text-[10px] font-bold bg-white/90 text-amber-950 rounded-full shadow">
+                <span className="inline-block px-3 py-0.5 sm:px-4 sm:py-1 bg-[#fbbf24] text-slate-950 rounded-full text-[10px] sm:text-xs font-extrabold border border-amber-200/60 shadow-sm">
                   {item.category}
                 </span>
               </div>
@@ -87,7 +105,8 @@ export const GallerySection: React.FC = () => {
               <div className="absolute bottom-4 left-4 right-4 text-white">
                 <div className="flex items-center gap-1.5 text-amber-400 text-xs font-bold mb-1">
                   <Sparkles className="w-3.5 h-3.5" />
-                  <span>Kolkata Sharodutsav</span>
+                  {/* Display dynamically formatted Club Name */}
+                  <span>{item.clubName}</span>
                 </div>
                 <h4 className="text-sm font-bold text-slate-100 leading-snug">
                   {item.caption}
@@ -123,7 +142,7 @@ export const GallerySection: React.FC = () => {
               <div className="relative w-full h-48 sm:h-56 md:h-64 bg-gradient-to-b from-amber-50/50 to-white/80">
                 <Image
                   src={selectedImage.src}
-                  alt={selectedImage.caption}
+                  alt={selectedImage.alt} // Uses the custom alt tag
                   fill
                   className="object-contain p-2"
                   sizes="(max-width: 640px) 100vw, (max-width: 768px) 80vw, 500px"
@@ -137,13 +156,14 @@ export const GallerySection: React.FC = () => {
                 </h3>
 
                 <div className="flex items-center gap-2 text-amber-600 text-xs sm:text-sm font-bold">
-                  <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500 fill-amber-300/30" />
-                  <span className="tracking-wide">Kolkata Sharodutsav</span>
+                  <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500 fill-amber-300/30" />
+                  {/* Display dynamically formatted Club Name in Modal */}
+                  <span className="tracking-wide">{selectedImage.clubName}</span>
                 </div>
 
+                {/* DYNAMIC DESCRIPTION HERE */}
                 <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                  Explore the best of Durga Puja with BroomBoom's premium fleet and local expertise.
-                  Book your ride for a hassle‑free festival experience.
+                  {selectedImage.description}
                 </p>
 
                 <div className="flex flex-wrap items-center gap-2 pt-1">

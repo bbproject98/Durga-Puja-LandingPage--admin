@@ -75,7 +75,7 @@ export const OutstationRoutes: React.FC<OutstationRoutesProps> = ({ onActionClic
                 <div className="relative h-44 overflow-hidden bg-slate-900">
                   <Image
                     src={route.image}
-                    alt={route.title}
+                    alt={route.imageAlt}
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-500 opacity-90"
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"

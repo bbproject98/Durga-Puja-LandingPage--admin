@@ -14,6 +14,7 @@ export interface RentalPackage {
   highlights: string[];
   inclusions: string[];
   image: string;
+  imageAlt: string;
 }
 
 export interface OutstationRoute {
@@ -26,6 +27,7 @@ export interface OutstationRoute {
   startingPrice: number;
   routeHighlights: string[];
   image: string;
+  imageAlt: string;
   prices: {
     sedan: number;
     suv: number;
@@ -58,6 +60,7 @@ export const RENTAL_PACKAGES: RentalPackage[] = [
       "Free 24h Cancellation",
     ],
     image: "/images/d1.png",
+    imageAlt: "5 Hours 50 KMs rental cab for morning Kolkata pandal hopping",
   },
   {
     id: "pkg_8hr_80km",
@@ -83,6 +86,7 @@ export const RENTAL_PACKAGES: RentalPackage[] = [
       "Senior Citizen Drop Points",
     ],
     image: "/images/d2.png",
+    imageAlt: "8-hours-80-kms-rental-package-broomboom-cabs",
   },
   {
     id: "pkg_10hr_100km",
@@ -108,6 +112,7 @@ export const RENTAL_PACKAGES: RentalPackage[] = [
       "Complimentary Water Bottles",
     ],
     image: "/images/d3.jpg",
+    imageAlt: "10-hours-100-kms-rental-package-broomboom-cabs",
   },
   {
     id: "pkg_12hr_120km",
@@ -133,6 +138,7 @@ export const RENTAL_PACKAGES: RentalPackage[] = [
       "Emergency Standby Vehicle Backup",
     ],
     image: "/images/d4.jpg",
+    imageAlt: "12-hours-120-kms-rental-package-broomboom-cabs",
   },
 ];
 
@@ -153,6 +159,7 @@ export const OUTSTATION_ROUTES: OutstationRoute[] = [
       "Sanitised roundtrip AC cab",
     ],
     image: "/images/digha.jpg",
+    imageAlt: "kolkata-to-digha-outstation-package-broomboom-cabs",
     prices: { sedan: 3299, suv: 4299, suvPlus: 5499 },
   },
   {
@@ -170,6 +177,7 @@ export const OUTSTATION_ROUTES: OutstationRoute[] = [
       "Day trip / overnight booking",
     ],
     image: "/images/mayapur.jpg",
+    imageAlt: "kolkata-to-mayapur-outstation-package-broomboom-cabs",
     prices: { sedan: 2499, suv: 3599, suvPlus: 4599 }, // approximate – not in matrix, kept original as base
   },
   {
@@ -187,6 +195,7 @@ export const OUTSTATION_ROUTES: OutstationRoute[] = [
       "Full festive weekend support",
     ],
     image: "/images/mandarmani.jpg",
+    imageAlt: "kolkata-to-mandarmani-outstation-package-broomboom-cabs",
     prices: { sedan: 3299, suv: 4299, suvPlus: 5499 },
   },
   {
@@ -204,6 +213,7 @@ export const OUTSTATION_ROUTES: OutstationRoute[] = [
       "Chauffeur trained on Durgapur Exp",
     ],
     image: "/images/Santiniketan.jpg",
+    imageAlt: "kolkata-to-bolpur-outstation-package-broomboom-cabs",
     prices: { sedan: 2999, suv: 3799, suvPlus: 4799 },
   },
   {
@@ -221,6 +231,7 @@ export const OUTSTATION_ROUTES: OutstationRoute[] = [
       "Dual driver option on request",
     ],
     image: "/images/ranchi.jpg",
+    imageAlt: "kolkata-to-ranchi-outstation-package-broomboom-cabs",
     prices: { sedan: 5999, suv: 7499, suvPlus: 8999 },
   },
 
@@ -240,6 +251,7 @@ export const OUTSTATION_ROUTES: OutstationRoute[] = [
       "Interstate permit & tolls included",
     ],
     image: "/images/Deoghar.jpg",
+    imageAlt: "kolkata-to-deoghar-outstation-package-broomboom-cabs",
     prices: { sedan: 5499, suv: 6999, suvPlus: 8499 },
   },
   {
@@ -257,6 +269,7 @@ export const OUTSTATION_ROUTES: OutstationRoute[] = [
       "Corporate & family trip ready",
     ],
     image: "/images/jamsedpur.jpg",
+    imageAlt: "kolkata-to-jamshedpur-outstation-package-broomboom-cabs",
     prices: { sedan: 4499, suv: 5799, suvPlus: 6999 },
   },
   {
@@ -274,6 +287,7 @@ export const OUTSTATION_ROUTES: OutstationRoute[] = [
       "Odisha interstate permit managed",
     ],
     image: "/images/Bhu.jpg",
+    imageAlt: "kolkata-to-bhubaneswar-outstation-package-broomboom-cabs",
     prices: { sedan: 6499, suv: 8299, suvPlus: 9999 },
   },
   {
@@ -291,6 +305,7 @@ export const OUTSTATION_ROUTES: OutstationRoute[] = [
       "Overnight / 2‑day custom trips",
     ],
     image: "/images/puri.jpg",
+    imageAlt: "kolkata-to-puri-outstation-package-broomboom-cabs",
     prices: { sedan: 7299, suv: 9299, suvPlus: 10999 },
   },
   {
@@ -308,6 +323,7 @@ export const OUTSTATION_ROUTES: OutstationRoute[] = [
       "Hill‑trained chauffeur provided",
     ],
     image: "/images/dar.jpg",
+    imageAlt: "kolkata-to-darjeeling-outstation-package-broomboom-cabs",
     prices: { sedan: 8499, suv: 10499, suvPlus: 12499 },
   },
   {
@@ -325,6 +341,7 @@ export const OUTSTATION_ROUTES: OutstationRoute[] = [
       "Sikkim entry permit assistance",
     ],
     image: "/images/gan.jpg",
+    imageAlt: "kolkata-to-gangtok-outstation-package-broomboom-cabs",
     prices: { sedan: 9499, suv: 11499, suvPlus: 13499 },
   },{
   id: "kolkata-gangasagar",
@@ -341,6 +358,7 @@ export const OUTSTATION_ROUTES: OutstationRoute[] = [
     "Fresh coconut water & local sweet stalls",
   ],
   image: "/images/gangasagar.jpg",
+  imageAlt: "kolkata-to-gangasagar-outstation-package-broomboom-cabs",
   prices: { sedan: 3499, suv: 4599, suvPlus: 5799 },
 },
 ];

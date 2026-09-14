@@ -75,7 +75,7 @@ export const RentalPackages: React.FC<RentalPackagesProps> = ({ onActionClick })
                 <div className="relative h-36 w-full shrink-0 rounded-2xl overflow-hidden bg-slate-900 shadow-inner mb-3">
                   <Image
                     src={pkg.image}
-                    alt={pkg.title}
+                    alt={pkg.imageAlt}
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-500 opacity-90"
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"

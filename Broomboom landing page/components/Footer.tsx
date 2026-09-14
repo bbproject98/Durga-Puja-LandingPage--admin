@@ -31,9 +31,16 @@ export const Footer: React.FC<FooterProps> = ({ onActionClick }) => {
               {/* Round BroomBoom Logo */}
               <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-full overflow-hidden shrink-0 shadow-md shadow-amber-500/30">
                 <img
-                  src="/images/Broomboom-logo.png"
+                  src="/images/broomboom-logo.png"
                   alt="BroomBoom Cabs"
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    if (!target.dataset.tried) {
+                      target.dataset.tried = "true";
+                      target.src = "/images/Broomboom-logo.png";
+                    }
+                  }}
                 />
               </div>
 
@@ -324,21 +331,21 @@ export const Footer: React.FC<FooterProps> = ({ onActionClick }) => {
           <div className="flex items-center gap-6">
 
             <a
-              href="#"
+              href="http://broomboomcabs.com/user-terms"
               className="hover:text-amber-300 transition-colors"
             >
               Terms of Service
             </a>
 
             <a
-              href="#"
+              href="http://broomboomcabs.com/privacy-policy"
               className="hover:text-amber-300 transition-colors"
             >
               Privacy Policy
             </a>
 
             <a
-              href="#"
+              href="http://broomboomcabs.com/user-terms"
               className="hover:text-amber-300 transition-colors"
             >
               Refund Policy
