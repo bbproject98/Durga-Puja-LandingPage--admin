@@ -40,7 +40,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         if (savedUser) {
           const parsed = JSON.parse(savedUser);
           if (parsed.name && parsed.name !== "Guest Traveler") setName(parsed.name);
-          if (parsed.phone && parsed.phone !== "+91 9876543210") setPhone(parsed.phone);
+          if (parsed.phone && parsed.phone !== "+91 8240765499") setPhone(parsed.phone);
           if (parsed.email && parsed.email !== "guest@example.com") setEmail(parsed.email);
         }
       } catch (_) {}
@@ -175,7 +175,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                 </label>
                 <input
                   type="tel"
-                  placeholder="e.g. 9876543210"
+                  placeholder="e.g. 8240765499"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   required

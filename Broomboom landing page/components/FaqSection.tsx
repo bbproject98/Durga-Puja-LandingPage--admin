@@ -97,7 +97,7 @@ export const FaqSection: React.FC = () => {
             <span className="text-slate-700 font-medium">Need custom group booking or routes?</span>
           </div>
           <a
-            href="tel:+919876543210"
+            href="tel:+918240765499"
             className="px-3.5 py-1.5 bg-amber-100 hover:bg-amber-200 text-amber-950 font-bold text-xs rounded-xl flex items-center gap-1.5 transition-colors"
           >
             <PhoneCall className="w-3 h-3" />

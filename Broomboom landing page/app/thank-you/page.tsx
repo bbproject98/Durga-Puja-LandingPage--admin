@@ -383,7 +383,7 @@ function ThankYouContent() {
           {/* Action Buttons */}
           <div className="space-y-3 pt-3">
             <a
-              href={`https://wa.me/919876543210?text=${waMsg}`}
+              href={`https://wa.me/918240765499?text=${waMsg}`}
               target="_blank"
               rel="noopener noreferrer"
               className="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold text-sm rounded-xl transition-all shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 min-h-[48px]"

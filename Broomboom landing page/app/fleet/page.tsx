@@ -13,6 +13,7 @@ import { RENTAL_PACKAGES, RentalPackage } from "@/data/packages";
 import { submitBooking } from "@/lib/api";
 import { RentalBookingHeader } from "@/components/RentalBookingHeader";
 import { useSearchParams } from "next/navigation";
+
 type CashfreeInstance = {
   checkout: (options: {
     paymentSessionId: string;
@@ -46,6 +47,7 @@ function loadCashfree(): Promise<CashfreeInstance> {
     document.head.appendChild(script);
   });
 }
+
 const INDIAN_STATES = [
   "Andaman and Nicobar Islands", "Andhra Pradesh", "Arunachal Pradesh", "Assam", 
   "Bihar", "Chandigarh", "Chhattisgarh", "Dadra and Nagar Haveli and Daman and Diu", 
@@ -99,7 +101,7 @@ function FleetContent() {
   const [expandedDetailsCarId, setExpandedDetailsCarId] = useState<string | null>("sedan_4");
   const [userData, setUserData] = useState<{ name: string; phone: string; email: string }>({
     name: "Guest Traveler",
-    phone: "+91 9876543210",
+    phone: "+91 8240765499",
     email: "guest@example.com"
   });
 
@@ -111,8 +113,9 @@ function FleetContent() {
     return RENTAL_PACKAGES.find(p => p.id === initialPkgId) || RENTAL_PACKAGES[1];
   });
   
-  const [selectedPickupDate, setSelectedPickupDate] = useState("Oct 16 (Maha Saptami)");
-  const [selectedPickupTime, setSelectedPickupTime] = useState("04:00 PM");
+  const [selectedPickupDate, setSelectedPickupDate] = useState("");
+  const [city, setCity] = useState("Kolkata (Citywide)");
+  const [selectedPickupTime, setSelectedPickupTime] = useState("");
   const [pickupAddress, setPickupAddress] = useState("");
   const [pickupPincode, setPickupPincode] = useState("");
   const [pickupState, setPickupState] = useState("");
@@ -135,6 +138,22 @@ function FleetContent() {
         const pkg = RENTAL_PACKAGES.find(p => p.id === activePkgId);
         if (pkg) setSelectedRentalPackage(pkg);
       }
+
+      // Populate current real-time date and time
+      const now = new Date();
+      const currentDate = now.toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "short",
+        year: "numeric"
+      });
+      const currentTime = now.toLocaleTimeString("en-IN", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true
+      });
+
+      setSelectedPickupDate((prev) => prev || currentDate);
+      setSelectedPickupTime((prev) => prev || currentTime);
     } catch (e) {
       console.warn("Storage load error", e);
     }
@@ -160,267 +179,171 @@ function FleetContent() {
   };
 
   const handleConfirmBooking = async (
-  e: React.FormEvent
-) => {
-  e.preventDefault();
+    e: React.FormEvent
+  ) => {
+    e.preventDefault();
 
-  // -------------------------------
-  // 1. Validate customer & address details
-  // -------------------------------
-
-  if (!userData.name.trim() || userData.name === "Guest Traveler") {
-    alert("Please enter your name in the checkout form for chauffeur coordination.");
-    return;
-  }
-
-  if (!userData.phone.trim() || userData.phone.replace(/\D/g, "").length < 10) {
-    alert("Please enter a valid 10-digit mobile number for WhatsApp booking updates.");
-    return;
-  }
-
-  if (!pickupAddress.trim()) {
-    alert("Please enter your pickup address in Kolkata.");
-    return;
-  }
-
-  if (!selectedVehicle) {
-    alert("Please select a vehicle.");
-    return;
-  }
-
-  try {
-    localStorage.setItem("broomboom_user", JSON.stringify(userData));
-  } catch (_) {}
-
-  try {
-    // -------------------------------
-    // 2. Calculate price
-    // -------------------------------
-
-    const totalTariff = checkoutPrice;
-
-    const advancePaid = Math.round(
-      totalTariff * 0.25
-    );
-
-    const balancePayable =
-      totalTariff - advancePaid;
-
-    // -------------------------------
-    // 3. Prepare booking data
-    // -------------------------------
-
-    const bookingData = {
-      customerName:
-        userData.name || "Guest Traveler",
-
-      customerPhone:
-        userData.phone || "+91 8240765499",
-
-      customerEmail:
-        userData.email || "guest@example.com",
-
-      vehicleName:
-        selectedVehicle.name,
-
-      vehicleModels:
-        selectedVehicle.models,
-
-      vehicleSeats:
-        selectedVehicle.seats,
-
-      packageTitle:
-        tripType === "rental"
-          ? selectedRentalPackage.title
-          : "Outstation Trip",
-
-      travelDate:
-        selectedPickupDate,
-
-      pickupTime:
-        selectedPickupTime,
-
-      pickupAddress:
-        pickupAddress.trim(),
-
-      pickupPincode:
-        pickupPincode.trim(),
-
-      pickupState:
-        pickupState,
-
-      totalTariff,
-
-      advancePaid,
-
-      balancePayable,
-    };
-
-    console.log(
-      "Creating booking:",
-      bookingData
-    );
-
-    setIsProcessingPayment(true);
-
-    // -------------------------------
-    // 4. Send booking to Node.js
-    // -------------------------------
-
-    const result =
-      await submitBooking(bookingData);
-
-    console.log(
-      "Booking API response:",
-      result
-    );
-
-    // -------------------------------
-    // 5. Check API response
-    // -------------------------------
-
-    if (!result?.success) {
-      throw new Error(
-        result?.message ||
-        "Unable to create booking."
-      );
-    }
-
-    // -------------------------------
-    // 6. Get payment session
-    // -------------------------------
-
-    const paymentSessionId =
-      result.data?.paymentSessionId;
-
-    if (!paymentSessionId) {
-      throw new Error(
-        "Payment session was not created."
-      );
-    }
-
-    const bookingRef =
-      result.data?.booking?.cashfreeOrderId ||
-      result.data?.booking?.bookingId ||
-      `BBC-PUJA-${Math.floor(100000 + Math.random() * 900000)}`;
-
-    try {
-      const confirmedBooking = {
-        refId: result.data?.booking?.bookingId || bookingRef,
-        cashfreeOrderId: result.data?.booking?.cashfreeOrderId || bookingRef,
-        customerName: bookingData.customerName,
-        customerPhone: bookingData.customerPhone,
-        customerEmail: bookingData.customerEmail,
-        vehicle: bookingData.vehicleName,
-        vehicleModel: bookingData.vehicleModels,
-        package: bookingData.packageTitle,
-        date: bookingData.travelDate,
-        slot: bookingData.pickupTime,
-        pickupLocation: bookingData.pickupAddress,
-        totalFare: `₹${bookingData.totalTariff.toLocaleString()}`,
-        advanceToPay: `₹${bookingData.advancePaid.toLocaleString()}`,
-        balancePayable: `₹${bookingData.balancePayable.toLocaleString()}`,
-      };
-      localStorage.setItem("broomboom_confirmed_booking", JSON.stringify(confirmedBooking));
-    } catch (e) {
-      console.warn("Storage error", e);
-    }
-
-    // -------------------------------
-    // 7. Load Cashfree
-    // -------------------------------
-
-    const cashfree = await loadCashfree();
-
-    if (!cashfree) {
-      throw new Error(
-        "Unable to load Cashfree."
-      );
-    }
-
-    // -------------------------------
-    // 8. Open Cashfree checkout
-    // -------------------------------
-
-    const checkoutRes = await cashfree.checkout({
-      paymentSessionId,
-      redirectTarget: "_modal",
-    });
-
-    if (checkoutRes && (checkoutRes as any).error) {
-      console.warn("Cashfree checkout modal closed or error:", (checkoutRes as any).error);
-      setIsProcessingPayment(false);
+    if (!userData.name.trim() || userData.name === "Guest Traveler") {
+      alert("Please enter your name in the checkout form for chauffeur coordination.");
       return;
     }
 
-    // Modal completed -> redirect to Thank You page
-    window.location.href = `/thank-you?order_id=${encodeURIComponent(bookingRef)}&payment_status=SUCCESS`;
+    if (!userData.phone.trim() || userData.phone.replace(/\D/g, "").length < 10) {
+      alert("Please enter a valid 10-digit mobile number for WhatsApp booking updates.");
+      return;
+    }
 
-  } catch (error) {
-    setIsProcessingPayment(false);
+    if (!pickupAddress.trim()) {
+      alert("Please enter your pickup address in Kolkata.");
+      return;
+    }
 
-    console.error(
-      "Booking / Payment Error:",
-      error
-    );
+    if (!selectedVehicle) {
+      alert("Please select a vehicle.");
+      return;
+    }
 
-    alert(
-      error instanceof Error
-        ? error.message
-        : "Something went wrong while creating your booking."
-    );
-  }
-};
+    try {
+      localStorage.setItem("broomboom_user", JSON.stringify(userData));
+    } catch (_) {}
+
+    try {
+      const totalTariff = checkoutPrice;
+      const advancePaid = Math.round(totalTariff * 0.25);
+      const balancePayable = totalTariff - advancePaid;
+
+      const bookingData = {
+        customerName: userData.name || "Guest Traveler",
+        customerPhone: userData.phone || "+91 8240765499",
+        customerEmail: userData.email || "guest@example.com",
+        vehicleName: selectedVehicle.name,
+        vehicleModels: selectedVehicle.models,
+        vehicleSeats: selectedVehicle.seats,
+        packageTitle: tripType === "rental" ? selectedRentalPackage.title : "Outstation Trip",
+        travelDate: selectedPickupDate,
+        pickupTime: selectedPickupTime,
+        pickupAddress: pickupAddress.trim(),
+        pickupPincode: pickupPincode.trim(),
+        pickupState: pickupState,
+        totalTariff,
+        advancePaid,
+        balancePayable,
+      };
+
+      setIsProcessingPayment(true);
+
+      const result = await submitBooking(bookingData);
+
+      if (!result?.success) {
+        throw new Error(result?.message || "Unable to create booking.");
+      }
+
+      const paymentSessionId = result.data?.paymentSessionId;
+      if (!paymentSessionId) {
+        throw new Error("Payment session was not created.");
+      }
+
+      const bookingRef =
+        result.data?.booking?.cashfreeOrderId ||
+        result.data?.booking?.bookingId ||
+        `BBC-PUJA-${Math.floor(100000 + Math.random() * 900000)}`;
+
+      try {
+        const confirmedBooking = {
+          refId: result.data?.booking?.bookingId || bookingRef,
+          cashfreeOrderId: result.data?.booking?.cashfreeOrderId || bookingRef,
+          customerName: bookingData.customerName,
+          customerPhone: bookingData.customerPhone,
+          customerEmail: bookingData.customerEmail,
+          vehicle: bookingData.vehicleName,
+          vehicleModel: bookingData.vehicleModels,
+          package: bookingData.packageTitle,
+          date: bookingData.travelDate,
+          slot: bookingData.pickupTime,
+          pickupLocation: bookingData.pickupAddress,
+          totalFare: `₹${bookingData.totalTariff.toLocaleString()}`,
+          advanceToPay: `₹${bookingData.advancePaid.toLocaleString()}`,
+          balancePayable: `₹${bookingData.balancePayable.toLocaleString()}`,
+        };
+        localStorage.setItem("broomboom_confirmed_booking", JSON.stringify(confirmedBooking));
+      } catch (e) {
+        console.warn("Storage error", e);
+      }
+
+      const cashfree = await loadCashfree();
+      if (!cashfree) {
+        throw new Error("Unable to load Cashfree.");
+      }
+
+      const checkoutRes = await cashfree.checkout({
+        paymentSessionId,
+        redirectTarget: "_modal",
+      });
+
+      if (checkoutRes && (checkoutRes as any).error) {
+        console.warn("Cashfree checkout modal closed or error:", (checkoutRes as any).error);
+        setIsProcessingPayment(false);
+        return;
+      }
+
+      window.location.href = `/thank-you?order_id=${encodeURIComponent(bookingRef)}&payment_status=SUCCESS`;
+    } catch (error) {
+      setIsProcessingPayment(false);
+      console.error("Booking / Payment Error:", error);
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Something went wrong while creating your booking."
+      );
+    }
+  };
 
   return (
     <div className="min-h-screen bg-puja-cream text-slate-900 flex flex-col font-sans">
-      
       {/* Header */}
       <header className="sticky top-0 z-40 bg-white border-b border-amber-200 shadow-sm backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-  {/* BroomBoom Logo + Puja Information */}
-  <Link
-    href="/"
-    className="flex items-center gap-2.5 sm:gap-3 group shrink-0"
-    aria-label="BroomBoom Cabs Home"
-  >
-    {/* Round Logo */}
-    <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-full overflow-hidden shrink-0">
-      <img
-        src="/images/broomboom-logo.png"
-        alt="BroomBoom Cabs"
-        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-        onError={(e) => {
-          const target = e.currentTarget;
-          if (!target.dataset.tried) {
-            target.dataset.tried = "true";
-            target.src = "/images/Broomboom-logo.png";
-          }
-        }}
-      />
-    </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 py-3 flex items-center justify-between gap-2 sm:gap-4">
+          {/* Left Section: Logo + Text */}
+          <div className="flex items-center gap-3 min-w-0">
+            <Link
+              href="/"
+              className="flex items-center gap-2.5 sm:gap-3 group min-w-0"
+              aria-label="BroomBoom Cabs Home"
+            >
+              <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-full overflow-hidden shrink-0">
+                <img
+                  src="/images/broomboom-logo.png"
+                  alt="BroomBoom Cabs"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    if (!target.dataset.tried) {
+                      target.dataset.tried = "true";
+                      target.src = "/images/Broomboom-logo.png";
+                    }
+                  }}
+                />
+              </div>
 
-    {/* Puja Information */}
-    <div className="flex flex-col justify-center">
-      <span className="px-2 py-0.5 w-fit text-[8px] sm:text-[9px] font-black bg-amber-400 text-slate-950 rounded border border-amber-500/40 tracking-wide">
-        PUJA 2026
-      </span>
+              <div className="flex flex-col justify-center min-w-0">
+                <span className="px-2 py-0.5 w-fit text-[8px] sm:text-[9px] font-black bg-amber-400 text-slate-950 rounded border border-amber-500/40 tracking-wide shrink-0">
+                  PUJA 2026
+                </span>
+                <p className="text-[8px] sm:text-[10px] text-slate-500 tracking-widest uppercase font-semibold mt-1 truncate">
+                  Kolkata Durga Puja Travel
+                </p>
+              </div>
+            </Link>
 
-      <p className="text-[8px] sm:text-[10px] text-slate-500 tracking-widest uppercase font-semibold mt-1">
-        Kolkata Durga Puja Travel
-      </p>
-    </div>
-  </Link>
-
-          {/* Step Indicator */}
-          <div className="hidden md:flex items-center gap-2 text-xs font-bold bg-amber-50 text-amber-900 px-3 py-1 rounded-full border border-amber-200">
-            <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-            <span>Step 2 of 3: Select Your Cab</span>
+            <div className="hidden lg:flex items-center gap-2 text-xs font-bold bg-amber-50 text-amber-900 px-3 py-1 rounded-full border border-amber-200 shrink-0">
+              <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+              <span>Step 2 of 3: Select Your Cab</span>
+            </div>
           </div>
-        </div>
-          <div className="flex items-center gap-3">
-            <div className="hidden sm:block text-right">
+
+          {/* Right Section: User Info + Phone */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <div className="hidden md:block text-right">
               <span className="text-[10px] text-slate-500 block font-medium">Logged In As</span>
               <div className="flex items-center gap-1.5 justify-end">
                 <span className="text-xs font-bold text-slate-900">{userData.name}</span>
@@ -441,9 +364,10 @@ function FleetContent() {
                 )}
               </div>
             </div>
+            
             <a
-              href="tel:+919876543210"
-              className="px-3.5 py-2 bg-amber-100 hover:bg-amber-200 text-amber-950 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors"
+              href="tel:+918240765499"
+              className="px-2 py-2 sm:px-3.5 bg-amber-100 hover:bg-amber-200 text-amber-950 rounded-xl text-[10px] sm:text-xs font-bold flex items-center gap-1 sm:gap-1.5 transition-colors whitespace-nowrap shrink-0"
             >
               <PhoneCall className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">24x7 Helpline:</span> +91 8240765499
@@ -455,10 +379,10 @@ function FleetContent() {
       {/* Rental Booking Header */}
       <RentalBookingHeader 
         tripType={tripType}
-        city="Kolkata (Citywide)"
+        city={city}
         pickupDate={selectedPickupDate}
         pickupTime={selectedPickupTime}
-        onUpdateCity={() => {}}
+        onUpdateCity={setCity}
         onUpdateDate={setSelectedPickupDate}
         onUpdateTime={setSelectedPickupTime}
         selectedPackage={selectedRentalPackage}
@@ -467,7 +391,6 @@ function FleetContent() {
 
       {/* Main Fleet Layout */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 w-full pb-20 lg:pb-8">
-        
         {/* Category Tabs */}
         <div className="flex items-center gap-2 mb-6 border-b border-amber-200 pb-3 overflow-x-auto scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap">
           <button
@@ -514,15 +437,12 @@ function FleetContent() {
 
         {/* Cars Grid */}
         <div className="grid lg:grid-cols-12 gap-8 items-start">
-          
           <div className="lg:col-span-8 space-y-6">
             {vehiclesList.map((car) => {
-              // Dynamic price
               const currentPrice = tripType === "rental" && car.packageRates
                 ? car.packageRates[selectedRentalPackage.id] || car.basePrice
                 : car.basePrice;
 
-              // --- DYNAMIC INCLUSIONS ---
               const dynamicInclusions = getDynamicInclusions(car, selectedRentalPackage, currentPrice);
 
               return (
@@ -531,7 +451,6 @@ function FleetContent() {
                   className="bg-white rounded-3xl border-2 border-amber-200/90 shadow-md card-shadow overflow-hidden p-5 sm:p-6 hover:border-amber-400 transition-all group"
                 >
                   <div className="grid sm:grid-cols-12 gap-6 items-center">
-                    
                     <div className="sm:col-span-5 space-y-3">
                       <div className="relative aspect-[3/2] w-full rounded-2xl overflow-hidden bg-gradient-to-b from-slate-50 to-slate-100/90 border border-amber-200/80 shadow-sm flex items-center justify-center">
                         <Image
@@ -588,8 +507,7 @@ function FleetContent() {
 
                     <div className="sm:col-span-3 flex flex-row sm:flex-col items-center sm:items-end justify-between text-left sm:text-right pt-4 sm:pt-0 border-t sm:border-t-0 sm:border-l border-amber-100 sm:pl-5 gap-3">
                       <div>
-                        {/* After */}
-                         <span className="text-sm font-semibold text-slate-500 block line-through decoration-red-500 decoration-2">
+                        <span className="text-sm font-semibold text-slate-500 block line-through decoration-red-500 decoration-2">
                           ₹{(currentPrice + 800).toLocaleString()}
                         </span>
                         <div className="text-2xl sm:text-3xl font-black text-amber-900 leading-none">
@@ -604,10 +522,9 @@ function FleetContent() {
                         <span>BOOK NOW</span>
                       </button>
                     </div>
-
                   </div>
 
-                  {/* --- INCLUSIONS & EXCLUSIONS ACCORDION --- */}
+                  {/* Inclusions & Exclusions Accordion */}
                   <div className="mt-4 pt-3 border-t border-amber-100">
                     <button
                       onClick={() =>
@@ -707,7 +624,7 @@ function FleetContent() {
                 Our Kolkata festival route specialists can customize multiple days, timings, and large group travellers.
               </p>
               <a
-                href="https://wa.me/919876543210?text=Hi%20BroomBoom%20Cabs,%20please%20help%20me%20select%20a%20cab%20for%20Durga%20Puja."
+                href="https://wa.me/918240765499?text=Hi%20BroomBoom%20Cabs,%20please%20help%20me%20select%20a%20cab%20for%20Durga%20Puja."
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full py-2.5 bg-slate-950 hover:bg-slate-800 text-amber-400 font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition-colors shadow"
@@ -724,7 +641,6 @@ function FleetContent() {
       {isCheckoutOpen && selectedVehicle && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto animate-fadeIn">
           <div className="bg-white w-full max-w-lg rounded-2xl sm:rounded-3xl border-2 border-amber-300 shadow-2xl overflow-hidden relative card-shadow my-auto sm:my-8">
-            
             <div className="alpana-yellow-top bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-400 p-4 sm:p-5 text-slate-950 relative">
               <button
                 onClick={() => setIsCheckoutOpen(false)}
@@ -746,7 +662,6 @@ function FleetContent() {
 
             <div className="p-4 sm:p-6 space-y-4 bg-puja-cream max-h-[82vh] overflow-y-auto">
               <form onSubmit={handleConfirmBooking} className="space-y-4">
-                
                 <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-amber-200 flex items-center justify-between">
                   <div>
                     <span className="text-[10px] font-bold text-amber-700 uppercase">Selected Vehicle</span>
@@ -864,27 +779,27 @@ function FleetContent() {
                       onClick={() => setIsStateOpen(!isStateOpen)}
                       className="w-full px-3 py-2.5 border border-amber-200 rounded-xl bg-white focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none cursor-pointer flex justify-between items-center text-base sm:text-xs min-h-[42px]"
                     >
-                        <span className={pickupState ? "text-slate-900" : "text-slate-400"}>
-                            {pickupState || "Select a state"}
-                        </span>
-                        <ChevronDown className="w-4 h-4 text-slate-400" />
+                      <span className={pickupState ? "text-slate-900" : "text-slate-400"}>
+                        {pickupState || "Select a state"}
+                      </span>
+                      <ChevronDown className="w-4 h-4 text-slate-400" />
                     </div>
 
                     {isStateOpen && (
-                        <ul className="absolute z-10 w-full mt-1 bg-white border border-amber-200 rounded-xl shadow-lg max-h-48 overflow-y-auto py-1 text-base sm:text-xs">
-                            {INDIAN_STATES.map((state) => (
-                                <li
-                                    key={state}
-                                    onClick={() => {
-                                        setPickupState(state);
-                                        setIsStateOpen(false);
-                                    }}
-                                    className="px-3 py-2 hover:bg-amber-50 cursor-pointer text-slate-700"
-                                >
-                                    {state}
-                                </li>
-                            ))}
-                        </ul>
+                      <ul className="absolute z-10 w-full mt-1 bg-white border border-amber-200 rounded-xl shadow-lg max-h-48 overflow-y-auto py-1 text-base sm:text-xs">
+                        {INDIAN_STATES.map((state) => (
+                          <li
+                            key={state}
+                            onClick={() => {
+                              setPickupState(state);
+                              setIsStateOpen(false);
+                            }}
+                            className="px-3 py-2 hover:bg-amber-50 cursor-pointer text-slate-700"
+                          >
+                            {state}
+                          </li>
+                        ))}
+                      </ul>
                     )}
                   </div>
                 </div>
@@ -946,10 +861,8 @@ function FleetContent() {
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
                   <span>Free cancellation with 100% refund up to 24h prior</span>
                 </div>
-
               </form>
             </div>
-
           </div>
         </div>
       )}
@@ -968,7 +881,6 @@ function FleetContent() {
           </p>
         </div>
       </footer>
-
     </div>
   );
 }

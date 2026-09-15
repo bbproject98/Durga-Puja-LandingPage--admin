@@ -60,6 +60,7 @@ const isToday = (dateStr: string): boolean => {
 
 const getTodayStr = (): string => new Date().toISOString().split("T")[0];
 
+// Long form for the date picker field (e.g. "16 Oct 2024")
 const formatDisplayDate = (dateStr: string): string => {
   if (!dateStr) return "Select date";
   const parsed = new Date(`${dateStr}T00:00:00`);
@@ -68,6 +69,21 @@ const formatDisplayDate = (dateStr: string): string => {
     day: "2-digit",
     month: "short",
     year: "numeric",
+  });
+};
+
+// Short form for the summary bar (e.g. "Oct 16").
+// If the string is already human-readable (e.g. "Oct 16 (Maha Saptami)"),
+// it is passed through untouched.
+const formatSummaryDate = (dateStr: string): string => {
+  if (!dateStr) return "";
+  const isIso = /^\d{4}-\d{2}-\d{2}$/.test(dateStr);
+  if (!isIso) return dateStr;
+  const parsed = new Date(`${dateStr}T00:00:00`);
+  if (isNaN(parsed.getTime())) return dateStr;
+  return parsed.toLocaleDateString("en-US", {
+    month: "short",
+    day: "2-digit",
   });
 };
 
@@ -80,6 +96,7 @@ interface TimeDropdownProps {
 
 const TimeDropdown: React.FC<TimeDropdownProps> = ({ value, onChange, selectedDate }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
@@ -88,7 +105,7 @@ const TimeDropdown: React.FC<TimeDropdownProps> = ({ value, onChange, selectedDa
     if (isToday(selectedDate)) {
       const nowMinutes = timeToMinutes(getCurrentTimeStr());
       const nextQuarter = Math.ceil(nowMinutes / 15) * 15;
-      return ALL_TIME_SLOTS.filter(slot => timeToMinutes(slot) >= nextQuarter);
+      return ALL_TIME_SLOTS.filter((slot) => timeToMinutes(slot) >= nextQuarter);
     }
     return ALL_TIME_SLOTS;
   }, [selectedDate]);
@@ -111,12 +128,74 @@ const TimeDropdown: React.FC<TimeDropdownProps> = ({ value, onChange, selectedDa
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Scroll to top when opened and it's a future date
+  // Reset the highlight to the currently selected value whenever the list opens
   useEffect(() => {
-    if (isOpen && listRef.current && !isToday(selectedDate)) {
-      listRef.current.scrollTop = 0;
+    if (!isOpen) return;
+    const idx = availableSlots.indexOf(value);
+    setHighlightedIndex(idx >= 0 ? idx : 0);
+  }, [isOpen, availableSlots, value]);
+
+  // Keep the highlighted option visible inside the scroll container
+  useEffect(() => {
+    if (!isOpen) return;
+    const container = listRef.current;
+    if (!container) return;
+    const el = container.querySelector<HTMLElement>(`[data-index="${highlightedIndex}"]`);
+    if (!el) return;
+    const elTop = el.offsetTop;
+    const elBottom = elTop + el.offsetHeight;
+    if (elTop < container.scrollTop) {
+      container.scrollTop = elTop;
+    } else if (elBottom > container.scrollTop + container.clientHeight) {
+      container.scrollTop = elBottom - container.clientHeight;
     }
-  }, [isOpen, selectedDate]);
+  }, [isOpen, highlightedIndex]);
+
+  const commitSelection = (index: number) => {
+    const time = availableSlots[index];
+    if (time) onChange(time);
+    setIsOpen(false);
+  };
+
+  const handleButtonKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+    // Opening keys
+    if (!isOpen && (e.key === "ArrowDown" || e.key === "ArrowUp" || e.key === "Enter" || e.key === " ")) {
+      e.preventDefault();
+      setIsOpen(true);
+      return;
+    }
+    if (!isOpen) return;
+
+    switch (e.key) {
+      case "ArrowDown":
+        e.preventDefault();
+        setHighlightedIndex((i) => Math.min(i + 1, availableSlots.length - 1));
+        break;
+      case "ArrowUp":
+        e.preventDefault();
+        setHighlightedIndex((i) => Math.max(i - 1, 0));
+        break;
+      case "Home":
+        e.preventDefault();
+        setHighlightedIndex(0);
+        break;
+      case "End":
+        e.preventDefault();
+        setHighlightedIndex(availableSlots.length - 1);
+        break;
+      case "Enter":
+      case " ":
+        e.preventDefault();
+        commitSelection(highlightedIndex);
+        break;
+      case "Escape":
+      case "Tab":
+        setIsOpen(false);
+        break;
+      default:
+        break;
+    }
+  };
 
   if (availableSlots.length === 0) {
     return (
@@ -130,7 +209,11 @@ const TimeDropdown: React.FC<TimeDropdownProps> = ({ value, onChange, selectedDa
     <div className="relative" ref={dropdownRef}>
       <button
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => setIsOpen((o) => !o)}
+        onKeyDown={handleButtonKeyDown}
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+        aria-label="Select pickup time"
         className="bg-slate-900 text-white text-xs px-3 py-1 rounded-lg border border-slate-700 focus:outline-none focus:border-amber-400 w-[180px] flex items-center justify-between"
       >
         <span>{value}</span>
@@ -140,22 +223,29 @@ const TimeDropdown: React.FC<TimeDropdownProps> = ({ value, onChange, selectedDa
       {isOpen && (
         <div
           ref={listRef}
+          role="listbox"
+          tabIndex={-1}
           className="absolute z-10 mt-1 w-[180px] bg-slate-900 border border-slate-700 rounded-lg shadow-lg max-h-48 overflow-y-auto"
         >
-          {availableSlots.map((time) => (
-            <div
-              key={time}
-              onClick={() => {
-                onChange(time);
-                setIsOpen(false);
-              }}
-              className={`px-3 py-1.5 text-xs text-white hover:bg-amber-500/20 cursor-pointer transition-colors ${
-                time === value ? "bg-amber-500/20 text-amber-400 font-semibold" : ""
-              }`}
-            >
-              {time}
-            </div>
-          ))}
+          {availableSlots.map((time, index) => {
+            const isSelected = time === value;
+            const isHighlighted = index === highlightedIndex;
+            return (
+              <div
+                key={time}
+                data-index={index}
+                role="option"
+                aria-selected={isSelected}
+                onMouseEnter={() => setHighlightedIndex(index)}
+                onClick={() => commitSelection(index)}
+                className={`px-3 py-1.5 text-xs text-white cursor-pointer transition-colors ${
+                  isHighlighted ? "bg-amber-500/20" : ""
+                } ${isSelected ? "text-amber-400 font-semibold" : ""}`}
+              >
+                {time}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
@@ -174,7 +264,9 @@ const DateField: React.FC<DateFieldProps> = ({ value, onChange, min, className =
   const inputRef = useRef<HTMLInputElement>(null);
 
   const openPicker = () => {
-    const el = inputRef.current;
+    const el = inputRef.current as
+      | (HTMLInputElement & { showPicker?: () => void })
+      | null;
     if (!el) return;
     // showPicker() is supported in Chrome 99+, Edge 99+, Safari 16+, Firefox 101+
     if (typeof el.showPicker === "function") {
@@ -248,29 +340,29 @@ export const RentalBookingHeader: React.FC<RentalBookingHeaderProps> = ({
 
   const today = getTodayStr();
 
-  // When entering edit mode, ensure time is valid for today (if today)
+  // Keep the local draft state in sync with the props whenever we're NOT editing.
+  // This handles async data loading in the parent.
   useEffect(() => {
-    if (isEditing && isToday(tempDate)) {
-      const nextSlot = getNextQuarterHour();
-      const currentMinutes = timeToMinutes(getCurrentTimeStr());
-      const selectedMinutes = timeToMinutes(tempTime);
-      if (selectedMinutes < currentMinutes) {
-        setTempTime(nextSlot);
-      }
+    if (!isEditing) {
+      setTempCity(city);
+      setTempDate(pickupDate);
+      setTempTime(pickupTime);
     }
-  }, [isEditing, tempDate]);
+  }, [city, pickupDate, pickupTime, isEditing]);
 
-  // When date changes, if it's today and time is past, update; otherwise do nothing (future date keeps its time)
+  // Single consolidated effect: while editing, if the date is today and the
+  // chosen time has already passed, snap it to the next quarter hour.
   useEffect(() => {
-    if (isEditing && isToday(tempDate)) {
-      const nextSlot = getNextQuarterHour();
-      const currentMinutes = timeToMinutes(getCurrentTimeStr());
-      const selectedMinutes = timeToMinutes(tempTime);
-      if (selectedMinutes < currentMinutes) {
-        setTempTime(nextSlot);
-      }
+    if (!isEditing) return;
+    if (!isToday(tempDate)) return;
+
+    const currentMinutes = timeToMinutes(getCurrentTimeStr());
+    const selectedMinutes = timeToMinutes(tempTime);
+
+    if (selectedMinutes < currentMinutes) {
+      setTempTime(getNextQuarterHour());
     }
-  }, [tempDate, isEditing]);
+  }, [isEditing, tempDate, tempTime]);
 
   if (tripType !== "rental") return null;
 
@@ -301,17 +393,22 @@ export const RentalBookingHeader: React.FC<RentalBookingHeaderProps> = ({
                   <span className="font-semibold text-white truncate block">{city}</span>
                 </div>
                 <div className="h-6 w-px bg-slate-800 hidden sm:block" />
-                <div className="hidden xs:block">
+                <div className="hidden sm:block">
                   <span className="text-[10px] text-slate-400 block uppercase font-bold">Trip Type</span>
                   <span className="font-bold text-amber-400">Local Rental</span>
                 </div>
                 <div className="h-6 w-px bg-slate-800 hidden sm:block" />
                 <div>
-                  <span className="text-[10px] text-emerald-400 block uppercase font-bold">Pickup Schedule</span>
-                  <span className="font-semibold text-white text-[11px] sm:text-xs">{pickupDate} • {pickupTime}</span>
+                  <span className="text-[10px] text-emerald-400 block uppercase font-bold">
+                    Pickup Schedule
+                  </span>
+                  <span className="font-semibold text-white text-[11px] sm:text-xs">
+                    {formatSummaryDate(pickupDate)} • {pickupTime}
+                  </span>
                 </div>
               </div>
               <button
+                type="button"
                 onClick={() => setIsEditing(true)}
                 className="px-3.5 sm:px-5 py-2 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-[10px] sm:text-[11px] uppercase tracking-wider transition-colors shadow shrink-0 active:scale-95"
               >
@@ -322,7 +419,9 @@ export const RentalBookingHeader: React.FC<RentalBookingHeaderProps> = ({
             <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-3 text-xs animate-fadeIn py-1">
               <div className="flex flex-wrap items-end gap-2.5 sm:gap-4 w-full xl:w-auto flex-1">
                 <div className="w-[calc(50%-5px)] sm:w-auto">
-                  <label className="text-[10px] text-slate-400 block uppercase font-bold mb-1">City</label>
+                  <label className="text-[10px] text-slate-400 block uppercase font-bold mb-1">
+                    City
+                  </label>
                   <select
                     value={tempCity}
                     onChange={(e) => setTempCity(e.target.value)}
@@ -337,25 +436,22 @@ export const RentalBookingHeader: React.FC<RentalBookingHeaderProps> = ({
 
                 {/* Pickup Date — fully clickable bar */}
                 <div className="w-[calc(50%-5px)] sm:w-auto">
-                  <label className="text-[10px] text-slate-400 block uppercase font-bold mb-1">Pickup Date</label>
-                  <DateField
-                    value={tempDate}
-                    min={today}
-                    onChange={(newDate) => setTempDate(newDate)}
-                  />
+                  <label className="text-[10px] text-slate-400 block uppercase font-bold mb-1">
+                    Pickup Date
+                  </label>
+                  <DateField value={tempDate} min={today} onChange={(newDate) => setTempDate(newDate)} />
                 </div>
 
                 <div className="w-full sm:w-auto">
-                  <label className="text-[10px] text-slate-400 block uppercase font-bold mb-1">Pickup Time</label>
-                  <TimeDropdown
-                    value={tempTime}
-                    onChange={setTempTime}
-                    selectedDate={tempDate}
-                  />
+                  <label className="text-[10px] text-slate-400 block uppercase font-bold mb-1">
+                    Pickup Time
+                  </label>
+                  <TimeDropdown value={tempTime} onChange={setTempTime} selectedDate={tempDate} />
                 </div>
               </div>
               <div className="flex items-center gap-2 shrink-0 self-end xl:self-auto pt-1 xl:pt-0">
                 <button
+                  type="button"
                   onClick={handleCancel}
                   className="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors active:scale-95"
                   aria-label="Cancel"
@@ -363,6 +459,7 @@ export const RentalBookingHeader: React.FC<RentalBookingHeaderProps> = ({
                   <X className="w-4 h-4" />
                 </button>
                 <button
+                  type="button"
                   onClick={handleSave}
                   className="px-4 sm:px-5 py-2 h-9 flex items-center gap-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-[11px] uppercase tracking-wider transition-colors shadow active:scale-95"
                 >
@@ -389,7 +486,9 @@ export const RentalBookingHeader: React.FC<RentalBookingHeaderProps> = ({
             return (
               <button
                 key={pkg.id}
+                type="button"
                 onClick={() => onSelectPackage(pkg)}
+                aria-pressed={isActive}
                 className={`whitespace-nowrap px-4 sm:px-8 py-2.5 sm:py-3 text-[11px] sm:text-xs font-bold transition-colors ${borderClasses} ${roundedClasses} ${
                   isActive
                     ? "bg-black text-yellow-400 shadow-inner"

@@ -317,7 +317,7 @@ function renderFleetSection() {
           <button onclick="openBookingModal('${car.id}', 'south_theme')" class="w-full py-2.5 px-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-xs rounded-xl transition-all shadow-lg shadow-amber-500/20 flex items-center justify-center gap-1.5">
             <i class="fa-solid fa-bolt text-xs"></i> Book Vehicle
           </button>
-          <a href="https://wa.me/919876543210?text=Hi%20PujoParikrama,%20I%20am%20interested%20in%20booking%20${encodeURIComponent(car.name)}%20for%20Durga%20Puja." target="_blank" class="w-full py-2.5 px-3 bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/40 text-emerald-300 font-semibold text-xs rounded-xl transition-all flex items-center justify-center gap-1.5">
+          <a href="https://wa.me/918240765499?text=Hi%20PujoParikrama,%20I%20am%20interested%20in%20booking%20${encodeURIComponent(car.name)}%20for%20Durga%20Puja." target="_blank" class="w-full py-2.5 px-3 bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/40 text-emerald-300 font-semibold text-xs rounded-xl transition-all flex items-center justify-center gap-1.5">
             <i class="fa-brands fa-whatsapp text-emerald-400"></i> WhatsApp
           </a>
         </div>
@@ -724,7 +724,7 @@ function renderThankYouScreen(b) {
 
   const waBtn = document.getElementById("ty-whatsapp-btn");
   if (waBtn) {
-    waBtn.href = `https://wa.me/919876543210?text=${waMsg}`;
+    waBtn.href = `https://wa.me/918240765499?text=${waMsg}`;
   }
 
   thankYouModal.classList.remove("hidden");

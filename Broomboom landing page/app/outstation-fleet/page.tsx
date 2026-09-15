@@ -203,7 +203,7 @@ function OutstationFleetContent() {
 
   const [userData, setUserData] = useState({
     name: "Guest Traveler",
-    phone: "+91 9876543210",
+    phone: "+91 8240765499",
     email: "guest@example.com",
   });
 
@@ -486,48 +486,48 @@ function OutstationFleetContent() {
     <div className="min-h-screen bg-puja-cream text-slate-900 flex flex-col font-sans">
       {/* Header */}
       <header className="sticky top-0 z-40 bg-white border-b border-amber-200 shadow-sm backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link
-              href="/"
-              className="flex items-center gap-2.5 sm:gap-3 group shrink-0"
-              aria-label="BroomBoom Cabs Home"
-            >
-              <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-full overflow-hidden shrink-0">
-                <img
-                  src="/images/Broomboom-logo.png"
-                  alt="BroomBoom Cabs"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  onError={(e) => {
-                    const target = e.currentTarget;
-                    if (!target.dataset.tried) {
-                      target.dataset.tried = "true";
-                      target.src = "/images/Broomboom-logo.png";
-                    }
-                  }}
-                />
-              </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-2">
+          {/* Left Side: Logo & Title */}
+          <Link
+            href="/"
+            className="flex items-center gap-3 group shrink-0 min-w-0"
+            aria-label="BroomBoom Cabs Home"
+          >
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden shrink-0 flex items-center justify-center bg-amber-50">
+              <img
+                src="/images/Broomboom-logo.png"
+                alt="BroomBoom Cabs"
+                className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  if (!target.dataset.tried) {
+                    target.dataset.tried = "true";
+                    target.src = "/images/Broomboom-logo.png";
+                  }
+                }}
+              />
+            </div>
 
-              <div className="flex flex-col justify-center">
-                <span className="px-2 py-0.5 w-fit text-[8px] sm:text-[9px] font-black bg-amber-400 text-slate-950 rounded border border-amber-500/40 tracking-wide">
-                  PUJA 2026
-                </span>
+            <div className="flex flex-col justify-center min-w-0">
+              <span className="px-2 py-0.5 w-fit text-[8px] sm:text-[9px] font-black bg-amber-400 text-slate-950 rounded border border-amber-500/40 tracking-wide whitespace-nowrap">
+                PUJA 2026
+              </span>
 
-                <p className="text-[8px] sm:text-[10px] text-slate-500 tracking-widest uppercase font-semibold mt-1">
-                  Kolkata Durga Puja Travel
-                </p>
-              </div>
-            </Link>
-          </div>
+              <p className="text-[8px] sm:text-[10px] text-slate-500 tracking-wider uppercase font-semibold mt-1 truncate">
+                Kolkata Durga Puja Travel
+              </p>
+            </div>
+          </Link>
 
-          <div className="flex items-center gap-3">
-            <div className="hidden sm:block text-right">
+          {/* Right Side: User Info & Phone */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {/* User Info - Hidden on smaller screens to save space */}
+            <div className="hidden md:block text-right">
               <span className="text-[10px] text-slate-500 block font-medium">
                 Logged In As
               </span>
-
               <div className="flex items-center gap-1.5 justify-end">
-                <span className="text-xs font-bold text-slate-900">
+                <span className="text-xs font-bold text-slate-900 truncate max-w-[100px]">
                   {userData.name}
                 </span>
                 {userData.name !== "Guest Traveler" && (
@@ -539,7 +539,7 @@ function OutstationFleetContent() {
                       } catch (_) {}
                       setUserData({ name: "Guest Traveler", phone: "+91 8240765499", email: "guest@example.com" });
                     }}
-                    className="text-[10px] text-amber-800 hover:text-red-600 font-bold underline cursor-pointer"
+                    className="text-[10px] text-amber-800 hover:text-red-600 font-bold underline cursor-pointer whitespace-nowrap"
                     title="Change / Logout"
                   >
                     (Change)
@@ -548,13 +548,14 @@ function OutstationFleetContent() {
               </div>
             </div>
 
+            {/* Phone Number - whitespace-nowrap prevents breaking */}
             <a
-              href="tel:+919876543210"
-              className="px-3.5 py-2 bg-amber-100 hover:bg-amber-200 text-amber-950 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors"
+              href="tel:+918240765499"
+              className="px-3 py-2 sm:px-4 sm:py-2.5 bg-amber-100 hover:bg-amber-200 text-amber-950 rounded-xl text-[10px] sm:text-xs font-bold flex items-center gap-1.5 transition-colors whitespace-nowrap"
             >
-              <PhoneCall className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Highway Helpline:</span>
-              +91 8240765499
+              <PhoneCall className="w-3.5 h-3.5 shrink-0" />
+              <span className="hidden lg:inline">Highway Helpline:</span>
+              <span>+91 8240765499</span>
             </a>
           </div>
         </div>

@@ -467,7 +467,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                   </label>
                   <input
                     type="tel"
-                    placeholder="e.g. 9876543210"
+                    placeholder="e.g. 8240765499"
                     value={bookingState.customerPhone}
                     onChange={(e) =>
                       setBookingState({ ...bookingState, customerPhone: e.target.value })
