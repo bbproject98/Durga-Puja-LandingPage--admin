@@ -834,9 +834,6 @@ function FleetContent() {
                     <span>Payable 25% Deposit to Lock:</span>
                     <span className="text-amber-900">₹{Math.round(checkoutPrice * 0.25).toLocaleString()}</span>
                   </div>
-                  <p className="text-[10px] text-slate-500 pt-0.5">
-                    Remaining 75% (₹{(checkoutPrice * 0.75).toLocaleString()}) payable to chauffeur during trip.
-                  </p>
                 </div>
 
                 <button

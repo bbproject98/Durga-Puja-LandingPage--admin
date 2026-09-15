@@ -72,9 +72,7 @@ const formatDisplayDate = (dateStr: string): string => {
   });
 };
 
-// Short form for the summary bar (e.g. "Oct 16").
-// If the string is already human-readable (e.g. "Oct 16 (Maha Saptami)"),
-// it is passed through untouched.
+// Short form for the summary bar (e.g. "Oct 16")
 const formatSummaryDate = (dateStr: string): string => {
   if (!dateStr) return "";
   const isIso = /^\d{4}-\d{2}-\d{2}$/.test(dateStr);
@@ -87,37 +85,53 @@ const formatSummaryDate = (dateStr: string): string => {
   });
 };
 
-// --- Custom Time Dropdown Component ---
-interface TimeDropdownProps {
+// --- West Bengal city list (grouped by region) ---
+
+const WB_CITY_GROUPS: { region: string; cities: string[] }[] = [
+  {
+    region: "Kolkata & Greater Kolkata",
+    cities: [
+      "Kolkata",
+      "Kolkata (Citywide)",
+      "Salt Lake (Bidhannagar)",
+      "New Town (Rajarhat)",
+      "Dum Dum",
+      "Barasat",
+      "Barrackpore",
+      "Sonarpur",
+      "Budge Budge",
+      "Shalimar",
+      "Shatragathi",
+    ],
+  },
+  {
+    region: "Howrah & Hooghly",
+    cities: [
+      "Howrah",
+      "Bally",
+      "Uttarpara",
+      "Konnagar",
+      "Rishra",
+      "Serampore",
+      "Chandannagar",
+      "Chinsurah",
+    ],
+  },
+];
+
+const ALL_WB_CITIES = WB_CITY_GROUPS.flatMap((group) => group.cities);
+
+// --- Custom City Dropdown Component (Exactly 4 rows visible before scroll) ---
+interface CityDropdownProps {
   value: string;
-  onChange: (time: string) => void;
-  selectedDate: string; // YYYY-MM-DD
+  isCustomCity: boolean;
+  onSelectCity: (city: string, isCustom: boolean) => void;
 }
 
-const TimeDropdown: React.FC<TimeDropdownProps> = ({ value, onChange, selectedDate }) => {
+const CityDropdown: React.FC<CityDropdownProps> = ({ value, isCustomCity, onSelectCity }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [highlightedIndex, setHighlightedIndex] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const listRef = useRef<HTMLDivElement>(null);
 
-  // Compute available slots based on the selected date
-  const availableSlots = useMemo(() => {
-    if (isToday(selectedDate)) {
-      const nowMinutes = timeToMinutes(getCurrentTimeStr());
-      const nextQuarter = Math.ceil(nowMinutes / 15) * 15;
-      return ALL_TIME_SLOTS.filter((slot) => timeToMinutes(slot) >= nextQuarter);
-    }
-    return ALL_TIME_SLOTS;
-  }, [selectedDate]);
-
-  // If current value is not available (e.g., past time for today), auto‑select the first available
-  useEffect(() => {
-    if (availableSlots.length > 0 && !availableSlots.includes(value)) {
-      onChange(availableSlots[0]);
-    }
-  }, [availableSlots, value, onChange]);
-
-  // Close when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -128,14 +142,105 @@ const TimeDropdown: React.FC<TimeDropdownProps> = ({ value, onChange, selectedDa
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Reset the highlight to the currently selected value whenever the list opens
+  return (
+    <div className="relative w-full" ref={dropdownRef}>
+      <button
+        type="button"
+        onClick={() => setIsOpen((prev) => !prev)}
+        className="bg-slate-900 text-white text-xs px-2.5 py-1.5 rounded-lg border border-slate-700 focus:outline-none focus:border-amber-400 w-full flex items-center justify-between min-h-[38px]"
+      >
+        <span className="truncate">{isCustomCity ? (value || "Other city...") : (value || "Select City")}</span>
+        <ChevronDown className="w-3 h-3 ml-1 opacity-60 shrink-0" />
+      </button>
+
+      {isOpen && (
+        <div className="absolute z-30 mt-1 w-full sm:w-[200px] bg-slate-900 border border-slate-700 rounded-lg shadow-xl max-h-[128px] overflow-y-auto">
+          {WB_CITY_GROUPS.map((group) => (
+            <div key={group.region}>
+              <div className="h-[24px] px-2.5 flex items-center text-[10px] font-bold text-slate-400 bg-slate-950/95 sticky top-0 uppercase tracking-wider border-b border-slate-800">
+                {group.region}
+              </div>
+              {group.cities.map((c) => {
+                const isSelected = !isCustomCity && value === c;
+                return (
+                  <div
+                    key={c}
+                    onClick={() => {
+                      onSelectCity(c, false);
+                      setIsOpen(false);
+                    }}
+                    className={`h-[32px] px-3 flex items-center text-xs text-white cursor-pointer transition-colors hover:bg-amber-500/20 ${
+                      isSelected ? "text-amber-400 font-bold bg-amber-500/10" : ""
+                    }`}
+                  >
+                    <span className="truncate">{c}</span>
+                  </div>
+                );
+              })}
+            </div>
+          ))}
+
+          <div className="border-t border-slate-800">
+            <div
+              onClick={() => {
+                onSelectCity("", true);
+                setIsOpen(false);
+              }}
+              className="h-[32px] px-3 flex items-center text-xs text-amber-400 hover:bg-amber-500/20 cursor-pointer font-medium"
+            >
+              Other — enter city…
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// --- Custom Time Dropdown Component ---
+interface TimeDropdownProps {
+  value: string;
+  onChange: (time: string) => void;
+  selectedDate: string;
+}
+
+const TimeDropdown: React.FC<TimeDropdownProps> = ({ value, onChange, selectedDate }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(0);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+
+  const availableSlots = useMemo(() => {
+    if (isToday(selectedDate)) {
+      const nowMinutes = timeToMinutes(getCurrentTimeStr());
+      const nextQuarter = Math.ceil(nowMinutes / 15) * 15;
+      return ALL_TIME_SLOTS.filter((slot) => timeToMinutes(slot) >= nextQuarter);
+    }
+    return ALL_TIME_SLOTS;
+  }, [selectedDate]);
+
+  useEffect(() => {
+    if (availableSlots.length > 0 && !availableSlots.includes(value)) {
+      onChange(availableSlots[0]);
+    }
+  }, [availableSlots, value, onChange]);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   useEffect(() => {
     if (!isOpen) return;
     const idx = availableSlots.indexOf(value);
     setHighlightedIndex(idx >= 0 ? idx : 0);
   }, [isOpen, availableSlots, value]);
 
-  // Keep the highlighted option visible inside the scroll container
   useEffect(() => {
     if (!isOpen) return;
     const container = listRef.current;
@@ -158,7 +263,6 @@ const TimeDropdown: React.FC<TimeDropdownProps> = ({ value, onChange, selectedDa
   };
 
   const handleButtonKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
-    // Opening keys
     if (!isOpen && (e.key === "ArrowDown" || e.key === "ArrowUp" || e.key === "Enter" || e.key === " ")) {
       e.preventDefault();
       setIsOpen(true);
@@ -192,14 +296,12 @@ const TimeDropdown: React.FC<TimeDropdownProps> = ({ value, onChange, selectedDa
       case "Tab":
         setIsOpen(false);
         break;
-      default:
-        break;
     }
   };
 
   if (availableSlots.length === 0) {
     return (
-      <div className="bg-slate-900 text-white text-xs px-3 py-1 rounded-lg border border-slate-700 w-[180px] flex items-center justify-between opacity-60">
+      <div className="bg-slate-900 text-white text-xs px-3 py-2 rounded-lg border border-slate-700 w-[150px] flex items-center justify-between opacity-60 min-h-[38px]">
         <span>No slots</span>
       </div>
     );
@@ -214,10 +316,10 @@ const TimeDropdown: React.FC<TimeDropdownProps> = ({ value, onChange, selectedDa
         aria-haspopup="listbox"
         aria-expanded={isOpen}
         aria-label="Select pickup time"
-        className="bg-slate-900 text-white text-xs px-3 py-1 rounded-lg border border-slate-700 focus:outline-none focus:border-amber-400 w-[180px] flex items-center justify-between"
+        className="bg-slate-900 text-white text-xs px-3 py-2 rounded-lg border border-slate-700 focus:outline-none focus:border-amber-400 w-full sm:w-[150px] flex items-center justify-between min-h-[38px]"
       >
         <span>{value}</span>
-        <ChevronDown className="w-3 h-3 ml-2 opacity-60" />
+        <ChevronDown className="w-3 h-3 ml-2 opacity-60 shrink-0" />
       </button>
 
       {isOpen && (
@@ -225,7 +327,7 @@ const TimeDropdown: React.FC<TimeDropdownProps> = ({ value, onChange, selectedDa
           ref={listRef}
           role="listbox"
           tabIndex={-1}
-          className="absolute z-10 mt-1 w-[180px] bg-slate-900 border border-slate-700 rounded-lg shadow-lg max-h-48 overflow-y-auto"
+          className="absolute z-30 mt-1 w-full sm:w-[150px] bg-slate-900 border border-slate-700 rounded-lg shadow-lg max-h-48 overflow-y-auto"
         >
           {availableSlots.map((time, index) => {
             const isSelected = time === value;
@@ -264,31 +366,26 @@ const DateField: React.FC<DateFieldProps> = ({ value, onChange, min, className =
   const inputRef = useRef<HTMLInputElement>(null);
 
   const openPicker = () => {
-    const el = inputRef.current as
-      | (HTMLInputElement & { showPicker?: () => void })
-      | null;
+    const el = inputRef.current as (HTMLInputElement & { showPicker?: () => void }) | null;
     if (!el) return;
-    // showPicker() is supported in Chrome 99+, Edge 99+, Safari 16+, Firefox 101+
     if (typeof el.showPicker === "function") {
       try {
         el.showPicker();
         return;
       } catch {
-        /* fall through to focus */
+        /* fallback */
       }
     }
     el.focus();
   };
 
   return (
-    <div className={`relative w-full sm:w-[140px] group ${className}`}>
-      {/* Visible bar — the whole thing is covered by the invisible input below */}
+    <div className={`relative w-full sm:w-[130px] group ${className}`}>
       <div className="pointer-events-none bg-slate-900 text-white text-xs px-2.5 sm:px-3 py-2 rounded-lg border border-slate-700 group-focus-within:border-amber-400 w-full flex items-center justify-between min-h-[38px]">
         <span className="truncate">{formatDisplayDate(value)}</span>
-        <CalendarDays className="w-3.5 h-3.5 ml-2 opacity-60 shrink-0" />
+        <CalendarDays className="w-3.5 h-3.5 ml-1.5 opacity-60 shrink-0" />
       </div>
 
-      {/* Invisible native date input stretched over the entire bar */}
       <input
         ref={inputRef}
         type="date"
@@ -337,21 +434,26 @@ export const RentalBookingHeader: React.FC<RentalBookingHeaderProps> = ({
   const [tempCity, setTempCity] = useState(city);
   const [tempDate, setTempDate] = useState(pickupDate);
   const [tempTime, setTempTime] = useState(pickupTime);
+  const [isCustomCity, setIsCustomCity] = useState(() => !ALL_WB_CITIES.includes(city));
+  const customCityRef = useRef<HTMLInputElement>(null);
 
   const today = getTodayStr();
 
-  // Keep the local draft state in sync with the props whenever we're NOT editing.
-  // This handles async data loading in the parent.
   useEffect(() => {
     if (!isEditing) {
       setTempCity(city);
       setTempDate(pickupDate);
       setTempTime(pickupTime);
+      setIsCustomCity(!ALL_WB_CITIES.includes(city));
     }
   }, [city, pickupDate, pickupTime, isEditing]);
 
-  // Single consolidated effect: while editing, if the date is today and the
-  // chosen time has already passed, snap it to the next quarter hour.
+  useEffect(() => {
+    if (isEditing && isCustomCity) {
+      customCityRef.current?.focus();
+    }
+  }, [isEditing, isCustomCity]);
+
   useEffect(() => {
     if (!isEditing) return;
     if (!isToday(tempDate)) return;
@@ -367,7 +469,7 @@ export const RentalBookingHeader: React.FC<RentalBookingHeaderProps> = ({
   if (tripType !== "rental") return null;
 
   const handleSave = () => {
-    onUpdateCity(tempCity);
+    onUpdateCity(isCustomCity ? tempCity.trim() || city : tempCity);
     onUpdateDate(tempDate);
     onUpdateTime(tempTime);
     setIsEditing(false);
@@ -377,6 +479,7 @@ export const RentalBookingHeader: React.FC<RentalBookingHeaderProps> = ({
     setTempCity(city);
     setTempDate(pickupDate);
     setTempTime(pickupTime);
+    setIsCustomCity(!ALL_WB_CITIES.includes(city));
     setIsEditing(false);
   };
 
@@ -386,30 +489,50 @@ export const RentalBookingHeader: React.FC<RentalBookingHeaderProps> = ({
       <div className="w-full bg-slate-950 border-b border-amber-500/30 transition-all duration-300">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-3 min-h-[72px] flex flex-col justify-center">
           {!isEditing ? (
-            <div className="flex items-center justify-between gap-3 text-xs animate-fadeIn">
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={() => setIsEditing(true)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  setIsEditing(true);
+                }
+              }}
+              className="flex items-center justify-between gap-3 text-xs animate-fadeIn cursor-pointer group rounded-lg focus:outline-none focus:ring-1 focus:ring-amber-400 p-1 -m-1"
+              aria-label="Click to modify trip details"
+            >
               <div className="flex flex-wrap items-center gap-2 sm:gap-6 flex-1 min-w-0">
-                <div className="min-w-[70px]">
+                {/* City */}
+                <div className="min-w-[65px] group-hover:opacity-90">
                   <span className="text-[10px] text-slate-400 block uppercase font-bold">City</span>
-                  <span className="font-semibold text-white truncate block">{city}</span>
+                  <span className="font-semibold text-white truncate block group-hover:text-amber-300 transition-colors">
+                    {city}
+                  </span>
                 </div>
                 <div className="h-6 w-px bg-slate-800 hidden sm:block" />
-                <div className="hidden sm:block">
+                {/* Trip Type */}
+                <div className="hidden sm:block group-hover:opacity-90">
                   <span className="text-[10px] text-slate-400 block uppercase font-bold">Trip Type</span>
                   <span className="font-bold text-amber-400">Local Rental</span>
                 </div>
                 <div className="h-6 w-px bg-slate-800 hidden sm:block" />
-                <div>
+                {/* Pickup Schedule */}
+                <div className="group-hover:opacity-90">
                   <span className="text-[10px] text-emerald-400 block uppercase font-bold">
                     Pickup Schedule
                   </span>
-                  <span className="font-semibold text-white text-[11px] sm:text-xs">
+                  <span className="font-semibold text-white text-[11px] sm:text-xs group-hover:text-amber-300 transition-colors">
                     {formatSummaryDate(pickupDate)} • {pickupTime}
                   </span>
                 </div>
               </div>
               <button
                 type="button"
-                onClick={() => setIsEditing(true)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsEditing(true);
+                }}
                 className="px-3.5 sm:px-5 py-2 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-[10px] sm:text-[11px] uppercase tracking-wider transition-colors shadow shrink-0 active:scale-95"
               >
                 Modify Trip
@@ -417,31 +540,43 @@ export const RentalBookingHeader: React.FC<RentalBookingHeaderProps> = ({
             </div>
           ) : (
             <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-3 text-xs animate-fadeIn py-1">
-              <div className="flex flex-wrap items-end gap-2.5 sm:gap-4 w-full xl:w-auto flex-1">
-                <div className="w-[calc(50%-5px)] sm:w-auto">
+              <div className="flex flex-wrap items-end gap-2 sm:gap-3 w-full xl:w-auto flex-1">
+                {/* City Dropdown limited to 4 lines visible */}
+                <div className="w-[calc(50%-4px)] sm:w-[150px]">
                   <label className="text-[10px] text-slate-400 block uppercase font-bold mb-1">
                     City
                   </label>
-                  <select
+                  <CityDropdown
                     value={tempCity}
-                    onChange={(e) => setTempCity(e.target.value)}
-                    className="bg-slate-900 text-white text-xs px-2.5 sm:px-3 py-2 rounded-lg border border-slate-700 focus:outline-none focus:border-amber-400 w-full sm:w-[160px]"
-                  >
-                    <option value="Kolkata (Citywide)">Kolkata (Citywide)</option>
-                    <option value="Howrah">Howrah</option>
-                    <option value="Salt Lake">Salt Lake</option>
-                    <option value="New Town">New Town</option>
-                  </select>
+                    isCustomCity={isCustomCity}
+                    onSelectCity={(selectedCity, isCustom) => {
+                      setIsCustomCity(isCustom);
+                      setTempCity(selectedCity);
+                    }}
+                  />
+
+                  {isCustomCity && (
+                    <input
+                      ref={customCityRef}
+                      type="text"
+                      value={tempCity}
+                      onChange={(e) => setTempCity(e.target.value)}
+                      placeholder="City name"
+                      aria-label="Enter city name"
+                      className="mt-1.5 bg-slate-900 text-white text-xs px-2.5 py-1.5 rounded-lg border border-slate-700 focus:outline-none focus:border-amber-400 w-full min-h-[38px]"
+                    />
+                  )}
                 </div>
 
-                {/* Pickup Date — fully clickable bar */}
-                <div className="w-[calc(50%-5px)] sm:w-auto">
+                {/* Pickup Date */}
+                <div className="w-[calc(50%-4px)] sm:w-auto">
                   <label className="text-[10px] text-slate-400 block uppercase font-bold mb-1">
                     Pickup Date
                   </label>
                   <DateField value={tempDate} min={today} onChange={(newDate) => setTempDate(newDate)} />
                 </div>
 
+                {/* Pickup Time */}
                 <div className="w-full sm:w-auto">
                   <label className="text-[10px] text-slate-400 block uppercase font-bold mb-1">
                     Pickup Time
@@ -449,6 +584,8 @@ export const RentalBookingHeader: React.FC<RentalBookingHeaderProps> = ({
                   <TimeDropdown value={tempTime} onChange={setTempTime} selectedDate={tempDate} />
                 </div>
               </div>
+
+              {/* Action Buttons */}
               <div className="flex items-center gap-2 shrink-0 self-end xl:self-auto pt-1 xl:pt-0">
                 <button
                   type="button"
