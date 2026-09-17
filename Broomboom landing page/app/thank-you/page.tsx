@@ -76,16 +76,16 @@ function ThankYouContent() {
   const [bookingDetails, setBookingDetails] = useState<any>(null);
 
   /* ---------------------------------------------------------------- */
-  /* 1. Load booking details (backend → localStorage fallback)         */
+  /* 1. Load booking details (backend → sessionStorage fallback)         */
   /* ---------------------------------------------------------------- */
   const loadBooking = useCallback(
     async (opts?: { silent?: boolean }) => {
       const silent = opts?.silent ?? false;
       if (!silent) setLoading(true);
 
-      // Instant paint from localStorage (if any)
+      // Instant paint from sessionStorage (if any)
       try {
-        const saved = localStorage.getItem("broomboom_confirmed_booking");
+        const saved = sessionStorage.getItem("broomboom_confirmed_booking");
         if (saved) {
           const localSaved = JSON.parse(saved);
           setBookingDetails(localSaved);
@@ -114,7 +114,7 @@ function ThankYouContent() {
 
           // Keep local copy in sync so a refresh shows the latest status
           try {
-            localStorage.setItem(
+            sessionStorage.setItem(
               "broomboom_confirmed_booking",
               JSON.stringify(data)
             );

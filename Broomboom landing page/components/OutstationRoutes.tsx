@@ -17,8 +17,8 @@ export const OutstationRoutes: React.FC<OutstationRoutesProps> = ({ onActionClic
     const destination = routeTitle.split(" to ")[1] || "Digha";
 
     try {
-      localStorage.setItem("broomboom_selected_outstation", routeTitle);
-      localStorage.setItem("broomboom_selected_tour", `Outstation: ${routeTitle}`);
+      sessionStorage.setItem("broomboom_selected_outstation", routeTitle);
+      sessionStorage.setItem("broomboom_selected_tour", `Outstation: ${routeTitle}`);
     } catch (e) {
       console.warn("Storage error", e);
     }

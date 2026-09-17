@@ -184,7 +184,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
     };
 
     try {
-      localStorage.setItem("broomboom_confirmed_booking", JSON.stringify(confirmed));
+      sessionStorage.setItem("broomboom_confirmed_booking", JSON.stringify(confirmed));
     } catch (e) {
       console.warn("Storage error", e);
     }
@@ -229,7 +229,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
 
       confirmed.refId = result.data?.booking?.bookingId || bookingRef;
       try {
-        localStorage.setItem("broomboom_confirmed_booking", JSON.stringify(confirmed));
+        sessionStorage.setItem("broomboom_confirmed_booking", JSON.stringify(confirmed));
       } catch (_) {}
 
       const cashfree = await loadCashfree();

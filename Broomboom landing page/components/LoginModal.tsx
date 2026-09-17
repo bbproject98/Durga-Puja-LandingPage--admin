@@ -36,7 +36,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       try {
-        const savedUser = localStorage.getItem("broomboom_user");
+        const savedUser = sessionStorage.getItem("broomboom_user");
         if (savedUser) {
           const parsed = JSON.parse(savedUser);
           if (parsed.name && parsed.name !== "Guest Traveler") setName(parsed.name);
@@ -86,17 +86,17 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       console.warn("API submit error", err);
     }
 
-    // 2. Save to localStorage fallback
+    // 2. Save to sessionStorage fallback
     try {
-      localStorage.setItem("broomboom_user", JSON.stringify(userData));
-      const leads = JSON.parse(localStorage.getItem("broomboom_leads") || "[]");
+      sessionStorage.setItem("broomboom_user", JSON.stringify(userData));
+      const leads = JSON.parse(sessionStorage.getItem("broomboom_leads") || "[]");
       leads.push({
         ...userData,
         context: actionContext?.title || "General Request",
         action: actionContext?.type || "book",
         timestamp: new Date().toISOString(),
       });
-      localStorage.setItem("broomboom_leads", JSON.stringify(leads));
+      sessionStorage.setItem("broomboom_leads", JSON.stringify(leads));
     } catch (err) {
       console.warn("Storage error", err);
     }

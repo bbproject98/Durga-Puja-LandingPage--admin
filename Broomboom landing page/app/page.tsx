@@ -18,7 +18,7 @@ import { StickyMobileBar } from "@/components/StickyMobileBar";
 import { ConfirmedBooking } from "@/types";
 
 export default function Home() {
-  // Logged-in user state (persisted in localStorage)
+  // Logged-in user state (persisted in sessionStorage)
   const [currentUser, setCurrentUser] = useState<{ name: string; phone: string; email?: string } | null>(null);
 
   // Login popup state
@@ -33,10 +33,10 @@ export default function Home() {
   const [thankYouModalOpen, setThankYouModalOpen] = useState(false);
   const [confirmedBooking, setConfirmedBooking] = useState<ConfirmedBooking | null>(null);
 
-  // Sync user from localStorage on mount
+  // Sync user from sessionStorage on mount
   useEffect(() => {
     try {
-      const savedUser = localStorage.getItem("broomboom_user");
+      const savedUser = sessionStorage.getItem("broomboom_user");
       if (savedUser) {
         const parsed = JSON.parse(savedUser);
         if (parsed?.name && parsed?.name !== "Guest Traveler" && parsed?.phone) {
@@ -50,17 +50,17 @@ export default function Home() {
 
   const handleLogout = useCallback(() => {
     try {
-      localStorage.removeItem("broomboom_user");
+      sessionStorage.removeItem("broomboom_user");
     } catch (_) {}
     setCurrentUser(null);
   }, []);
 
   // Central routing helper based on the selected package or outstation tour
   const proceedToDestination = useCallback((title: string) => {
-    // 1. Save current active selection to local storage
+    // 1. Save current active selection to session storage
     try {
       if (title) {
-        localStorage.setItem("broomboom_selected_tour", title);
+        sessionStorage.setItem("broomboom_selected_tour", title);
       }
     } catch (e) {
       console.warn("Storage error", e);
@@ -104,14 +104,14 @@ export default function Home() {
       targetPkg = "pkg_5day_vip";
     } else {
       try {
-        const savedPkg = localStorage.getItem("broomboom_active_package");
+        const savedPkg = sessionStorage.getItem("broomboom_active_package");
         if (savedPkg) targetPkg = savedPkg;
       } catch (_) {}
     }
 
     if (targetPkg) {
       try {
-        localStorage.setItem("broomboom_active_package", targetPkg);
+        sessionStorage.setItem("broomboom_active_package", targetPkg);
       } catch (_) {}
       window.location.href = `/fleet?pkg=${targetPkg}`;
       return;
@@ -123,11 +123,11 @@ export default function Home() {
 
   // Triggered on ANY "Book" or "Explore" button on the entire homepage
   const handleActionClick = (type: "book" | "explore", title: string) => {
-    // Check if user is already logged in (state or localStorage)
+    // Check if user is already logged in (state or sessionStorage)
     let user = currentUser;
     if (!user) {
       try {
-        const savedUser = localStorage.getItem("broomboom_user");
+        const savedUser = sessionStorage.getItem("broomboom_user");
         if (savedUser) {
           const parsed = JSON.parse(savedUser);
           if (parsed?.name && parsed?.name !== "Guest Traveler" && parsed?.phone) {

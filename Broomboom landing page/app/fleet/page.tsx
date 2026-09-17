@@ -108,7 +108,7 @@ function FleetContent() {
   const [tripType, setTripType] = useState<"rental" | "outstation">("rental");
   const [selectedRentalPackage, setSelectedRentalPackage] = useState<RentalPackage>(() => {
     const initialPkgId = pkgFromUrl
-      || (typeof window !== "undefined" ? localStorage.getItem("broomboom_active_package") : null)
+      || (typeof window !== "undefined" ? sessionStorage.getItem("broomboom_active_package") : null)
       || "pkg_8hr_80km";
     return RENTAL_PACKAGES.find(p => p.id === initialPkgId) || RENTAL_PACKAGES[1];
   });
@@ -129,11 +129,11 @@ function FleetContent() {
 
   useEffect(() => {
     try {
-      const savedUser = localStorage.getItem("broomboom_user");
+      const savedUser = sessionStorage.getItem("broomboom_user");
       if (savedUser) {
         setUserData(JSON.parse(savedUser));
       }
-      const activePkgId = localStorage.getItem("broomboom_active_package");
+      const activePkgId = sessionStorage.getItem("broomboom_active_package");
       if (activePkgId) {
         const pkg = RENTAL_PACKAGES.find(p => p.id === activePkgId);
         if (pkg) setSelectedRentalPackage(pkg);
@@ -204,7 +204,7 @@ function FleetContent() {
     }
 
     try {
-      localStorage.setItem("broomboom_user", JSON.stringify(userData));
+      sessionStorage.setItem("broomboom_user", JSON.stringify(userData));
     } catch (_) {}
 
     try {
@@ -265,7 +265,7 @@ function FleetContent() {
           advanceToPay: `₹${bookingData.advancePaid.toLocaleString()}`,
           balancePayable: `₹${bookingData.balancePayable.toLocaleString()}`,
         };
-        localStorage.setItem("broomboom_confirmed_booking", JSON.stringify(confirmedBooking));
+        sessionStorage.setItem("broomboom_confirmed_booking", JSON.stringify(confirmedBooking));
       } catch (e) {
         console.warn("Storage error", e);
       }
@@ -352,7 +352,7 @@ function FleetContent() {
                     type="button"
                     onClick={() => {
                       try {
-                        localStorage.removeItem("broomboom_user");
+                        sessionStorage.removeItem("broomboom_user");
                       } catch (_) {}
                       setUserData({ name: "Guest Traveler", phone: "+91 8240765499", email: "guest@example.com" });
                     }}
