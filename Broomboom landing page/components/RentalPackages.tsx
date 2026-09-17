@@ -14,8 +14,8 @@ export const RentalPackages: React.FC<RentalPackagesProps> = ({ onActionClick })
   // Single source of truth for the booking action
   const handleBook = (pkg: (typeof RENTAL_PACKAGES)[number]) => {
     try {
-      localStorage.setItem("broomboom_active_package", pkg.id);
-      localStorage.setItem("broomboom_selected_tour", pkg.title);
+      sessionStorage.setItem("broomboom_active_package", pkg.id);
+      sessionStorage.setItem("broomboom_selected_tour", pkg.title);
     } catch (e) {
       console.warn("Storage error", e);
     }

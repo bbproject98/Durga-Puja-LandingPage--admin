@@ -226,7 +226,7 @@ function OutstationFleetContent() {
     }));
 
     try {
-      const savedUser = localStorage.getItem("broomboom_user");
+      const savedUser = sessionStorage.getItem("broomboom_user");
       if (savedUser) setUserData(JSON.parse(savedUser));
     } catch (e) {}
   }, []);
@@ -398,7 +398,7 @@ function OutstationFleetContent() {
     }
 
     try {
-      localStorage.setItem("broomboom_user", JSON.stringify(userData));
+      sessionStorage.setItem("broomboom_user", JSON.stringify(userData));
     } catch (_) {}
 
     try {
@@ -453,7 +453,7 @@ function OutstationFleetContent() {
           advanceToPay: `₹${bookingData.advancePaid.toLocaleString()}`,
           balancePayable: `₹${bookingData.balancePayable.toLocaleString()}`,
         };
-        localStorage.setItem("broomboom_confirmed_booking", JSON.stringify(confirmedBooking));
+        sessionStorage.setItem("broomboom_confirmed_booking", JSON.stringify(confirmedBooking));
       } catch (e) {
         console.warn("Storage error", e);
       }
@@ -535,7 +535,7 @@ function OutstationFleetContent() {
                     type="button"
                     onClick={() => {
                       try {
-                        localStorage.removeItem("broomboom_user");
+                        sessionStorage.removeItem("broomboom_user");
                       } catch (_) {}
                       setUserData({ name: "Guest Traveler", phone: "+91 8240765499", email: "guest@example.com" });
                     }}

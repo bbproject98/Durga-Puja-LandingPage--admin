@@ -680,11 +680,11 @@ window.submitFinalBooking = function(payMode = "advance") {
 
   AppState.confirmedBooking = bookingRecord;
 
-  // Save to LocalStorage
+  // Save to sessionStorage
   try {
-    const existing = JSON.parse(localStorage.getItem("pujo_bookings") || "[]");
+    const existing = JSON.parse(sessionStorage.getItem("pujo_bookings") || "[]");
     existing.push(bookingRecord);
-    localStorage.setItem("pujo_bookings", JSON.stringify(existing));
+    sessionStorage.setItem("pujo_bookings", JSON.stringify(existing));
   } catch (e) {
     console.warn("Storage error", e);
   }
