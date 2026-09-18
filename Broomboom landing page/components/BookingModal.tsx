@@ -130,7 +130,10 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   if (bookingState.addons.sweets) addonsTotal += 599;
 
   const totalFare = baseFare + addonsTotal;
-  const advanceAmount = Math.round(totalFare * 0.25);
+
+  // Fixed ₹2051 booking advance (GST + gateway still added on top as before)
+  const FIXED_ADVANCE = 2051;
+  const advanceAmount = Math.min(FIXED_ADVANCE, totalFare);
 
   const withGst = advanceAmount * 1.05;
   const withGateway = withGst * 1.03;
@@ -139,7 +142,6 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   const gstAmount = Math.round(advanceAmount * 0.05);
   const gatewayCharge = Math.ceil(withGst * 0.03);
   const balanceDue = totalFare - advanceAmount;
-
   // –––– Handlers –––––––––––––––––––––––––––––––––––
   const handleNextStep = (currentStep: number) => {
     if (currentStep === 1) {
@@ -724,7 +726,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
 
                 <div className="p-2 sm:p-3 bg-amber-500/10 rounded-xl border border-amber-500/30 space-y-1.5 sm:space-y-2">
                   <div className="flex justify-between items-center text-[10px] sm:text-xs">
-                    <span className="text-amber-300">Advance (25%)</span>
+                    <span className="text-amber-300">Fixed Booking Advance </span>
                     <span className="text-white font-semibold">₹{advanceAmount.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between items-center text-[10px] sm:text-xs">
