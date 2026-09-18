@@ -87,7 +87,7 @@ function getDynamicInclusions(
   const shared = [
     "Fuel Charges & Chauffeur Day Allowance Included",
     "State & City Toll Taxes Included",
-    "Free 24h Cancellation with 100% Refund",
+    "Free 24h Modification",
   ];
 
   return [baseText, acText, ...shared];
@@ -209,7 +209,7 @@ function FleetContent() {
 
     try {
       const totalTariff = checkoutPrice;
-      const advancePaid = Math.round(totalTariff * 0.25);
+      const advancePaid = Math.min(2051, totalTariff); // Fixed 2051 deposit
       const balancePayable = totalTariff - advancePaid;
 
       const bookingData = {
@@ -497,7 +497,7 @@ function FleetContent() {
                         </div>
                         <div className="flex items-center gap-1.5">
                           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
-                          <span>Free 24h Cancellation</span>
+                          <span>Free 24h Modification</span>
                         </div>
                       </div>
                       <div className="text-[11px] text-slate-500 pt-0.5 font-medium">
@@ -831,8 +831,8 @@ function FleetContent() {
                     <span className="font-bold">₹{checkoutPrice.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between text-slate-950 font-black text-sm pt-1 border-t border-amber-200">
-                    <span>Payable 25% Deposit to Lock:</span>
-                    <span className="text-amber-900">₹{Math.round(checkoutPrice * 0.25).toLocaleString()}</span>
+                    <span>Pay Advance To Confirm Booking:</span>
+                    <span className="text-amber-900">₹{Math.min(2051, checkoutPrice).toLocaleString()}</span>
                   </div>
                 </div>
 
@@ -848,7 +848,7 @@ function FleetContent() {
                     </>
                   ) : (
                     <>
-                      <span>Pay 25% Advance &amp; Confirm Booking</span>
+                      <span>Pay Advance To Confirm Booking</span>
                       <ArrowRight className="w-4 h-4" />
                     </>
                   )}
