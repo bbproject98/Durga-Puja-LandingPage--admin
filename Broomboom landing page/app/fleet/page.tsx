@@ -848,7 +848,7 @@ function FleetContent() {
                     </>
                   ) : (
                     <>
-                      <span>Pay Advance To Confirm Booking</span>
+                      <span className="text-lg font-semibold">Book Now</span>
                       <ArrowRight className="w-4 h-4" />
                     </>
                   )}
