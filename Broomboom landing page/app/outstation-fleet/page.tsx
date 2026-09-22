@@ -452,13 +452,15 @@ function OutstationFleetContent() {
           totalFare: `₹${bookingData.totalTariff.toLocaleString()}`,
           advanceToPay: `₹${bookingData.advancePaid.toLocaleString()}`,
           balancePayable: `₹${bookingData.balancePayable.toLocaleString()}`,
+          paymentSessionId: result.data.paymentSessionId,
+          paymentLink: result.data?.paymentLink || null,
         };
         sessionStorage.setItem("broomboom_confirmed_booking", JSON.stringify(confirmedBooking));
       } catch (e) {
         console.warn("Storage error", e);
       }
 
-      const cashfree = await loadCashfree();
+     const cashfree = await loadCashfree();
       if (!cashfree) throw new Error("Unable to load Cashfree.");
 
       const checkoutRes = await cashfree.checkout({
@@ -466,11 +468,31 @@ function OutstationFleetContent() {
         redirectTarget: "_modal",
       });
 
+      // If Cashfree returns an error object, the user closed the modal or it failed
       if (checkoutRes && (checkoutRes as any).error) {
         setIsProcessingPayment(false);
+
+        try {
+          const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/+$/, "");
+          // Notify Backend to trigger the Pending Email/State
+          await fetch(`${baseUrl}/api/bookings/${bookingRef}`, {
+            method: "PUT",
+            headers: { 
+              "Content-Type": "application/json",
+              "Accept": "application/json"
+            },
+            body: JSON.stringify({ paymentStatus: "FAILED", status: "PAYMENT_FAILED" })
+          });
+        } catch (networkErr) {
+          console.error("🚨 Failed to notify backend of abandonment", networkErr);
+        }
+
+        // Redirect to the Pending page
+        window.location.href = `/pending?order_id=${encodeURIComponent(bookingRef)}&payment_status=PENDING`;
         return;
       }
 
+      // If successful, redirect to Thank You page
       window.location.href = `/thank-you?order_id=${encodeURIComponent(bookingRef)}&payment_status=SUCCESS`;
     } catch (error) {
       setIsProcessingPayment(false);

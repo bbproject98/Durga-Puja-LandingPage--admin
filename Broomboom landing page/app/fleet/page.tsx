@@ -264,6 +264,8 @@ function FleetContent() {
           totalFare: `₹${bookingData.totalTariff.toLocaleString()}`,
           advanceToPay: `₹${bookingData.advancePaid.toLocaleString()}`,
           balancePayable: `₹${bookingData.balancePayable.toLocaleString()}`,
+          paymentSessionId: result.data.paymentSessionId,
+          paymentLink: result.data?.paymentLink || null,
         };
         sessionStorage.setItem("broomboom_confirmed_booking", JSON.stringify(confirmedBooking));
       } catch (e) {
@@ -286,7 +288,7 @@ function FleetContent() {
         return;
       }
 
-      window.location.href = `/thank-you?order_id=${encodeURIComponent(bookingRef)}&payment_status=SUCCESS`;
+      window.location.href = `/pending?order_id=${encodeURIComponent(bookingRef)}&payment_status=SUCCESS`;
     } catch (error) {
       setIsProcessingPayment(false);
       console.error("Booking / Payment Error:", error);
