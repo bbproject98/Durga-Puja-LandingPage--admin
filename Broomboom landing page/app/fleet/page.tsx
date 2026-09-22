@@ -234,13 +234,8 @@ const handleConfirmBooking = async (
 
       const result = await submitBooking(bookingData);
 
-      if (!result?.success) {
+      if (!result?.success || !result.data?.paymentSessionId) {
         throw new Error(result?.message || "Unable to create booking.");
-      }
-
-      const paymentSessionId = result.data?.paymentSessionId;
-      if (!paymentSessionId) {
-        throw new Error("Payment session was not created.");
       }
 
       const bookingRef =
@@ -278,18 +273,16 @@ const handleConfirmBooking = async (
       }
 
       const checkoutRes = await cashfree.checkout({
-        paymentSessionId,
+        paymentSessionId: result.data.paymentSessionId,
         redirectTarget: "_modal",
       });
 
-      // 1. IF THE USER CLOSES THE PAYMENT MODAL (REDIRECT TO PENDING)
+      // If the user closes or backs out of the Cashfree modal
       if (checkoutRes && (checkoutRes as any).error) {
-        console.warn("Cashfree checkout modal closed or error:", (checkoutRes as any).error);
         setIsProcessingPayment(false);
-        
+
         try {
           const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/+$/, "");
-          // Notify Backend to trigger the Pending Email
           await fetch(`${baseUrl}/api/bookings/${bookingRef}`, {
             method: "PUT",
             headers: { 
@@ -302,21 +295,16 @@ const handleConfirmBooking = async (
           console.error("🚨 Failed to notify backend of abandonment", networkErr);
         }
 
-        window.location.href = `/Pending?order_id=${encodeURIComponent(bookingRef)}&payment_status=PENDING`;
+        // Redirect to Pending page with the valid order_id parameter
+        window.location.href = `/pending?order_id=${encodeURIComponent(bookingRef)}&payment_status=PENDING`;
         return;
       }
 
-      // 2. IF THE PAYMENT IS SUCCESSFUL (REDIRECT TO THANK YOU)
+      // If successful, redirect to Thank You page
       window.location.href = `/thank-you?order_id=${encodeURIComponent(bookingRef)}&payment_status=SUCCESS`;
-      
     } catch (error) {
       setIsProcessingPayment(false);
-      console.error("Booking / Payment Error:", error);
-      alert(
-        error instanceof Error
-          ? error.message
-          : "Something went wrong while creating your booking."
-      );
+      alert(error instanceof Error ? error.message : "Something went wrong while creating your booking.");
     }
   };
   return (
