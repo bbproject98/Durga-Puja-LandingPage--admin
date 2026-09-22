@@ -178,7 +178,7 @@ function FleetContent() {
     setIsCheckoutOpen(true);
   };
 
-  const handleConfirmBooking = async (
+const handleConfirmBooking = async (
     e: React.FormEvent
   ) => {
     e.preventDefault();
@@ -282,13 +282,33 @@ function FleetContent() {
         redirectTarget: "_modal",
       });
 
+      // 1. IF THE USER CLOSES THE PAYMENT MODAL (REDIRECT TO PENDING)
       if (checkoutRes && (checkoutRes as any).error) {
         console.warn("Cashfree checkout modal closed or error:", (checkoutRes as any).error);
         setIsProcessingPayment(false);
+        
+        try {
+          const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/+$/, "");
+          // Notify Backend to trigger the Pending Email
+          await fetch(`${baseUrl}/api/bookings/${bookingRef}`, {
+            method: "PUT",
+            headers: { 
+              "Content-Type": "application/json",
+              "Accept": "application/json"
+            },
+            body: JSON.stringify({ paymentStatus: "FAILED", status: "PAYMENT_FAILED" })
+          });
+        } catch (networkErr) {
+          console.error("🚨 Failed to notify backend of abandonment", networkErr);
+        }
+
+        window.location.href = `/Pending?order_id=${encodeURIComponent(bookingRef)}&payment_status=PENDING`;
         return;
       }
 
-      window.location.href = `/pending?order_id=${encodeURIComponent(bookingRef)}&payment_status=SUCCESS`;
+      // 2. IF THE PAYMENT IS SUCCESSFUL (REDIRECT TO THANK YOU)
+      window.location.href = `/thank-you?order_id=${encodeURIComponent(bookingRef)}&payment_status=SUCCESS`;
+      
     } catch (error) {
       setIsProcessingPayment(false);
       console.error("Booking / Payment Error:", error);
@@ -299,7 +319,6 @@ function FleetContent() {
       );
     }
   };
-
   return (
     <div className="min-h-screen bg-puja-cream text-slate-900 flex flex-col font-sans">
       {/* Header */}

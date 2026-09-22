@@ -32,7 +32,7 @@ function toNumber(value: any): number | null {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Cashfree Loader Setup                                             */
+/*  Cashfree Loader Setup (Forced to Production)                      */
 /* ------------------------------------------------------------------ */
 type CashfreeInstance = {
   checkout: (options: {
@@ -44,10 +44,10 @@ type CashfreeInstance = {
 function loadCashfree(): Promise<CashfreeInstance> {
   return new Promise((resolve, reject) => {
     const win = window as any;
-    const currentMode = process.env.NEXT_PUBLIC_CASHFREE_ENV === "production" ? "production" : "sandbox";
     
+    // Hardcoded to production to prevent sandbox mismatch errors
     if (win.Cashfree) {
-      resolve(win.Cashfree({ mode: currentMode }));
+      resolve(win.Cashfree({ mode: "production" }));
       return;
     }
     
@@ -55,7 +55,7 @@ function loadCashfree(): Promise<CashfreeInstance> {
     script.src = "https://sdk.cashfree.com/js/v3/cashfree.js";
     script.async = true;
     script.onload = () => {
-      if (win.Cashfree) resolve(win.Cashfree({ mode: currentMode }));
+      if (win.Cashfree) resolve(win.Cashfree({ mode: "production" }));
       else reject(new Error("Unable to load Cashfree."));
     };
     script.onerror = () => reject(new Error("Unable to load Cashfree."));
@@ -164,12 +164,11 @@ function PendingContent() {
   const customerPhone = bookingDetails?.customerPhone || "+91 8240765499";
   
   /* ------------------------------------------------------------------ */
-  /*  Updated Payment Handler (Modal + Redirect to Success)             */
+  /*  Updated Payment Handler (Modal + Fallback to Link)                */
   /* ------------------------------------------------------------------ */
   const handleCompletePayment = async () => {
     setIsProcessingPayment(true);
     
-    // Attempt to pull the session ID from our merged state
     const paymentSessionId = bookingDetails?.paymentSessionId || bookingDetails?.cashfreeSessionId;
     const resumePaymentUrl = bookingDetails?.paymentLink || bookingDetails?.paymentUrl || bookingDetails?.checkoutUrl || bookingDetails?.shortUrl;
 
@@ -177,28 +176,26 @@ function PendingContent() {
       try {
         const cashfree = await loadCashfree();
         
-        // Open Cashfree in a modal so we can catch the success/close event
         const checkoutRes = await cashfree.checkout({
           paymentSessionId: paymentSessionId,
           redirectTarget: "_modal", 
         });
 
-        // If Cashfree returns an error, the user closed the modal or it failed
         if (checkoutRes && (checkoutRes as any).error) {
           setIsProcessingPayment(false);
           return; // Stay on the pending page
         }
 
-        // If no error, the payment was successful! Redirect to Thank You page
         window.location.href = `/thank-you?order_id=${encodeURIComponent(bookingRef)}&payment_status=SUCCESS`;
         return;
 
       } catch (err) {
-        console.error("Failed to load Cashfree checkout on Pending page", err);
+        console.error("Failed to load Cashfree checkout on Pending page, falling back to link", err);
+        // Do not return here; allow the code to fall through to the resumePaymentUrl below
       }
     }
 
-    // Fallback if there is only a link and no session ID
+    // Fallback if the session ID is missing, expired, or errored out
     if (resumePaymentUrl) {
       window.location.href = resumePaymentUrl;
       return;
