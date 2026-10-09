@@ -58,6 +58,20 @@ const INDIAN_STATES = [
   "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal"
 ];
 
+// ---------- HELPER: DURATION & ADVANCE RATES ----------
+function detectDuration(pkgId?: string, pkgTitle?: string): number {
+  const text = `${pkgId || ""} ${pkgTitle || ""}`.toLowerCase();
+  if (text.includes("12hr") || text.includes("12 hour") || text.includes("12 hrs")) return 12;
+  if (text.includes("10hr") || text.includes("10 hour") || text.includes("10 hrs")) return 10;
+  if (text.includes("8hr") || text.includes("8 hour") || text.includes("8 hrs")) return 8;
+  if (text.includes("5hr") || text.includes("5 hour") || text.includes("5 hrs")) return 5;
+  return 0;
+}
+
+const NON_TRAVELLER_RATES: Record<number, number> = { 5: 1051, 8: 1551, 10: 2051, 12: 2551 };
+const TRAVELLER_RATES: Record<number, number> = { 5: 2551, 8: 3051, 10: 4051, 12: 5051 };
+// ------------------------------------------------------
+
 // ---------- HELPER: DYNAMIC INCLUSIONS ----------
 function getDynamicInclusions(
   vehicle: any,
@@ -133,13 +147,22 @@ function FleetContent() {
       if (savedUser) {
         setUserData(JSON.parse(savedUser));
       }
+      
       const activePkgId = sessionStorage.getItem("broomboom_active_package");
-      if (activePkgId) {
+
+      if (!pkgFromUrl && activePkgId) {
         const pkg = RENTAL_PACKAGES.find(p => p.id === activePkgId);
         if (pkg) setSelectedRentalPackage(pkg);
       }
 
-      // Populate current real-time date and time
+      if (pkgFromUrl) {
+        const urlPkg = RENTAL_PACKAGES.find(p => p.id === pkgFromUrl);
+        if (urlPkg) {
+          setSelectedRentalPackage(urlPkg);
+          sessionStorage.setItem("broomboom_active_package", urlPkg.id);
+        }
+      }
+
       const now = new Date();
       const currentDate = now.toLocaleDateString("en-IN", {
         day: "numeric",
@@ -157,7 +180,7 @@ function FleetContent() {
     } catch (e) {
       console.warn("Storage load error", e);
     }
-  }, []);
+  }, [pkgFromUrl]);
 
   const vehiclesList = Object.values(FLEET_DATA).filter((v) => {
     if (selectedCategory === "all") return true;
@@ -173,14 +196,47 @@ function FleetContent() {
       : selectedVehicle.basePrice;
   }, [selectedVehicle, tripType, selectedRentalPackage]);
 
+  const pricingDetails = useMemo(() => {
+    const totalFare = checkoutPrice;
+    const duration = tripType === "rental"
+      ? detectDuration(selectedRentalPackage?.id, selectedRentalPackage?.title)
+      : 0;
+
+    const vehicleStr = `${selectedVehicle?.name || ""} ${selectedVehicle?.models || ""}`.toLowerCase();
+    const isTraveller = vehicleStr.includes("traveller") || vehicleStr.includes("urbania");
+
+    const rates = isTraveller ? TRAVELLER_RATES : NON_TRAVELLER_RATES;
+    const advanceAmount = duration && rates[duration]
+      ? rates[duration]
+      : Math.min(1051, totalFare);
+
+    const gstAmount = Math.round(advanceAmount * 0.05);
+    const withGst = advanceAmount + gstAmount;
+    const gatewayCharge = Math.ceil(withGst * 0.03);
+    const payableAmount = withGst + gatewayCharge;
+    const balanceDue = Math.max(0, totalFare - advanceAmount);
+    const advanceLabel = duration ? `Booking Advance (${duration} hrs)` : "Fixed Booking Advance";
+
+    return {
+      duration,
+      isTraveller,
+      totalFare,
+      advanceAmount,
+      gstAmount,
+      withGst,
+      gatewayCharge,
+      payableAmount,
+      balanceDue,
+      advanceLabel,
+    };
+  }, [checkoutPrice, tripType, selectedRentalPackage, selectedVehicle]);
+
   const handleSelectCar = (vehicleKey: string) => {
     setSelectedVehicleKey(vehicleKey);
     setIsCheckoutOpen(true);
   };
 
-const handleConfirmBooking = async (
-    e: React.FormEvent
-  ) => {
+  const handleConfirmBooking = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!userData.name.trim() || userData.name === "Guest Traveler") {
@@ -208,9 +264,12 @@ const handleConfirmBooking = async (
     } catch (_) {}
 
     try {
-      const totalTariff = checkoutPrice;
-      const advancePaid = Math.min(1051, totalTariff); // Fixed 1051 deposit
-      const balancePayable = totalTariff - advancePaid;
+      const totalTariff = pricingDetails.totalFare;
+      const advanceAmount = pricingDetails.advanceAmount;
+      const gstAmount = pricingDetails.gstAmount;
+      const gatewayCharge = pricingDetails.gatewayCharge;
+      const payableAmount = pricingDetails.payableAmount;
+      const balancePayable = pricingDetails.balanceDue;
 
       const bookingData = {
         customerName: userData.name || "Guest Traveler",
@@ -226,7 +285,11 @@ const handleConfirmBooking = async (
         pickupPincode: pickupPincode.trim(),
         pickupState: pickupState,
         totalTariff,
-        advancePaid,
+        advancePaid: payableAmount,
+        advanceAmount,
+        gstAmount,
+        gatewayCharge,
+        payableAmount,
         balancePayable,
       };
 
@@ -257,7 +320,7 @@ const handleConfirmBooking = async (
           slot: bookingData.pickupTime,
           pickupLocation: bookingData.pickupAddress,
           totalFare: `₹${bookingData.totalTariff.toLocaleString()}`,
-          advanceToPay: `₹${bookingData.advancePaid.toLocaleString()}`,
+          advanceToPay: `₹${payableAmount.toLocaleString()}`,
           balancePayable: `₹${bookingData.balancePayable.toLocaleString()}`,
           paymentSessionId: result.data.paymentSessionId,
           paymentLink: result.data?.paymentLink || null,
@@ -277,7 +340,6 @@ const handleConfirmBooking = async (
         redirectTarget: "_modal",
       });
 
-      // If the user closes or backs out of the Cashfree modal
       if (checkoutRes && (checkoutRes as any).error) {
         setIsProcessingPayment(false);
 
@@ -295,18 +357,17 @@ const handleConfirmBooking = async (
           console.error("🚨 Failed to notify backend of abandonment", networkErr);
         }
 
-        // Redirect to Pending page with the valid order_id parameter
         window.location.href = `/pending?order_id=${encodeURIComponent(bookingRef)}&payment_status=PENDING`;
         return;
       }
 
-      // If successful, redirect to Thank You page
       window.location.href = `/thank-you?order_id=${encodeURIComponent(bookingRef)}&payment_status=SUCCESS`;
     } catch (error) {
       setIsProcessingPayment(false);
       alert(error instanceof Error ? error.message : "Something went wrong while creating your booking.");
     }
   };
+
   return (
     <div className="min-h-screen bg-puja-cream text-slate-900 flex flex-col font-sans">
       {/* Header */}
@@ -773,7 +834,7 @@ const handleConfirmBooking = async (
                   </div>
                 </div>
 
-                {/* Updated Location Inputs Grid */}
+                {/* Location Inputs Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div className="md:col-span-2">
                     <label className="text-xs font-bold text-slate-700 mb-1 block">
@@ -854,14 +915,15 @@ const handleConfirmBooking = async (
                   </label>
                 </div>
 
+                {/* Tariff & Dynamic Advance Summary */}
                 <div className="p-3.5 bg-amber-100/90 rounded-2xl border border-amber-300 text-xs space-y-1.5">
                   <div className="flex justify-between text-slate-700">
                     <span>Total Trip Tariff:</span>
-                    <span className="font-bold">₹{checkoutPrice.toLocaleString()}</span>
+                    <span className="font-bold">₹{pricingDetails.totalFare.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between text-slate-950 font-black text-sm pt-1 border-t border-amber-200">
-                    <span>Pay Advance To Confirm Booking:</span>
-                    <span className="text-amber-900">₹{Math.min(1051, checkoutPrice).toLocaleString()}</span>
+                    <span>{pricingDetails.advanceLabel}:</span>
+                    <span className="text-amber-900">₹{pricingDetails.advanceAmount.toLocaleString()}</span>
                   </div>
                 </div>
 
@@ -882,11 +944,6 @@ const handleConfirmBooking = async (
                     </>
                   )}
                 </button>
-
-                <div className="flex items-center justify-center gap-1.5 text-[11px] text-slate-500">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Free cancellation with 100% refund up to 24h prior</span>
-                </div>
               </form>
             </div>
           </div>

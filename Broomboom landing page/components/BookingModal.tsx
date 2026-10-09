@@ -131,17 +131,43 @@ export const BookingModal: React.FC<BookingModalProps> = ({
 
   const totalFare = baseFare + addonsTotal;
 
-  // Fixed ₹1051 booking advance (GST + gateway still added on top as before)
-  const FIXED_ADVANCE = 1051;
-  const advanceAmount = Math.min(FIXED_ADVANCE, totalFare);
+  // –––– Advance calculation (duration-based for rentals, fixed for Puja routes) ––––
+  const packageId = String(bookingState.selectedPackageId || "").toLowerCase();
+  const packageTitle = String(pkg.title || "").toLowerCase();
 
-  const withGst = advanceAmount * 1.05;
-  const withGateway = withGst * 1.03;
-  const payableAmount = Math.ceil(withGateway);
+  const vehicleInfo = `${car.name || ""} ${car.models || ""}`.toLowerCase();
+
+  const isTraveller =
+    vehicleInfo.includes("traveller") || vehicleInfo.includes("urbania");
+
+  const duration =
+    packageId.includes("5hr") || /\b5\s*hours?\b/.test(packageTitle)
+      ? 5
+      : packageId.includes("8hr") || /\b8\s*hours?\b/.test(packageTitle)
+        ? 8
+        : packageId.includes("10hr") || /\b10\s*hours?\b/.test(packageTitle)
+          ? 10
+          : packageId.includes("12hr") || /\b12\s*hours?\b/.test(packageTitle)
+            ? 12
+            : 0;
+
+  const advanceRates: Record<number, number> = isTraveller
+    ? { 5: 2551, 8: 3051, 10: 4051, 12: 5051 }
+    : { 5: 1051, 8: 1551, 10: 2051, 12: 2551 };
+
+  // Preserve the existing fixed advance for current Puja routes.
+  // Apply duration-based rates only to rental packages.
+  const advanceAmount = duration
+    ? advanceRates[duration]
+    : Math.min(1051, totalFare);
 
   const gstAmount = Math.round(advanceAmount * 0.05);
+  const withGst = advanceAmount + gstAmount;
   const gatewayCharge = Math.ceil(withGst * 0.03);
-  const balanceDue = totalFare - advanceAmount;
+  const payableAmount = withGst + gatewayCharge;
+
+  const balanceDue = Math.max(0, totalFare - advanceAmount);
+
   // –––– Handlers –––––––––––––––––––––––––––––––––––
   const handleNextStep = (currentStep: number) => {
     if (currentStep === 1) {
@@ -726,7 +752,9 @@ export const BookingModal: React.FC<BookingModalProps> = ({
 
                 <div className="p-2 sm:p-3 bg-amber-500/10 rounded-xl border border-amber-500/30 space-y-1.5 sm:space-y-2">
                   <div className="flex justify-between items-center text-[10px] sm:text-xs">
-                    <span className="text-amber-300">Fixed Booking Advance </span>
+                    <span className="text-amber-300">
+                      {duration ? `Booking Advance (${duration} hrs)` : "Fixed Booking Advance"}
+                    </span>
                     <span className="text-white font-semibold">₹{advanceAmount.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between items-center text-[10px] sm:text-xs">
