@@ -209,7 +209,7 @@ const handleConfirmBooking = async (
 
     try {
       const totalTariff = checkoutPrice;
-      const advancePaid = Math.min(2051, totalTariff); // Fixed 2051 deposit
+      const advancePaid = Math.min(1051, totalTariff); // Fixed 1051 deposit
       const balancePayable = totalTariff - advancePaid;
 
       const bookingData = {
@@ -627,6 +627,26 @@ const handleConfirmBooking = async (
               </div>
             </div>
 
+            {/* 🪔 Mahalaya & Durga Puja Exclusive Offer Banner */}
+            <div 
+              onClick={() => {
+                window.scrollTo({ top: 380, behavior: "smooth" });
+              }}
+              className="rounded-3xl overflow-hidden border-2 border-amber-400 shadow-xl bg-slate-950 cursor-pointer group hover:border-amber-300 hover:shadow-2xl transition-all"
+              title="Click to select your Durga Puja rental car"
+            >
+              <div className="relative aspect-[16/9] w-full overflow-hidden">
+                <Image
+                  src="/images/durga-puja-pandal-hopping-offer.png"
+                  alt="BroomBoom Cabs - Shubho Mahalaya Exclusive Offer - Durga Puja 2026 Pandal Hopping Car Rental Packages"
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  sizes="(max-width: 1024px) 100vw, 33vw"
+                  priority
+                />
+              </div>
+            </div>
+
             <div className="bg-gradient-to-br from-amber-400 to-yellow-400 rounded-3xl p-6 text-slate-950 shadow-md space-y-3">
               <h4 className="text-base font-bold font-royal">Need Help Selecting?</h4>
               <p className="text-xs text-amber-950/90 leading-relaxed font-medium">
@@ -841,7 +861,7 @@ const handleConfirmBooking = async (
                   </div>
                   <div className="flex justify-between text-slate-950 font-black text-sm pt-1 border-t border-amber-200">
                     <span>Pay Advance To Confirm Booking:</span>
-                    <span className="text-amber-900">₹{Math.min(2051, checkoutPrice).toLocaleString()}</span>
+                    <span className="text-amber-900">₹{Math.min(1051, checkoutPrice).toLocaleString()}</span>
                   </div>
                 </div>
 

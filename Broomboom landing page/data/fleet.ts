@@ -20,10 +20,10 @@ export const FLEET_DATA: Record<string, Vehicle> = {
     perExtraHour: 200,
     outstationPerKm: 20,
     packageRates: {
-      pkg_5hr_50km: 3551,
-      pkg_8hr_80km: 4551,
-      pkg_10hr_100km: 5051,
-      pkg_12hr_120km: 6051,
+      pkg_5hr_50km: 2551,
+      pkg_8hr_80km: 3551,
+      pkg_10hr_100km: 4051,
+      pkg_12hr_120km: 5051,
     },
     features: [
       "Chilled Dual AC",
@@ -33,7 +33,7 @@ export const FLEET_DATA: Record<string, Vehicle> = {
       "Free Cancellation up to 24 hrs",
     ],
     inclusions: [
-      "Base package 80 KMs & 8 Hours usage (₹4,551) or 50 KMs (₹3,551)",
+      "Base package 80 KMs & 8 Hours usage (₹3,551) or 50 KMs (₹2,551)",
       "Chilled Dual AC & Sanitised Interior",
       "Fuel Charges & Chauffeur Day Allowance Included",
       "State & City Toll Taxes Included",
@@ -65,10 +65,10 @@ export const FLEET_DATA: Record<string, Vehicle> = {
     perExtraHour: 250,
     outstationPerKm: 25,
     packageRates: {
-      pkg_5hr_50km: 4551,
-      pkg_8hr_80km: 5551,
-      pkg_10hr_100km: 7051,
-      pkg_12hr_120km: 8051,
+      pkg_5hr_50km: 3551,
+      pkg_8hr_80km: 4551,
+      pkg_10hr_100km: 6051,
+      pkg_12hr_120km: 7051,
     },
     features: [
       "Spacious 3-Row AC",
@@ -78,7 +78,7 @@ export const FLEET_DATA: Record<string, Vehicle> = {
       "24x7 Puja Control Room Support",
     ],
     inclusions: [
-      "Base package 80 KMs & 8 Hours usage (₹5,551) or 50 KMs (₹4,551)",
+      "Base package 80 KMs & 8 Hours usage (₹4,551) or 50 KMs (₹3,551)",
       "Chilled 3-Row AC & Ample Legroom",
       "Fuel & Verified Chauffeur Allowance",
       "All Bengal Highway Tolls & Taxes Included",
@@ -110,10 +110,10 @@ export const FLEET_DATA: Record<string, Vehicle> = {
     perExtraHour: 300,
     outstationPerKm: 30,
     packageRates: {
-      pkg_5hr_50km: 6051,
-      pkg_8hr_80km: 7551,
-      pkg_10hr_100km: 8051,
-      pkg_12hr_120km: 9051,
+      pkg_5hr_50km: 5051,
+      pkg_8hr_80km: 6551,
+      pkg_10hr_100km: 7051,
+      pkg_12hr_120km: 8051,
     },
     features: [
       "Captain Recliner Seats",
@@ -123,7 +123,7 @@ export const FLEET_DATA: Record<string, Vehicle> = {
       "In-car Phone Chargers & Wet Wipes",
     ],
     inclusions: [
-      "Base package 80 KMs & 8 Hours usage (₹7,551) or 50 KMs (₹6,051)",
+      "Base package 80 KMs & 8 Hours usage (₹6,551) or 50 KMs (₹5,051)",
       "Luxury Captain Seats & Heavy-duty Dual AC",
       "Fuel & Senior Route-Master Chauffeur Allowance",
       "Fastag Highway Tolls & Taxes Included",
@@ -168,7 +168,7 @@ export const FLEET_DATA: Record<string, Vehicle> = {
       "Assigned Senior Chauffeur & Cleaner",
     ],
     inclusions: [
-      "Base package 80 KMs & 8 Hours usage (₹10,051) or 50 KMs (₹9,051)",
+      "Base package 80 KMs & 8 Hours usage (₹10,051) or 50 KMs (₹8,051)",
       "Individual AC Vents on Every Seat & Pushback Rows",
       "Fuel, Commercial Permit & Driver Allowances",
       "All West Bengal Highway Tolls Included",

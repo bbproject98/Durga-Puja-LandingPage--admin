@@ -131,8 +131,8 @@ export const BookingModal: React.FC<BookingModalProps> = ({
 
   const totalFare = baseFare + addonsTotal;
 
-  // Fixed ₹2051 booking advance (GST + gateway still added on top as before)
-  const FIXED_ADVANCE = 2051;
+  // Fixed ₹1051 booking advance (GST + gateway still added on top as before)
+  const FIXED_ADVANCE = 1051;
   const advanceAmount = Math.min(FIXED_ADVANCE, totalFare);
 
   const withGst = advanceAmount * 1.05;
