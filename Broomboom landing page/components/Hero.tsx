@@ -262,7 +262,7 @@ export const Hero: React.FC<HeroProps> = ({
                             {/* INCLUSIONS – hidden on mobile, visible on lg+ */}
                             <div className="hidden lg:flex lg:flex-wrap lg:items-center lg:justify-start gap-4 pt-1 text-xs text-slate-600 font-medium">
                                 <div className="flex items-center gap-1.5">
-                                    <CheckCircle2 className="w-4 h-4 text-amber-600" /> Free 24h Cancellation
+                                    <CheckCircle2 className="w-4 h-4 text-amber-600" /> GST &amp; Gateway Charges Included
                                 </div>
                                 <div className="flex items-center gap-1.5">
                                     <CheckCircle2 className="w-4 h-4 text-amber-600" /> VIP Pandal Pass Concierge

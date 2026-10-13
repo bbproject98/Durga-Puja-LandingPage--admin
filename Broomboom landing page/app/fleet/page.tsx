@@ -100,8 +100,7 @@ function getDynamicInclusions(
 
   const shared = [
     "Fuel Charges & Chauffeur Day Allowance Included",
-    "State & City Toll Taxes Included",
-    "Free 24h Modification",
+    "GST & Payment Gateway Charges Included",
   ];
 
   return [baseText, acText, ...shared];
@@ -567,7 +566,7 @@ function FleetContent() {
                         </div>
                         <div className="flex items-center gap-1.5">
                           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
-                          <span>Free 24h Modification</span>
+                          <span>GST &amp; Gateway Charges Included</span>
                         </div>
                       </div>
                       <div className="text-[11px] text-slate-500 pt-0.5 font-medium">
@@ -779,7 +778,7 @@ function FleetContent() {
                 <div className="bg-white p-3 rounded-2xl border border-amber-200 text-[11px] space-y-1">
                   <span className="font-bold text-slate-900 block">✓ Included in this tariff:</span>
                   <p className="text-slate-600">
-                    Fuel, chauffeur allowance, dual AC, all West Bengal tolls &amp; free 24h cancellation.
+                    Fuel, chauffeur allowance, dual AC, GST &amp; gateway charges included. (State/City tolls &amp; parking payable as per actuals).
                   </p>
                 </div>
 

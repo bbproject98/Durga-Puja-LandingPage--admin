@@ -57,7 +57,7 @@ export const RENTAL_PACKAGES: RentalPackage[] = [
       "50 KMs & 5 Hours Included",
       "Chilled Dual AC & Sanitised Cab",
       "Driver Allowance & Fuel Included",
-      "Free 24h Cancellation",
+      "GST & Gateway Charges Included",
     ],
     image: "/images/d1.png",
     imageAlt: "5 Hours 50 KMs rental cab for morning Kolkata pandal hopping",
@@ -82,7 +82,7 @@ export const RENTAL_PACKAGES: RentalPackage[] = [
     inclusions: [
       "80 KMs & 8 Hours Included",
       "Dedicated Route-Master Chauffeur",
-      "All West Bengal Toll Taxes Handled",
+      "GST & Gateway Charges Included",
       "Senior Citizen Drop Points",
     ],
     image: "/images/d2.png",
