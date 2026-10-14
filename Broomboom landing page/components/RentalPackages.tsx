@@ -86,28 +86,27 @@ export const RentalPackages: React.FC<RentalPackagesProps> = ({ onActionClick })
               aria-label={`Book ${pkg.title} rental package`}
               onClick={() => handleBook(pkg)}
               onKeyDown={(e) => handleKeyDown(e, pkg)}
-              className="bg-puja-cream h-full rounded-3xl overflow-hidden border-2 border-amber-200/90 card-shadow flex flex-col justify-between group hover:border-amber-400 hover:shadow-lg active:scale-[0.99] transition-all p-4 lg:p-3.5 space-y-3 lg:space-y-2.5 cursor-pointer select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2"
+              className="bg-puja-cream h-full rounded-3xl overflow-hidden border-2 border-amber-200/90 card-shadow flex flex-col justify-between group hover:border-amber-400 hover:shadow-lg active:scale-[0.99] transition-all p-4 lg:p-3.5 cursor-pointer select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2"
             >
               {/* Top Content */}
-              <div className="flex flex-col flex-1">
+              <div className="flex flex-col flex-1 space-y-2.5">
                 
-                {/* Highlight Text Above Package - Now with Icons on Both Sides */}
-                <div className="mb-3 relative overflow-hidden rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 shadow-md shadow-amber-500/30 border border-amber-300/50 flex items-center justify-center p-2.5">
-                  
-                  {/* Left Icon */}
+                {/* Highlight Text Above Package */}
+                <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 shadow-md shadow-amber-500/30 border border-amber-300/50 flex items-center justify-center py-2 px-2.5">
                   <DurgaTrishulIcon className="w-4 h-4 text-slate-950 mr-1.5 shrink-0 animate-bounce" />
-                  
-                  <p className="text-[11px] sm:text-xs font-black text-slate-950 uppercase tracking-widest leading-tight text-center drop-shadow-sm">
-                    Book at Your Preferable Time this Puja
-                  </p>
-                  
-                  {/* Right Icon */}
+                  <div className="text-center drop-shadow-sm leading-tight">
+                    <p className="text-[11px] sm:text-xs font-black text-slate-950 uppercase tracking-wider">
+                      Book at Your Preferred Time This Durga Puja
+                    </p>
+                    <p className="text-[10px] font-bold text-amber-950 mt-0.5">
+                      Book Anytime • 24/7 Available
+                    </p>
+                  </div>
                   <DurgaTrishulIcon className="w-4 h-4 text-slate-950 ml-1.5 shrink-0 animate-bounce" />
-                
                 </div>
 
                 {/* Image Banner */}
-                <div className="relative h-36 w-full shrink-0 rounded-2xl overflow-hidden bg-slate-900 shadow-inner mb-3">
+                <div className="relative h-36 w-full shrink-0 rounded-2xl overflow-hidden bg-slate-900 shadow-inner">
                   <Image
                     src={pkg.image}
                     alt={pkg.imageAlt}
@@ -125,8 +124,8 @@ export const RentalPackages: React.FC<RentalPackagesProps> = ({ onActionClick })
                   </div>
                 </div>
 
-                {/* Title & Subtitle - REMOVED THE TITLE TO FIX OVERLAP */}
-                <div className="space-y-1 mb-3 flex-1">
+                {/* Subtitle */}
+                <div className="space-y-1 flex-1">
                   <p className="text-[11px] text-slate-600 line-clamp-2 leading-relaxed">
                     {pkg.subtitle}
                   </p>
@@ -144,34 +143,41 @@ export const RentalPackages: React.FC<RentalPackagesProps> = ({ onActionClick })
                     </span>
                   </div>
 
-                  <div className="text-[10px] text-slate-500 truncate pt-0.5 border-t border-amber-100">
-                    <span className="font-semibold text-slate-700">Pandals: </span>
-                    <span>{pkg.highlights.slice(0, 3).join(", ")}...</span>
+                  <div className="text-[10px] text-slate-500 pt-1 border-t border-amber-100 space-y-1">
+                    <p className="truncate">
+                      <span className="font-semibold text-slate-700">Pandals: </span>
+                      <span>{pkg.highlights.slice(0, 3).join(", ")} etc.</span>
+                    </p>
+                    <p className="text-[10px] font-bold text-amber-900 flex items-center gap-1.5 bg-amber-50/80 px-2 py-1 rounded-lg border border-amber-200/60 leading-tight">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span>
+                      <span>You can explore pandals as per your plan.</span>
+                    </p>
                   </div>
                 </div>
               </div>
 
-              {/* Bottom BOOK NOW Button */}
-              <div className="mt-3 lg:mt-2 pt-3 lg:pt-2 shrink-0 border-t border-amber-200/80">
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    // Prevent the card's onClick from firing twice
-                    e.stopPropagation();
-                    handleBook(pkg);
-                  }}
-                  className="w-full btn-yellow-shimmer py-3 lg:py-2.5 px-4 lg:px-3 bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 active:scale-95 text-slate-950 font-black text-xs sm:text-sm rounded-xl shadow-md shadow-amber-400/30 hover:scale-102 transition-all flex items-center justify-center gap-2 uppercase tracking-wider cursor-pointer min-h-[44px] lg:min-h-[40px]"
-                >
-                  <Zap className="w-4 h-4 fill-slate-950" />
-                  <span>BOOK NOW</span>
-                </button>
-              </div>
+              {/* Bottom Actions & Highlights */}
+              <div className="mt-3 shrink-0 space-y-2.5">
+                <div className="pt-2.5 border-t border-amber-200/80">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleBook(pkg);
+                    }}
+                    className="w-full btn-yellow-shimmer py-3 lg:py-2.5 px-4 lg:px-3 bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 active:scale-95 text-slate-950 font-black text-xs sm:text-sm rounded-xl shadow-md shadow-amber-400/30 hover:scale-102 transition-all flex items-center justify-center gap-2 uppercase tracking-wider cursor-pointer min-h-[44px] lg:min-h-[40px]"
+                  >
+                    <Zap className="w-4 h-4 fill-slate-950" />
+                    <span>BOOK NOW</span>
+                  </button>
+                </div>
 
-              {/* Highlight Text Below Package */}
-              <div className="mt-3 text-center bg-green-50 border border-green-200 rounded-xl p-2 shadow-sm">
-                <p className="text-[10px] font-black text-green-800 uppercase tracking-tight leading-tight">
-                  100% Cab Guarantee, No Cancellation, Free Time and Free Date Modification
-                </p>
+                {/* Highlight Text Below Package */}
+                <div className="text-center bg-green-50 border border-green-200 rounded-xl p-2 shadow-sm">
+                  <p className="text-[10px] font-black text-green-800 uppercase tracking-tight leading-tight">
+                    100% Cab Guarantee, No Cancellation, Free Time and Free Date Modification
+                  </p>
+                </div>
               </div>
 
             </div>

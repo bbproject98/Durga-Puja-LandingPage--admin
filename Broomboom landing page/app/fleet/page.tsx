@@ -100,7 +100,8 @@ function getDynamicInclusions(
 
   const shared = [
     "Fuel Charges & Chauffeur Day Allowance Included",
-    "GST & Payment Gateway Charges Included",
+    "Free 24h Modification",
+    "GST & Gateway Charges Excluded",
   ];
 
   return [baseText, acText, ...shared];
@@ -138,6 +139,9 @@ function FleetContent() {
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [addMishtiBox, setAddMishtiBox] = useState(true);
   const [addVipPass, setAddVipPass] = useState(true);
+  const [addMineralWaterSanitary, setAddMineralWaterSanitary] = useState(true);
+  const [addVipCarPass, setAddVipCarPass] = useState(true);
+  const [addTourExpertDriver, setAddTourExpertDriver] = useState(true);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
   useEffect(() => {
@@ -566,7 +570,11 @@ function FleetContent() {
                         </div>
                         <div className="flex items-center gap-1.5">
                           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
-                          <span>GST &amp; Gateway Charges Included</span>
+                          <span>Free 24h Modification</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+                          <span>GST &amp; Gateway Charges Excluded</span>
                         </div>
                       </div>
                       <div className="text-[11px] text-slate-500 pt-0.5 font-medium">
@@ -765,20 +773,47 @@ function FleetContent() {
                   </div>
                 </div>
 
-                <div className="bg-white p-3.5 rounded-2xl border border-amber-200 gap-3 text-xs flex flex-col">
-                  <div className="space-y-0.5">
-                    <span className="text-[10px] uppercase font-bold text-emerald-700 flex items-center gap-1">
-                      <Calendar className="w-3 h-3" /> Pickup Schedule:
+                                <div className="bg-white p-3.5 rounded-2xl border border-amber-200 space-y-3">
+                  <div className="flex items-center gap-1.5 border-b border-amber-100 pb-2">
+                    <Calendar className="w-3.5 h-3.5 text-amber-600" />
+                    <span className="text-[11px] font-bold text-slate-900 uppercase tracking-wider">
+                      Edit Pickup Schedule
                     </span>
-                    <strong className="text-slate-900 block">{selectedPickupDate}</strong>
-                    <span className="text-slate-500 text-[11px]">{selectedPickupTime}</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs font-bold text-slate-700 mb-1 block">
+                        Pickup Date <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. 14 Oct 2026"
+                        value={selectedPickupDate}
+                        onChange={(e) => setSelectedPickupDate(e.target.value)}
+                        required
+                        className="w-full px-3 py-2.5 bg-slate-50 border border-amber-200 rounded-xl text-base sm:text-xs text-slate-900 focus:outline-none focus:border-amber-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-700 mb-1 block">
+                        Pickup Time <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. 09:58 AM"
+                        value={selectedPickupTime}
+                        onChange={(e) => setSelectedPickupTime(e.target.value)}
+                        required
+                        className="w-full px-3 py-2.5 bg-slate-50 border border-amber-200 rounded-xl text-base sm:text-xs text-slate-900 focus:outline-none focus:border-amber-500"
+                      />
+                    </div>
                   </div>
                 </div>
 
                 <div className="bg-white p-3 rounded-2xl border border-amber-200 text-[11px] space-y-1">
                   <span className="font-bold text-slate-900 block">✓ Included in this tariff:</span>
                   <p className="text-slate-600">
-                    Fuel, chauffeur allowance, dual AC, GST &amp; gateway charges included. (State/City tolls &amp; parking payable as per actuals).
+                    Fuel, chauffeur allowance, dual AC, GST &amp; gateway charges Excluded.
                   </p>
                 </div>
 
@@ -892,27 +927,40 @@ function FleetContent() {
                     )}
                   </div>
                 </div>
+<div className="bg-white p-3.5 rounded-2xl border border-amber-200 space-y-3">
+  {/* Point 1 */}
+  <label className="flex items-center gap-2 text-xs font-semibold text-slate-800 cursor-pointer">
+    <input
+      type="checkbox"
+      checked={addMineralWaterSanitary}
+      onChange={(e) => setAddMineralWaterSanitary(e.target.checked)}
+      className="rounded text-amber-500 focus:ring-amber-400"
+    />
+    <span>💧 Mineral Water onboard and Sanitary Napkins available</span>
+  </label>
 
-                <div className="bg-white p-3.5 rounded-2xl border border-amber-200 space-y-2">
-                  <label className="flex items-center gap-2 text-xs font-semibold text-slate-800 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={addMishtiBox}
-                      onChange={(e) => setAddMishtiBox(e.target.checked)}
-                      className="rounded text-amber-500 focus:ring-amber-400"
-                    />
-                    <span>🎁 Free Bengali Mishti Box &amp; Mineral Water onboard</span>
-                  </label>
-                  <label className="flex items-center gap-2 text-xs font-semibold text-slate-800 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={addVipPass}
-                      onChange={(e) => setAddVipPass(e.target.checked)}
-                      className="rounded text-amber-500 focus:ring-amber-400"
-                    />
-                    <span>⭐ VIP Pandal Pass Concierge Assistance</span>
-                  </label>
-                </div>
+  {/* Point 2 */}
+  <label className="flex items-center gap-2 text-xs font-semibold text-slate-800 cursor-pointer">
+    <input
+      type="checkbox"
+      checked={addVipCarPass}
+      onChange={(e) => setAddVipCarPass(e.target.checked)}
+      className="rounded text-amber-500 focus:ring-amber-400"
+    />
+    <span>⭐ VIP Car Pandal Pass Concierge Assistance</span>
+  </label>
+
+  {/* Point 3 */}
+  <label className="flex items-center gap-2 text-xs font-semibold text-slate-800 cursor-pointer">
+    <input
+      type="checkbox"
+      checked={addTourExpertDriver}
+      onChange={(e) => setAddTourExpertDriver(e.target.checked)}
+      className="rounded text-amber-500 focus:ring-amber-400"
+    />
+    <span>🚗 Trained Professional Tour Expert Driver Guide</span>
+  </label>
+</div>
 
                 {/* Tariff & Dynamic Advance Summary */}
                 <div className="p-3.5 bg-amber-100/90 rounded-2xl border border-amber-300 text-xs space-y-1.5">

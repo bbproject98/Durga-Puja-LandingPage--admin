@@ -30,13 +30,14 @@ export const FLEET_DATA: Record<string, Vehicle> = {
       "Sanitised & Clean Interior",
       "Kolkata Pandal Route Specialist Driver",
       "Complimentary Water Bottles",
-      "GST & Gateway Charges Included",
+      "Free 24h Modification",
     ],
     inclusions: [
       "Base package 80 KMs & 8 Hours usage (₹3,551) or 50 KMs (₹2,551)",
       "Chilled Dual AC & Sanitised Interior",
       "Fuel Charges & Chauffeur Day Allowance Included",
-      "GST & Payment Gateway Charges Included",
+      "Free 24h Modification",
+      "GST & Gateway Charges Excluded",
     ],
     exclusions: [
       "Extra KMs beyond package (charged at ₹20/km)",
@@ -44,7 +45,6 @@ export const FLEET_DATA: Record<string, Vehicle> = {
       "Night driving allowance (₹500 if operating past 10 PM)",
       "State & City Toll Taxes (to be paid as per actuals)",
       "Specific pandal/mall parking entry tickets",
-      "Free 24h modification/cancellation not applicable",
     ],
   },
   suv_6: {
@@ -82,8 +82,9 @@ export const FLEET_DATA: Record<string, Vehicle> = {
       "Base package 80 KMs & 8 Hours usage (₹4,551) or 50 KMs (₹3,551)",
       "Chilled 3-Row AC & Ample Legroom",
       "Fuel & Verified Chauffeur Allowance",
-      "GST & Payment Gateway Charges Included",
+      "Free 24h Modification",
       "Senior Citizen Close Drop Point Assistance",
+      "GST & Gateway Charges Excluded",
     ],
     exclusions: [
       "Extra KMs beyond package (charged at ₹25/km)",
@@ -91,7 +92,6 @@ export const FLEET_DATA: Record<string, Vehicle> = {
       "Night driving allowance (₹500 if operating past 10 PM)",
       "State & City Toll Taxes (to be paid as per actuals)",
       "Private parking charges at venue/hotel",
-      "Free 24h modification/cancellation not applicable",
     ],
   },
   suv_7: {
@@ -129,8 +129,9 @@ export const FLEET_DATA: Record<string, Vehicle> = {
       "Base package 80 KMs & 8 Hours usage (₹5,551) or 50 KMs (₹4,051)",
       "Luxury Captain Seats & Heavy-duty Dual AC",
       "Fuel & Senior Route-Master Chauffeur Allowance",
-      "GST & Payment Gateway Charges Included",
+      "Free 24h Modification",
       "Complimentary Bengali Sweet Hamper Onboard",
+      "GST & Gateway Charges Excluded",
     ],
     exclusions: [
       "Extra KMs beyond package (charged at ₹30/km)",
@@ -138,7 +139,6 @@ export const FLEET_DATA: Record<string, Vehicle> = {
       "Night driving allowance (₹500 if operating past 10 PM)",
       "State & City Toll Taxes (to be paid as per actuals)",
       "Designated pandal VIP parking access slips",
-      "Free 24h modification/cancellation not applicable",
     ],
   },
   traveller_13: {
@@ -176,8 +176,9 @@ export const FLEET_DATA: Record<string, Vehicle> = {
       "Base package 80 KMs & 8 Hours usage (₹10,051) or 50 KMs (₹9,051)",
       "Individual AC Vents on Every Seat & Pushback Rows",
       "Fuel, Commercial Permit & Driver Allowances",
-      "GST & Payment Gateway Charges Included",
+      "Free 24h Modification",
       "Dedicated On-Call Operations Manager",
+      "GST & Gateway Charges Excluded",
     ],
     exclusions: [
       "Extra KMs beyond package (charged at ₹40/km)",
@@ -185,7 +186,6 @@ export const FLEET_DATA: Record<string, Vehicle> = {
       "Night driving allowance (₹500 if operating past 10 PM)",
       "State & City Toll Taxes (to be paid as per actuals)",
       "Club/Pandal special heavy vehicle parking tickets",
-      "Free 24h modification/cancellation not applicable",
     ],
   },
   traveller_17: {
@@ -224,7 +224,8 @@ export const FLEET_DATA: Record<string, Vehicle> = {
       "High Roof Cabin with Individual Blower ACs",
       "High-power Music System for Puja Agomoni Songs",
       "Driver + Assistant Chaperone Allowance Included",
-      "GST & Payment Gateway Charges Included",
+      "Free 24h Modification",
+      "GST & Gateway Charges Excluded",
     ],
     exclusions: [
       "Extra KMs beyond package (charged at ₹45/km)",
@@ -232,7 +233,6 @@ export const FLEET_DATA: Record<string, Vehicle> = {
       "Night driving allowance (₹500 if operating past 10 PM)",
       "State & City Toll Taxes (to be paid as per actuals)",
       "Special club/hotel bus parking fees",
-      "Free 24h modification/cancellation not applicable",
     ],
   },
   traveller_24: {
@@ -270,8 +270,9 @@ export const FLEET_DATA: Record<string, Vehicle> = {
       "Base package 80 KMs & 8 Hours usage (₹13,051) or 50 KMs (₹12,051)",
       "Ultra-luxury Pushback Leather Recliners & Dual AC",
       "Fuel, Commercial Permits & Driver Allowances",
-      "GST & Payment Gateway Charges Included",
+      "Free 24h Modification",
       "Guaranteed Backup Standby Vehicle",
+      "GST & Gateway Charges Excluded",
     ],
     exclusions: [
       "Extra KMs beyond package (charged at ₹50/km)",
@@ -279,7 +280,6 @@ export const FLEET_DATA: Record<string, Vehicle> = {
       "Night driving allowance (₹500 if operating past 10 PM)",
       "State & City Toll Taxes (to be paid as per actuals)",
       "Special venue/club bus parking slip",
-      "Free 24h modification/cancellation not applicable",
     ],
   },
 };
