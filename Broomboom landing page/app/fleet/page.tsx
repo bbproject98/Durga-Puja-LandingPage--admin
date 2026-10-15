@@ -11,8 +11,12 @@ import {
 import { FLEET_DATA } from "@/data/fleet";
 import { RENTAL_PACKAGES, RentalPackage } from "@/data/packages";
 import { submitBooking } from "@/lib/api";
-import { RentalBookingHeader } from "@/components/RentalBookingHeader";
 import { useSearchParams } from "next/navigation";
+import {
+  RentalBookingHeader,
+  getOneHourAheadQuarterHour,
+  getInitialPickupDate,
+} from "@/components/RentalBookingHeader";
 
 type CashfreeInstance = {
   checkout: (options: {
@@ -166,20 +170,11 @@ function FleetContent() {
         }
       }
 
-      const now = new Date();
-      const currentDate = now.toLocaleDateString("en-IN", {
-        day: "numeric",
-        month: "short",
-        year: "numeric"
-      });
-      const currentTime = now.toLocaleTimeString("en-IN", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true
-      });
+      const initialDate = getInitialPickupDate();
+      const initialTime = getOneHourAheadQuarterHour();
 
-      setSelectedPickupDate((prev) => prev || currentDate);
-      setSelectedPickupTime((prev) => prev || currentTime);
+      setSelectedPickupDate((prev) => prev || initialDate);
+      setSelectedPickupTime((prev) => prev || initialTime);
     } catch (e) {
       console.warn("Storage load error", e);
     }

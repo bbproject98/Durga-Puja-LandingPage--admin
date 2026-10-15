@@ -24,24 +24,45 @@ const ALL_TIME_SLOTS = generateTimeSlots();
 
 // Convert "HH:MM AM/PM" to minutes since midnight
 const timeToMinutes = (timeStr: string): number => {
-  const [time, ampm] = timeStr.split(" ");
+  if (!timeStr) return 0;
+  const parts = timeStr.trim().split(" ");
+  if (parts.length < 2) return 0;
+  const [time, ampm] = parts;
   let [hours, minutes] = time.split(":").map(Number);
-  if (ampm === "PM" && hours !== 12) hours += 12;
-  if (ampm === "AM" && hours === 12) hours = 0;
+  if (isNaN(hours) || isNaN(minutes)) return 0;
+  if (ampm.toUpperCase() === "PM" && hours !== 12) hours += 12;
+  if (ampm.toUpperCase() === "AM" && hours === 12) hours = 0;
   return hours * 60 + minutes;
 };
 
-// Get the next 15‑minute slot as a string from current time
-const getNextQuarterHour = (): string => {
-  const now = new Date();
-  const minutes = now.getMinutes();
+// Get the time slot 1 hour ahead of current time, rounded up to next 15-minute slot
+export const getOneHourAheadQuarterHour = (): string => {
+  const d = new Date();
+  d.setHours(d.getHours() + 1);
+  const minutes = d.getMinutes();
   const nextQuarter = Math.ceil(minutes / 15) * 15;
-  now.setMinutes(nextQuarter, 0, 0);
-  const h = now.getHours() % 12 || 12;
-  const ampm = now.getHours() < 12 ? "AM" : "PM";
-  const mm = now.getMinutes().toString().padStart(2, "0");
+  d.setMinutes(nextQuarter, 0, 0);
+  const h = d.getHours() % 12 || 12;
+  const ampm = d.getHours() < 12 ? "AM" : "PM";
+  const mm = d.getMinutes().toString().padStart(2, "0");
   return `${h.toString().padStart(2, "0")}:${mm} ${ampm}`;
 };
+
+// Get the initial pickup date (rolls over to next day if 1 hour ahead crosses midnight)
+export const getInitialPickupDate = (): string => {
+  const d = new Date();
+  d.setHours(d.getHours() + 1);
+  const minutes = d.getMinutes();
+  const nextQuarter = Math.ceil(minutes / 15) * 15;
+  d.setMinutes(nextQuarter, 0, 0);
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+};
+
+// Backward compatible alias
+const getNextQuarterHour = getOneHourAheadQuarterHour;
 
 // Get the current time as "HH:MM AM/PM" (rounded to minute)
 const getCurrentTimeStr = (): string => {
@@ -52,18 +73,37 @@ const getCurrentTimeStr = (): string => {
   return `${h.toString().padStart(2, "0")}:${mm} ${ampm}`;
 };
 
-// Check if a date string (YYYY-MM-DD) is today
-const isToday = (dateStr: string): boolean => {
-  const today = new Date().toISOString().split("T")[0];
-  return dateStr === today;
+export const getTodayStr = (): string => {
+  const now = new Date();
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth() + 1).padStart(2, "0");
+  const dd = String(now.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
 };
 
-const getTodayStr = (): string => new Date().toISOString().split("T")[0];
+// Check if a date string is today (supports ISO YYYY-MM-DD and formatted date strings)
+export const isToday = (dateStr: string): boolean => {
+  if (!dateStr) return false;
+  const today = getTodayStr();
+  if (dateStr === today) return true;
+  const d = new Date(dateStr);
+  if (!isNaN(d.getTime())) {
+    const now = new Date();
+    return (
+      d.getFullYear() === now.getFullYear() &&
+      d.getMonth() === now.getMonth() &&
+      d.getDate() === now.getDate()
+    );
+  }
+  return false;
+};
 
-// Long form for the date picker field (e.g. "16 Oct 2024")
+// Long form for the date picker field (e.g. "16 Oct 2026")
 const formatDisplayDate = (dateStr: string): string => {
   if (!dateStr) return "Select date";
-  const parsed = new Date(`${dateStr}T00:00:00`);
+  const parsed = /^\d{4}-\d{2}-\d{2}$/.test(dateStr)
+    ? new Date(`${dateStr}T00:00:00`)
+    : new Date(dateStr);
   if (isNaN(parsed.getTime())) return dateStr;
   return parsed.toLocaleDateString("en-IN", {
     day: "2-digit",
@@ -75,9 +115,9 @@ const formatDisplayDate = (dateStr: string): string => {
 // Short form for the summary bar (e.g. "Oct 16")
 const formatSummaryDate = (dateStr: string): string => {
   if (!dateStr) return "";
-  const isIso = /^\d{4}-\d{2}-\d{2}$/.test(dateStr);
-  if (!isIso) return dateStr;
-  const parsed = new Date(`${dateStr}T00:00:00`);
+  const parsed = /^\d{4}-\d{2}-\d{2}$/.test(dateStr)
+    ? new Date(`${dateStr}T00:00:00`)
+    : new Date(dateStr);
   if (isNaN(parsed.getTime())) return dateStr;
   return parsed.toLocaleDateString("en-US", {
     month: "short",
@@ -212,8 +252,8 @@ const TimeDropdown: React.FC<TimeDropdownProps> = ({ value, onChange, selectedDa
 
   const availableSlots = useMemo(() => {
     if (isToday(selectedDate)) {
-      const nowMinutes = timeToMinutes(getCurrentTimeStr());
-      const nextQuarter = Math.ceil(nowMinutes / 15) * 15;
+      const minMinutes = timeToMinutes(getCurrentTimeStr()) + 60;
+      const nextQuarter = Math.ceil(minMinutes / 15) * 15;
       return ALL_TIME_SLOTS.filter((slot) => timeToMinutes(slot) >= nextQuarter);
     }
     return ALL_TIME_SLOTS;
@@ -454,15 +494,27 @@ export const RentalBookingHeader: React.FC<RentalBookingHeaderProps> = ({
     }
   }, [isEditing, isCustomCity]);
 
+  // Keep pickupTime synchronized to at least 1 hour ahead of current time for today
+  useEffect(() => {
+    if (!isToday(pickupDate)) return;
+
+    const minMinutes = timeToMinutes(getCurrentTimeStr()) + 60;
+    const selectedMinutes = timeToMinutes(pickupTime);
+
+    if (selectedMinutes < minMinutes) {
+      onUpdateTime(getOneHourAheadQuarterHour());
+    }
+  }, [pickupDate, pickupTime, onUpdateTime]);
+
   useEffect(() => {
     if (!isEditing) return;
     if (!isToday(tempDate)) return;
 
-    const currentMinutes = timeToMinutes(getCurrentTimeStr());
+    const minMinutes = timeToMinutes(getCurrentTimeStr()) + 60;
     const selectedMinutes = timeToMinutes(tempTime);
 
-    if (selectedMinutes < currentMinutes) {
-      setTempTime(getNextQuarterHour());
+    if (selectedMinutes < minMinutes) {
+      setTempTime(getOneHourAheadQuarterHour());
     }
   }, [isEditing, tempDate, tempTime]);
 
