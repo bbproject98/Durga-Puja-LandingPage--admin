@@ -90,9 +90,11 @@ function ThankYouContent() {
   }, [loadBooking]);
 
   const bookingStatus = (bookingDetails?.paymentStatus || bookingDetails?.status || "").toUpperCase();
-  const isPaid = bookingStatus ? PAID_STATES.includes(bookingStatus) : paramStatus === "SUCCESS";
+  const isPaid = bookingStatus
+    ? PAID_STATES.includes(bookingStatus)
+    : paramStatus === "SUCCESS";
 
-  // REDIRECT LOGIC: Force URL to /pending with exact parameters if not paid
+  // REDIRECT LOGIC: Force URL to /Pending with exact parameters if not paid
   useEffect(() => {
     if (!loading && !isPaid) {
       router.replace(`/Pending?order_id=${orderId || ""}&payment_status=PENDING`);
@@ -121,17 +123,26 @@ function ThankYouContent() {
   const customerEmail = bookingDetails?.customerEmail || "guest@example.com";
   const vehicleSeats = bookingDetails?.vehicleSeats || bookingDetails?.passengers || 4;
 
+  // WhatsApp slip always shows "Tomorrow at 10:00 AM"
+  const tomorrowDate = new Date();
+  tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+  const tomorrowLabel = tomorrowDate.toLocaleDateString("en-IN", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+  }); // e.g. "Fri, 17 Oct"
+
   const waMsg = encodeURIComponent(
     `*🪔 DURGA PUJA CHAUFFEUR BOOKING CONFIRMATION*\n` +
       `*Booking ID:* ${bookingRef}\n` +
       `*Customer:* ${customerName || "Guest"} (${customerPhone})\n` +
       `*Vehicle:* ${vehicleName}\n` +
       `*Package:* ${packageTitle}\n` +
-      `*Date & Time:* ${travelDate} at ${pickupTime}\n` +
+      `*Date & Time:* Tomorrow (${tomorrowLabel}) at 10:00 AM\n` +
       `*Pickup Location:* ${pickupAddress}\n` +
       `*Advance Deposit:* ${advancePaid} (PAID)\n` +
       `*Total Trip Tariff:* ${totalTariff}\n\n` +
-      `*Shubho Sharodiya! Please send my dedicated chauffeur contact & cab number.*`
+      `*Shubho DurgaPuja! Please send my dedicated chauffeur contact & cab number.*`
   );
 
   if (loading || !isPaid) {
