@@ -266,14 +266,14 @@ export const RentalBookingHeader: React.FC<RentalBookingHeaderProps> = ({
   const customRef = useRef<HTMLInputElement>(null);
   const today = getTodayStr();
 
-  // ✅ FALLBACK: If you don't pass bookedSlotsByDate, it simulates your exact scenario
+  // ✅ FALLBACK: Matches your exact scenario for TODAY (18 Oct)
+  // - 18 Oct is booked until 2 PM.
+  // - 19 Oct and beyond are fully normal.
   const activeBooked = useMemo(() => {
     if (bookedSlotsByDate) return bookedSlotsByDate;
     const todayKey = getTodayStr();
-    const tmr = new Date(); tmr.setDate(tmr.getDate() + 1);
     return {
-      [todayKey]: makeBookedWholeDay(),
-      [dateToKey(tmr)]: makeBookedSlotsBefore("02:00 PM"),
+      [todayKey]: makeBookedSlotsBefore("02:00 PM"),
     };
   }, [bookedSlotsByDate]);
 
@@ -290,23 +290,29 @@ export const RentalBookingHeader: React.FC<RentalBookingHeaderProps> = ({
 
   useEffect(() => { if (isEditing && isCustomCity) customRef.current?.focus(); }, [isEditing, isCustomCity]);
 
-  // ✅ FORCE JUMP: If saved date is fully booked, jump to first available (18 Oct 2 PM)
+  // ✅ SYNC & JUMP: Ensure time is valid, or jump to next available date if fully booked
   useEffect(() => {
     const slots = getAvailableSlots(pickupDate, savedBooked);
-    if (slots.length > 0) return; 
-    const first = findFirstAvailable(activeBooked);
-    if (first.date !== pickupDate) onUpdateDate(first.date);
-    if (first.time !== pickupTime) onUpdateTime(first.time);
+    if (slots.length === 0) {
+      const first = findFirstAvailable(activeBooked);
+      if (first.date !== pickupDate) onUpdateDate(first.date);
+      if (first.time !== pickupTime) onUpdateTime(first.time);
+    } else if (!slots.includes(pickupTime)) {
+      onUpdateTime(slots[0]);
+    }
   }, [pickupDate, pickupTime, savedBooked, activeBooked, onUpdateDate, onUpdateTime]);
 
-  // Same for temp state while editing (if they manually pick 17 Oct, it bounces to 18 Oct)
+  // Same validation for temp state while editing
   useEffect(() => {
     if (!isEditing) return;
     const slots = getAvailableSlots(tempDate, tempBooked);
-    if (slots.length > 0) return;
-    const first = findFirstAvailable(activeBooked);
-    if (first.date !== tempDate) { setTempDate(first.date); setTempTime(first.time); }
-  }, [isEditing, tempDate, tempBooked, activeBooked]);
+    if (slots.length === 0) {
+      const first = findFirstAvailable(activeBooked);
+      if (first.date !== tempDate) { setTempDate(first.date); setTempTime(first.time); }
+    } else if (!slots.includes(tempTime)) {
+      setTempTime(slots[0]);
+    }
+  }, [isEditing, tempDate, tempTime, tempBooked, activeBooked]);
 
   if (tripType !== "rental") return null;
 
