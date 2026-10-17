@@ -46,7 +46,7 @@ export const RENTAL_PACKAGES: RentalPackage[] = [
     category: "Short Pandal Hopping",
     badge: "🌅 Morning Special",
     optimalTime: "08:00 AM – 01:00 PM",
-    priceStarting: 2551,
+    priceStarting: 3551,
     highlights: [
       "Sovabazar Rajbari & Bagbazar Sarbojanin",
       "Kumartuli Park & Ahiritola Ghat",
@@ -73,7 +73,7 @@ export const RENTAL_PACKAGES: RentalPackage[] = [
     category: "Prime Evening Circuit",
     badge: "🔥 Most Popular",
     optimalTime: "04:00 PM – 12:00 Midnight",
-    priceStarting: 3551,
+    priceStarting: 4551,
     highlights: [
       "Suruchi Sangha & Chetla Agrani",
       "Mudiali Club & Tridhara Sammilani",
@@ -100,7 +100,7 @@ export const RENTAL_PACKAGES: RentalPackage[] = [
     category: "Twin Mega Circuit",
     badge: "⭐ Grand Explorer",
     optimalTime: "02:00 PM – 12:00 Midnight",
-    priceStarting: 4051,
+    priceStarting: 5051,
     highlights: [
       "North Kolkata Bonedi Bari & Rajbari",
       "Salt Lake FD Block & Sreebhumi",
@@ -127,7 +127,7 @@ export const RENTAL_PACKAGES: RentalPackage[] = [
     category: "All-Night VIP Parikrama",
     badge: "✨ Zero Traffic VIP",
     optimalTime: "08:00 PM – 08:00 AM",
-    priceStarting: 5051,
+    priceStarting: 6051,
     highlights: [
       "Sreebhumi Sporting Club Light Show",
       "Santosh Mitra Square & Dum Dum Park",

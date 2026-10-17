@@ -152,14 +152,14 @@ export const BookingModal: React.FC<BookingModalProps> = ({
             : 0;
 
   const advanceRates: Record<number, number> = isTraveller
-    ? { 5: 2551, 8: 3051, 10: 4051, 12: 5051 }
-    : { 5: 1051, 8: 1551, 10: 2051, 12: 2551 };
+    ? { 5: 3051, 8: 3551, 10: 4551, 12: 5551 }
+    : { 5: 1551, 8: 2051, 10: 2551, 12: 3051 };
 
   // Preserve the existing fixed advance for current Puja routes.
   // Apply duration-based rates only to rental packages.
   const advanceAmount = duration
     ? advanceRates[duration]
-    : Math.min(1051, totalFare);
+    : Math.min(1551, totalFare);
 
   const gstAmount = Math.round(advanceAmount * 0.05);
   const withGst = advanceAmount + gstAmount;

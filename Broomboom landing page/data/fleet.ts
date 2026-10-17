@@ -13,17 +13,17 @@ export const FLEET_DATA: Record<string, Vehicle> = {
     image: "/images/sedan.png",
     altRental: "sedan-durga-puja-rental-broomboom-cabs",
     altOutstation: "sedan-durga-puja-outstation-broomboom-cabs",
-    basePrice: 4551, // 8hr 80km standard
+    basePrice: 5551, // 8hr 80km standard
     baseHours: 8,
     baseKm: 80,
-    nightPrice: 5051,
+    nightPrice: 6051,
     perExtraHour: 200,
     outstationPerKm: 20,
     packageRates: {
-      pkg_5hr_50km: 2551,
-      pkg_8hr_80km: 3551,
-      pkg_10hr_100km: 4051,
-      pkg_12hr_120km: 5051,
+      pkg_5hr_50km: 3551,
+      pkg_8hr_80km: 4551,
+      pkg_10hr_100km: 5051,
+      pkg_12hr_120km: 6051,
     },
     features: [
       "Chilled Dual AC",
@@ -33,7 +33,7 @@ export const FLEET_DATA: Record<string, Vehicle> = {
       "Free 24h Modification",
     ],
     inclusions: [
-      "Base package 80 KMs & 8 Hours usage (₹3,551) or 50 KMs (₹2,551)",
+      "Base package 80 KMs & 8 Hours usage (₹4,551) or 50 KMs (₹3,551)",
       "Chilled Dual AC & Sanitised Interior",
       "Fuel Charges & Chauffeur Day Allowance Included",
       "Free 24h Modification",
@@ -59,17 +59,17 @@ export const FLEET_DATA: Record<string, Vehicle> = {
     image: "/images/ertiga.png",
     altRental: "suv-durga-puja-rental-broomboom-cabs",
     altOutstation: "suv-durga-puja-outstation-broomboom-cabs",
-    basePrice: 5551, // 8hr 80km standard
+    basePrice: 6551, // 8hr 80km standard
     baseHours: 8,
     baseKm: 80,
-    nightPrice: 6051,
+    nightPrice: 7051,
     perExtraHour: 250,
     outstationPerKm: 25,
     packageRates: {
-      pkg_5hr_50km: 3551,
-      pkg_8hr_80km: 4551,
-      pkg_10hr_100km: 5051,
-      pkg_12hr_120km: 6051,
+      pkg_5hr_50km: 4551,
+      pkg_8hr_80km: 5551,
+      pkg_10hr_100km: 6051,
+      pkg_12hr_120km: 7051,
     },
     features: [
       "Spacious 3-Row AC",
@@ -79,7 +79,7 @@ export const FLEET_DATA: Record<string, Vehicle> = {
       "24x7 Puja Control Room Support",
     ],
     inclusions: [
-      "Base package 80 KMs & 8 Hours usage (₹4,551) or 50 KMs (₹3,551)",
+      "Base package 80 KMs & 8 Hours usage (₹5,551) or 50 KMs (₹4,551)",
       "Chilled 3-Row AC & Ample Legroom",
       "Fuel & Verified Chauffeur Allowance",
       "Free 24h Modification",
@@ -106,17 +106,17 @@ export const FLEET_DATA: Record<string, Vehicle> = {
     image: "/images/innova.png",
     altRental: "suv-plus-durga-puja-rental-broomboom-cabs",
     altOutstation: "suv-plus-durga-puja-outstation-broomboom-cabs",
-    basePrice: 7551, // 8hr 80km standard
+    basePrice: 8551, // 8hr 80km standard
     baseHours: 8,
     baseKm: 80,
-    nightPrice: 8051,
+    nightPrice: 9051,
     perExtraHour: 300,
     outstationPerKm: 30,
     packageRates: {
-      pkg_5hr_50km: 4051,
-      pkg_8hr_80km: 5551,
-      pkg_10hr_100km: 6051,
-      pkg_12hr_120km: 7051,
+      pkg_5hr_50km: 5051,
+      pkg_8hr_80km: 6551,
+      pkg_10hr_100km: 7051,
+      pkg_12hr_120km: 8051,
     },
     features: [
       "Captain Recliner Seats",
@@ -126,7 +126,7 @@ export const FLEET_DATA: Record<string, Vehicle> = {
       "In-car Phone Chargers & Wet Wipes",
     ],
     inclusions: [
-      "Base package 80 KMs & 8 Hours usage (₹5,551) or 50 KMs (₹4,051)",
+      "Base package 80 KMs & 8 Hours usage (₹6,551) or 50 KMs (₹5,051)",
       "Luxury Captain Seats & Heavy-duty Dual AC",
       "Fuel & Senior Route-Master Chauffeur Allowance",
       "Free 24h Modification",
@@ -153,17 +153,17 @@ export const FLEET_DATA: Record<string, Vehicle> = {
     image: "/images/tempo13.png",
     altRental: "13-seater-traveller-durga-puja-rental-broomboom-cabs",
     altOutstation: "13-seater-traveller-durga-puja-outstation-broomboom-cabs",
-    basePrice: 10051, // 8hr 80km standard
+    basePrice: 11051, // 8hr 80km standard
     baseHours: 8,
     baseKm: 80,
-    nightPrice: 10551,
+    nightPrice: 11551,
     perExtraHour: 400,
     outstationPerKm: 40,
     packageRates: {
-      pkg_5hr_50km: 9051,
-      pkg_8hr_80km: 10051,
-      pkg_10hr_100km: 11051,
-      pkg_12hr_120km: 12051,
+      pkg_5hr_50km: 10051,
+      pkg_8hr_80km: 11051,
+      pkg_10hr_100km: 12051,
+      pkg_12hr_120km: 13051,
     },
     features: [
       "Individual AC Vents on Every Seat",
@@ -173,7 +173,7 @@ export const FLEET_DATA: Record<string, Vehicle> = {
       "Assigned Senior Chauffeur & Cleaner",
     ],
     inclusions: [
-      "Base package 80 KMs & 8 Hours usage (₹10,051) or 50 KMs (₹9,051)",
+      "Base package 80 KMs & 8 Hours usage (₹11,051) or 50 KMs (₹10,051)",
       "Individual AC Vents on Every Seat & Pushback Rows",
       "Fuel, Commercial Permit & Driver Allowances",
       "Free 24h Modification",
@@ -200,17 +200,17 @@ export const FLEET_DATA: Record<string, Vehicle> = {
     image: "/images/tempo17.png",
     altRental: "17-seater-traveller-durga-puja-rental-broomboom-cabs",
     altOutstation: "17-seater-traveller-durga-puja-outstation-broomboom-cabs",
-    basePrice: 11051, // 8hr 80km standard
+    basePrice: 12051, // 8hr 80km standard
     baseHours: 8,
     baseKm: 80,
-    nightPrice: 11551,
+    nightPrice: 12551,
     perExtraHour: 450,
     outstationPerKm: 45,
     packageRates: {
-      pkg_5hr_50km: 10051,
-      pkg_8hr_80km: 11051,
-      pkg_10hr_100km: 12051,
-      pkg_12hr_120km: 13051,
+      pkg_5hr_50km: 11051,
+      pkg_8hr_80km: 12051,
+      pkg_10hr_100km: 13051,
+      pkg_12hr_120km: 14051,
     },
     features: [
       "High Roof Walkthrough Cabin",
@@ -220,7 +220,7 @@ export const FLEET_DATA: Record<string, Vehicle> = {
       "Police Route Permission Assistance",
     ],
     inclusions: [
-      "Base package 80 KMs & 8 Hours usage (₹11,051) or 50 KMs (₹10,051)",
+      "Base package 80 KMs & 8 Hours usage (₹12,051) or 50 KMs (₹11,051)",
       "High Roof Cabin with Individual Blower ACs",
       "High-power Music System for Puja Agomoni Songs",
       "Driver + Assistant Chaperone Allowance Included",
@@ -247,17 +247,17 @@ export const FLEET_DATA: Record<string, Vehicle> = {
     image: "/images/tempo24.png",
     altRental: "24-seater-traveller-durga-puja-rental-broomboom-cabs",
     altOutstation: "24-seater-traveller-durga-puja-outstation-broomboom-cabs",
-    basePrice: 13051, // 8hr 80km standard
+    basePrice: 14051, // 8hr 80km standard
     baseHours: 8,
     baseKm: 80,
-    nightPrice: 13551,
+    nightPrice: 14551,
     perExtraHour: 500,
     outstationPerKm: 50,
     packageRates: {
-      pkg_5hr_50km: 12051,
-      pkg_8hr_80km: 13051,
-      pkg_10hr_100km: 14051,
-      pkg_12hr_120km: 15051,
+      pkg_5hr_50km: 13051,
+      pkg_8hr_80km: 14051,
+      pkg_10hr_100km: 15051,
+      pkg_12hr_120km: 16051,
     },
     features: [
       "Ultra Luxury Pushback Leather Seats",
@@ -267,7 +267,7 @@ export const FLEET_DATA: Record<string, Vehicle> = {
       "Guaranteed Reserve Vehicle on Standby",
     ],
     inclusions: [
-      "Base package 80 KMs & 8 Hours usage (₹13,051) or 50 KMs (₹12,051)",
+      "Base package 80 KMs & 8 Hours usage (₹14,051) or 50 KMs (₹13,051)",
       "Ultra-luxury Pushback Leather Recliners & Dual AC",
       "Fuel, Commercial Permits & Driver Allowances",
       "Free 24h Modification",
