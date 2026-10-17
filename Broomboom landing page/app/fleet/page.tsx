@@ -6,7 +6,7 @@ import Link from "next/link";
 import {
   Car, Users, Briefcase, ShieldCheck, CheckCircle2, Clock,
   ArrowRight, Sparkles, PhoneCall, Calendar, MapPin,
-  ChevronDown, Info, Zap, Check, X, XCircle, MessageCircle, RotateCcw, User, Phone, Mail
+  ChevronDown, Info, Zap, Check, X, XCircle, MessageCircle, RotateCcw, User, Phone, Mail, Lock
 } from "lucide-react";
 import { FLEET_DATA } from "@/data/fleet";
 import { RENTAL_PACKAGES, RentalPackage } from "@/data/packages";
@@ -74,7 +74,6 @@ function detectDuration(pkgId?: string, pkgTitle?: string): number {
 
 const NON_TRAVELLER_RATES: Record<number, number> = { 5: 1051, 8: 1551, 10: 2051, 12: 2551 };
 const TRAVELLER_RATES: Record<number, number> = { 5: 2551, 8: 3051, 10: 4051, 12: 5051 };
-// ------------------------------------------------------
 
 // ---------- HELPER: DYNAMIC INCLUSIONS ----------
 function getDynamicInclusions(
@@ -83,7 +82,6 @@ function getDynamicInclusions(
   price: number
 ): string[] {
   const formattedPrice = `₹${price.toLocaleString('en-IN')}`;
-
   const baseText = `Base package ${selectedPkg.hoursKm} usage (${formattedPrice})`;
 
   let acText = "Chilled Dual AC & Sanitised Interior";
@@ -110,7 +108,6 @@ function getDynamicInclusions(
 
   return [baseText, acText, ...shared];
 }
-// -------------------------------------------------
 
 function FleetContent() {
   const searchParams = useSearchParams();
@@ -690,7 +687,7 @@ function FleetContent() {
               </div>
             </div>
 
-            {/* 🪔 Mahalaya & Durga Puja Exclusive Offer Banner */}
+            {/* Mahalaya & Durga Puja Exclusive Offer Banner */}
             <div 
               onClick={() => {
                 window.scrollTo({ top: 380, behavior: "smooth" });
@@ -768,41 +765,38 @@ function FleetContent() {
                   </div>
                 </div>
 
-                                <div className="bg-white p-3.5 rounded-2xl border border-amber-200 space-y-3">
-                  <div className="flex items-center gap-1.5 border-b border-amber-100 pb-2">
-                    <Calendar className="w-3.5 h-3.5 text-amber-600" />
-                    <span className="text-[11px] font-bold text-slate-900 uppercase tracking-wider">
-                      Edit Pickup Schedule
+                {/* Un-editable Pickup Schedule (Read-only values passed from Header) */}
+                <div className="bg-white p-3.5 rounded-2xl border border-amber-200 space-y-2.5">
+                  <div className="flex items-center justify-between border-b border-amber-100 pb-2">
+                    <div className="flex items-center gap-1.5">
+                      <Calendar className="w-3.5 h-3.5 text-amber-600" />
+                      <span className="text-[11px] font-bold text-slate-900 uppercase tracking-wider">
+                        Confirmed Pickup Schedule
+                      </span>
+                    </div>
+                    <span className="text-[10px] text-amber-900 font-bold bg-amber-100/90 px-2 py-0.5 rounded-md border border-amber-300 flex items-center gap-1">
+                      <Lock className="w-3 h-3 text-amber-700" /> Set from header
                     </span>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                      <label className="text-xs font-bold text-slate-700 mb-1 block">
-                        Pickup Date <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="e.g. 14 Oct 2026"
-                        value={selectedPickupDate}
-                        onChange={(e) => setSelectedPickupDate(e.target.value)}
-                        required
-                        className="w-full px-3 py-2.5 bg-slate-50 border border-amber-200 rounded-xl text-base sm:text-xs text-slate-900 focus:outline-none focus:border-amber-500"
-                      />
+
+                  <div className="grid grid-cols-2 gap-3 pt-0.5">
+                    <div className="bg-slate-50/80 border border-amber-200/80 rounded-xl p-2.5">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase block">Pickup Date</span>
+                      <span className="text-xs sm:text-sm font-bold text-slate-900 block mt-0.5 truncate">
+                        {selectedPickupDate || "Not Set"}
+                      </span>
                     </div>
-                    <div>
-                      <label className="text-xs font-bold text-slate-700 mb-1 block">
-                        Pickup Time <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="e.g. 09:58 AM"
-                        value={selectedPickupTime}
-                        onChange={(e) => setSelectedPickupTime(e.target.value)}
-                        required
-                        className="w-full px-3 py-2.5 bg-slate-50 border border-amber-200 rounded-xl text-base sm:text-xs text-slate-900 focus:outline-none focus:border-amber-500"
-                      />
+
+                    <div className="bg-slate-50/80 border border-amber-200/80 rounded-xl p-2.5">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase block">Pickup Time</span>
+                      <span className="text-xs sm:text-sm font-bold text-slate-900 block mt-0.5 truncate">
+                        {selectedPickupTime || "Not Set"}
+                      </span>
                     </div>
                   </div>
+                  <p className="text-[10px] text-slate-400 italic">
+                    To modify time or date, update the selector at the top of the fleet page before confirming.
+                  </p>
                 </div>
 
                 <div className="bg-white p-3 rounded-2xl border border-amber-200 text-[11px] space-y-1">
@@ -922,40 +916,39 @@ function FleetContent() {
                     )}
                   </div>
                 </div>
-<div className="bg-white p-3.5 rounded-2xl border border-amber-200 space-y-3">
-  {/* Point 1 */}
-  <label className="flex items-center gap-2 text-xs font-semibold text-slate-800 cursor-pointer">
-    <input
-      type="checkbox"
-      checked={addMineralWaterSanitary}
-      onChange={(e) => setAddMineralWaterSanitary(e.target.checked)}
-      className="rounded text-amber-500 focus:ring-amber-400"
-    />
-    <span>💧 Mineral Water onboard and Sanitary Napkins available</span>
-  </label>
 
-  {/* Point 2 */}
-  <label className="flex items-center gap-2 text-xs font-semibold text-slate-800 cursor-pointer">
-    <input
-      type="checkbox"
-      checked={addVipCarPass}
-      onChange={(e) => setAddVipCarPass(e.target.checked)}
-      className="rounded text-amber-500 focus:ring-amber-400"
-    />
-    <span>⭐ VIP Car Pandal Pass Concierge Assistance</span>
-  </label>
+                {/* Add-on Checkboxes */}
+                <div className="bg-white p-3.5 rounded-2xl border border-amber-200 space-y-3">
+                  <label className="flex items-center gap-2 text-xs font-semibold text-slate-800 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={addMineralWaterSanitary}
+                      onChange={(e) => setAddMineralWaterSanitary(e.target.checked)}
+                      className="rounded text-amber-500 focus:ring-amber-400"
+                    />
+                    <span>💧 Mineral Water onboard and Sanitary Napkins available</span>
+                  </label>
 
-  {/* Point 3 */}
-  <label className="flex items-center gap-2 text-xs font-semibold text-slate-800 cursor-pointer">
-    <input
-      type="checkbox"
-      checked={addTourExpertDriver}
-      onChange={(e) => setAddTourExpertDriver(e.target.checked)}
-      className="rounded text-amber-500 focus:ring-amber-400"
-    />
-    <span>🚗 Trained Professional Tour Expert Driver Guide</span>
-  </label>
-</div>
+                  <label className="flex items-center gap-2 text-xs font-semibold text-slate-800 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={addVipCarPass}
+                      onChange={(e) => setAddVipCarPass(e.target.checked)}
+                      className="rounded text-amber-500 focus:ring-amber-400"
+                    />
+                    <span>⭐ VIP Car Pandal Pass Concierge Assistance</span>
+                  </label>
+
+                  <label className="flex items-center gap-2 text-xs font-semibold text-slate-800 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={addTourExpertDriver}
+                      onChange={(e) => setAddTourExpertDriver(e.target.checked)}
+                      className="rounded text-amber-500 focus:ring-amber-400"
+                    />
+                    <span>🚗 Trained Professional Tour Expert Driver Guide</span>
+                  </label>
+                </div>
 
                 {/* Tariff & Dynamic Advance Summary */}
                 <div className="p-3.5 bg-amber-100/90 rounded-2xl border border-amber-300 text-xs space-y-1.5">
