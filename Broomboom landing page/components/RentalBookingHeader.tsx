@@ -273,7 +273,7 @@ export const RentalBookingHeader: React.FC<RentalBookingHeaderProps> = ({
     if (bookedSlotsByDate) return bookedSlotsByDate;
     const todayKey = getTodayStr();
     return {
-      [todayKey]: makeBookedSlotsBefore("02:00 PM"),
+      [todayKey]: makeBookedSlotsBefore("07:00 AM"),
     };
   }, [bookedSlotsByDate]);
 
