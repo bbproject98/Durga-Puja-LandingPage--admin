@@ -802,8 +802,8 @@ function FleetContent() {
                 <div className="bg-white p-3 rounded-2xl border border-amber-200 text-[11px] space-y-1">
                   <span className="font-bold text-slate-900 block">✓ Included in this tariff:</span>
                   <p className="text-slate-600">
-                    Fuel, chauffeur allowance, dual AC, GST &amp; gateway charges Excluded.
-                  </p>
+   GST &amp; gateway (Taxes) charges are not included in Fare. It's Exclusive and will be applicable on the fare
+</p>
                 </div>
 
                 {/* Passenger Contact Details */}
