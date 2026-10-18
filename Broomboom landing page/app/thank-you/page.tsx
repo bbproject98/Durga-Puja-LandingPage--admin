@@ -124,13 +124,7 @@ function ThankYouContent() {
   const vehicleSeats = bookingDetails?.vehicleSeats || bookingDetails?.passengers || 4;
 
   // WhatsApp slip always shows "Tomorrow at 10:00 AM"
-  const tomorrowDate = new Date();
-  tomorrowDate.setDate(tomorrowDate.getDate() + 1);
-  const tomorrowLabel = tomorrowDate.toLocaleDateString("en-IN", {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-  }); // e.g. "Fri, 17 Oct"
+ // e.g. "Fri, 17 Oct"
 
   const waMsg = encodeURIComponent(
     `*🪔 DURGA PUJA CHAUFFEUR BOOKING CONFIRMATION*\n` +
@@ -138,7 +132,7 @@ function ThankYouContent() {
       `*Customer:* ${customerName || "Guest"} (${customerPhone})\n` +
       `*Vehicle:* ${vehicleName}\n` +
       `*Package:* ${packageTitle}\n` +
-      `*Date & Time:* Tomorrow (${tomorrowLabel}) at 10:00 AM\n` +
+      `*Date & Time:* ${travelDate} at ${pickupTime}\n` +
       `*Pickup Location:* ${pickupAddress}\n` +
       `*Advance Deposit:* ${advancePaid} (PAID)\n` +
       `*Total Trip Tariff:* ${totalTariff}\n\n` +
