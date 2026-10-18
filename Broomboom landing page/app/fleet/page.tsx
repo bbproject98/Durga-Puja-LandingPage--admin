@@ -103,7 +103,6 @@ function getDynamicInclusions(
   const shared = [
     "Fuel Charges & Chauffeur Day Allowance Included",
     "Free 24h Modification",
-    "GST & Gateway Charges Excluded",
   ];
 
   return [baseText, acText, ...shared];
@@ -563,10 +562,6 @@ function FleetContent() {
                         <div className="flex items-center gap-1.5">
                           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
                           <span>Free 24h Modification</span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
-                          <span>GST &amp; Gateway Charges Excluded</span>
                         </div>
                       </div>
                       <div className="text-[11px] text-slate-500 pt-0.5 font-medium">
